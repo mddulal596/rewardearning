@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pro Rewards Master</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<header class="top-nav">
+  <div class="logo">Pro Rewards Master</div>
+  <div class="balance">Balance: <span id="userBalance">0</span> Tk</div>
+  <button id="logoutBtn">Logout</button>
+</header>
+
+<main>
+  <section class="stats-row">
+    <div>Total Refer: <span id="totalRefer">0</span></div>
+    <div>Tasks Done: <span id="tasksDone">0</span></div>
+  </section>
+
+  <section class="tasks-grid">
+    <div class="task-card" data-task="1">Task 01</div>
+    <div class="task-card" data-task="2">Task 02</div>
+    <div class="task-card" data-task="3">Task 03</div>
+    <div class="task-card" data-task="4">Task 04</div>
+  </section>
+
+  <button id="dailyBonusBtn">Claim Daily Bonus</button>
+  <button id="shareBtn">Share Referral</button>
+</main>
+
+<script type="module" src="js/app.js"></script>
+</body>
+</html>
