@@ -1,37 +1,32 @@
-import { db, auth } from './firebase.js';
+import { auth, db } from './firebase.js';
+import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-auth.js";
 import { doc, getDoc, updateDoc, increment } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore.js";
 
-const AD_REWARD = 5;
-const COOLDOWN_TIME = 30000; // 30 seconds
+onAuthStateChanged(auth, async (user) => {
+    if (user) {
+        const userRef = doc(db, "users", user.uid);
+        const snap = await getDoc(userRef);
+        if (snap.exists() && document.getElementById('userCoins')) {
+            document.getElementById('userCoins').innerText = snap.data().coins;
+        }
+    } else {
+        if (!window.location.pathname.includes("login.html") && !window.location.pathname.includes("signup.html")) {
+            window.location.href = "login.html";
+        }
+    }
+});
 
-window.watchAd = async () => {
+// Watch Ad Logic
+document.getElementById('watchAdBtn')?.addEventListener('click', async () => {
     const user = auth.currentUser;
-    if (!user) return alert("Please Login!");
-
     const userRef = doc(db, "users", user.uid);
     const snap = await getDoc(userRef);
     const lastClick = snap.data().lastAdClick || 0;
 
-    if (Date.now() - lastClick < COOLDOWN_TIME) {
-        alert("Wait 30 seconds before next ad!");
-        return;
-    }
+    if (Date.now() - lastClick < 30000) return alert("Wait 30 seconds!");
 
-    // Open Adsterra Direct Link
     window.open("https://middayopened.com/rmm8pbwe?key=a42d11bce0966c10bc9b3f909ae44009", "_blank");
-
-    // Update Balance after small delay
-    setTimeout(async () => {
-        await updateDoc(userRef, {
-            coins: increment(AD_REWARD),
-            lastAdClick: Date.now()
-        });
-        document.getElementById('userCoins').innerText = (snap.data().coins + AD_REWARD);
-        alert("Reward Added!");
-    }, 2000);
-};
-
-// Daily Check-in Logic
-window.claimDailyBonus = async () => {
-    // Logic similar to Watch Ad but with 24-hour timestamp check
-};
+    await updateDoc(userRef, { coins: increment(5), lastAdClick: Date.now() });
+    alert("Reward Added!");
+    location.reload();
+});
