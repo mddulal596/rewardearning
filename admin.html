@@ -1,26 +1,93 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8"><title>Admin Panel</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel - EarnPro</title>
     <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; font-size: 14px; }
+        th, td { border: 1px solid #ddd; padding: 12px; text-align: left; }
+        th { background: #667eea; color: white; }
+        .status-pending { color: orange; font-weight: bold; }
+        .status-approved { color: green; font-weight: bold; }
+        .btn-approve { background: #27ae60; color: white; border: none; padding: 5px 10px; border-radius: 5px; cursor: pointer; }
+    </style>
 </head>
 <body>
-    <div class="card">
-        <h2>Withdrawal Requests</h2>
-        <div id="adminData">Loading...</div>
+    <div class="card" style="background: #34495e; color: white;">
+        <h2><i class="fa fa-user-shield"></i> Admin Dashboard</h2>
+        <p>Manage Withdraw Requests</p>
     </div>
+
+    <div class="card">
+        <h4>Pending Requests</h4>
+        <div style="overflow-x:auto;">
+            <table>
+                <thead>
+                    <tr>
+                        <th>User Email</th>
+                        <th>Method</th>
+                        <th>Account No</th>
+                        <th>Amount</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody id="withdrawTable">
+                    </tbody>
+            </table>
+        </div>
+    </div>
+
     <script type="module">
         import { db } from './firebase.js';
-        import { collection, getDocs, updateDoc, doc } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore.js";
-        async function load() {
-            const snap = await getDocs(collection(db, "withdrawals"));
-            let html = "<table border='1' width='100%'><tr><th>Method</th><th>Number</th><th>Amount</th><th>Status</th></tr>";
-            snap.forEach(d => {
-                html += `<tr><td>${d.data().method}</td><td>${d.data().number}</td><td>${d.data().amount}</td><td>${d.data().status}</td></tr>`;
+        import { collection, getDocs, doc, updateDoc, query, where } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore.js";
+
+        async function loadRequests() {
+            const withdrawTable = document.getElementById('withdrawTable');
+            withdrawTable.innerHTML = "Loading...";
+
+            // শুধু Pending রিকোয়েস্টগুলো নিয়ে আসবে
+            const q = query(collection(db, "withdrawals"), where("status", "==", "Pending"));
+            const querySnapshot = await getDocs(q);
+            
+            withdrawTable.innerHTML = "";
+
+            querySnapshot.forEach((documentSnapshot) => {
+                const data = documentSnapshot.data();
+                const id = documentSnapshot.id;
+
+                const row = `
+                    <tr>
+                        <td>${data.email || 'N/A'}</td>
+                        <td>${data.method}</td>
+                        <td>${data.number}</td>
+                        <td>${data.amount} Coins</td>
+                        <td>
+                            <button class="btn-approve" onclick="approveRequest('${id}')">Approve</button>
+                        </td>
+                    </tr>
+                `;
+                withdrawTable.innerHTML += row;
             });
-            document.getElementById('adminData').innerHTML = html + "</table>";
+
+            if(withdrawTable.innerHTML === "") {
+                withdrawTable.innerHTML = "<tr><td colspan='5' style='text-align:center;'>No pending requests.</td></tr>";
+            }
         }
-        load();
+
+        // রিকোয়েস্ট অ্যাপ্রুভ করার ফাংশন
+        window.approveRequest = async (docId) => {
+            if(confirm("আপনি কি পেমেন্ট করেছেন? অ্যাপ্রুভ করলে এটি লিস্ট থেকে চলে যাবে।")) {
+                const docRef = doc(db, "withdrawals", docId);
+                await updateDoc(docRef, { status: "Approved" });
+                alert("Request Approved!");
+                loadRequests(); // টেবিল রিফ্রেশ
+            }
+        };
+
+        loadRequests();
     </script>
 </body>
 </html>
