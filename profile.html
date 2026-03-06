@@ -1,141 +1,37 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Profile - EarnPro</title>
-    <link rel="stylesheet" href="style.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <style>
-        .profile-img-container {
-            width: 100px; height: 100px; border-radius: 50%;
-            background: rgba(255, 255, 255, 0.2); margin: 0 auto 15px;
-            display: flex; align-items: center; justify-content: center;
-            overflow: hidden; border: 3px solid #fff; position: relative; cursor: pointer;
+// প্রোফাইল পেজের স্ক্রিপ্টের ভেতরে এই অংশটুকু আপডেট করুন
+document.getElementById('saveProfileBtn').onclick = async () => {
+    const name = document.getElementById('userNameInput').value;
+    const file = document.getElementById('profilePicInput').files[0];
+    const submitBtn = document.getElementById('saveProfileBtn');
+
+    if(!name) return alert("Please enter your name!");
+
+    submitBtn.disabled = true;
+    submitBtn.innerText = "Updating...";
+
+    try {
+        const user = auth.currentUser;
+        const userRef = doc(db, "users", user.uid);
+        
+        // শুধুমাত্র নাম আপডেট করার অবজেক্ট
+        let updateData = { name: name };
+
+        // যদি নতুন ছবি সিলেক্ট করা হয়
+        if (file) {
+            const storageRef = ref(storage, `profiles/${user.uid}`);
+            await uploadBytes(storageRef, file);
+            const photoURL = await getDownloadURL(storageRef);
+            updateData.photoURL = photoURL; // ছবির লিঙ্ক যোগ করা হলো
         }
-        .profile-img-container img { width: 100%; height: 100%; object-fit: cover; display: none; }
-        .profile-img-container i { font-size: 60px; color: #fff; }
-        .upload-overlay { position: absolute; bottom: 0; background: rgba(0,0,0,0.5); width: 100%; font-size: 10px; padding: 2px 0; color: #fff; }
-    </style>
-</head>
-<body>
-    <div class="card" style="text-align: center; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 30px;">
-        <div class="profile-img-container" onclick="document.getElementById('profilePicInput').click()">
-            <i class="fa fa-user-circle" id="defaultIcon"></i>
-            <img id="profileDisplay" src="" alt="Profile">
-            <div class="upload-overlay">Change</div>
-        </div>
-        <input type="file" id="profilePicInput" style="display: none;" accept="image/*">
-        <h2 id="displayUserName">Loading...</h2>
-        <p id="userEmail" style="font-size: 14px; opacity: 0.8;">...</p>
-    </div>
 
-    <div class="card">
-        <h4><i class="fa fa-user-edit"></i> Edit Your Profile</h4>
-        <input type="text" id="userNameInput" placeholder="Enter name" class="input-field">
-        <button id="saveProfileBtn" class="btn-main" style="margin-top: 10px;">Update Profile</button>
-    </div>
-
-    <div class="card">
-        <h4>Statistics</h4>
-        <p>Total Balance: <strong id="profileCoins">0</strong> Coins</p>
-    </div>
-
-    <div class="card">
-        <button id="logoutBtn" class="btn-main" style="background: #e74c3c;"><i class="fa fa-sign-out-alt"></i> Logout</button>
-    </div>
-
-    <nav class="bottom-nav">
-        <a href="index.html" class="nav-item"><i class="fa fa-home"></i>Home</a>
-        <a href="earn.html" class="nav-item"><i class="fa fa-gamepad"></i>Earn</a>
-        <a href="tasks.html" class="nav-item"><i class="fa fa-tasks"></i>Tasks</a>
-        <a href="withdraw.html" class="nav-item"><i class="fa fa-wallet"></i>Withdraw</a>
-        <a href="profile.html" class="nav-item active"><i class="fa fa-user"></i>Profile</a>
-    </nav>
-
-    <script type="module">
-        import { auth, db, storage } from './firebase.js';
-        import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-auth.js";
-        import { doc, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore.js";
-        import { ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-storage.js";
-
-        const profileDisplay = document.getElementById('profileDisplay');
-        const defaultIcon = document.getElementById('defaultIcon');
-
-        onAuthStateChanged(auth, async (user) => {
-            if (user) {
-                const userRef = doc(db, "users", user.uid);
-                const snap = await getDoc(userRef);
-                if (snap.exists()) {
-                    const data = snap.data();
-                    const name = data.name || user.email.split('@')[0];
-                    document.getElementById('displayUserName').innerText = name;
-                    document.getElementById('userNameInput').value = name;
-                    document.getElementById('userEmail').innerText = user.email;
-                    document.getElementById('profileCoins').innerText = data.coins || 0;
-
-                    // ডাটাবেস থেকে ছবি লোড করা (Cache এড়াতে শেষে টাইমস্ট্যাম্প যোগ করা হয়েছে)
-                    if (data.photoURL) {
-                        profileDisplay.src = data.photoURL + "?t=" + new Date().getTime();
-                        profileDisplay.style.display = 'block';
-                        defaultIcon.style.display = 'none';
-                    }
-                }
-            } else {
-                window.location.href = "login.html";
-            }
-        });
-
-        document.getElementById('saveProfileBtn').onclick = async () => {
-            const name = document.getElementById('userNameInput').value;
-            const file = document.getElementById('profilePicInput').files[0];
-            const submitBtn = document.getElementById('saveProfileBtn');
-
-            if(!name) return alert("Name is required!");
-
-            submitBtn.disabled = true;
-            submitBtn.innerText = "Processing...";
-
-            try {
-                const user = auth.currentUser;
-                const updateData = { name: name };
-
-                if (file) {
-                    // পাথ ঠিক রাখা হয়েছে: profiles/UserID
-                    const storageRef = ref(storage, `profiles/${user.uid}`);
-                    await uploadBytes(storageRef, file);
-                    const photoURL = await getDownloadURL(storageRef);
-                    updateData.photoURL = photoURL;
-                }
-
-                // Firestore আপডেট নিশ্চিত করা
-                await updateDoc(doc(db, "users", user.uid), updateData);
-                
-                alert("Profile Updated Successfully!");
-                // হার্ড রিলোড নিশ্চিত করতে location.href ব্যবহার করা হয়েছে
-                window.location.href = "profile.html"; 
-            } catch (err) {
-                alert("Error: " + err.message);
-                submitBtn.disabled = false;
-                submitBtn.innerText = "Update Profile";
-            }
-        };
-
-        document.getElementById('profilePicInput').onchange = (e) => {
-            const file = e.target.files[0];
-            if (file) {
-                profileDisplay.src = URL.createObjectURL(file);
-                profileDisplay.style.display = 'block';
-                defaultIcon.style.display = 'none';
-            }
-        };
-
-        document.getElementById('logoutBtn').onclick = async () => {
-            if(confirm("Logout now?")) {
-                await signOut(auth);
-                window.location.href = "login.html";
-            }
-        };
-    </script>
-</body>
-</html>
+        // updateDoc ব্যবহার করলে আপনার coins ফিল্ডটি নিরাপদ থাকবে
+        await updateDoc(userRef, updateData);
+        
+        alert("Profile Updated Successfully!");
+        window.location.href = "profile.html"; 
+    } catch (err) {
+        alert("Error: " + err.message);
+        submitBtn.disabled = false;
+        submitBtn.innerText = "Update Profile";
+    }
+};
