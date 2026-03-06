@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Withdraw - EarnPro</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <div class="card balance-card"><h3>Available Balance</h3><h2 id="userCoins">...</h2></div>
+    <div class="card">
+        <h4>Withdraw Request</h4>
+        <form id="wForm">
+            <select id="method" class="input-field"><option value="bKash">bKash</option><option value="Nagad">Nagad</option></select>
+            <input type="number" id="num" placeholder="Account Number" class="input-field" required>
+            <input type="number" id="amount" placeholder="Minimum 500 Coins" class="input-field" min="500" required>
+            <button type="submit" class="btn-main">Request Withdraw</button>
+        </form>
+    </div>
+    <nav class="bottom-nav">
+        <a href="index.html" class="nav-item"><i class="fa fa-home"></i>Home</a>
+        <a href="earn.html" class="nav-item"><i class="fa fa-gamepad"></i>Earn</a>
+        <a href="tasks.html" class="nav-item"><i class="fa fa-tasks"></i>Tasks</a>
+        <a href="withdraw.html" class="nav-item active"><i class="fa fa-wallet"></i>Withdraw</a>
+        <a href="profile.html" class="nav-item"><i class="fa fa-user"></i>Profile</a>
+    </nav>
+    <script type="module" src="app.js"></script>
+    <script type="module">
+        import { auth, db } from './firebase.js';
+        import { collection, addDoc, doc, getDoc, updateDoc, increment } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore.js";
+        document.getElementById('wForm').onsubmit = async (e) => {
+            e.preventDefault();
+            const user = auth.currentUser;
+            const amt = parseInt(document.getElementById('amount').value);
+            const userRef = doc(db, "users", user.uid);
+            const snap = await getDoc(userRef);
+            if(snap.data().coins < amt) return alert("Not enough coins!");
+            await addDoc(collection(db, "withdrawals"), { uid: user.uid, method: document.getElementById('method').value, number: document.getElementById('num').value, amount: amt, status: "Pending" });
+            await updateDoc(userRef, { coins: increment(-amt) });
+            alert("Request Sent!"); location.reload();
+        }
+    </script>
+</body>
+</html>
