@@ -1,72 +1,89 @@
 import { auth, db } from './firebase.js';
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-auth.js";
-import { doc, getDoc, updateDoc, increment } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore.js";
+import { doc, getDoc, updateDoc, increment, setDoc } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore.js";
 
-// ইউজারের কয়েন রিয়েল-টাইমে দেখানোর জন্য
+// ইউজার লগইন চেক
 onAuthStateChanged(auth, async (user) => {
     if (user) {
+        console.log("Logged in user:", user.email);
         const userRef = doc(db, "users", user.uid);
-        const snap = await getDoc(userRef);
-        if (snap.exists() && document.getElementById('userCoins')) {
-            document.getElementById('userCoins').innerText = snap.data().coins;
+        
+        try {
+            const snap = await getDoc(userRef);
+            if (snap.exists()) {
+                document.getElementById('userCoins').innerText = snap.data().coins || 0;
+            } else {
+                // যদি ইউজারের ডেটাবেস না থাকে তবে নতুন করে তৈরি করবে
+                await setDoc(userRef, { coins: 0, lastCheckIn: 0, lastAdClick: 0 });
+                document.getElementById('userCoins').innerText = 0;
+            }
+        } catch (error) {
+            console.error("Database error:", error);
         }
     } else {
-        if (!window.location.pathname.includes("login.html") && !window.location.pathname.includes("signup.html")) {
-            window.location.href = "login.html";
-        }
+        console.log("No user logged in.");
+        // লগইন না থাকলে index.html এ আর্নিং কাজ করবে না
     }
 });
 
-// ১. Watch Ad & Earn (+5) লজিক
-document.getElementById('watchAdBtn')?.addEventListener('click', async () => {
+// Daily Check-in Logic
+async function handleCheckIn() {
     const user = auth.currentUser;
-    if (!user) return alert("Please Login!");
+    if (!user) {
+        alert("আগে লগইন করুন!");
+        window.location.href = 'login.html';
+        return;
+    }
 
     const userRef = doc(db, "users", user.uid);
     const snap = await getDoc(userRef);
-    const lastClick = snap.data().lastAdClick || 0;
+    const lastCheck = snap.data().lastCheckIn || 0;
+    const now = Date.now();
 
-    // ৩০ সেকেন্ডের সিকিউরিটি চেক
-    if (Date.now() - lastClick < 30000) {
+    // ২৪ ঘণ্টার চেক (৮৬৪০০০০০ মিলিসেকেন্ড)
+    if (now - lastCheck < 86400000) {
+        alert("২৪ ঘণ্টার আগে বোনাস নিতে পারবেন না!");
+        return;
+    }
+
+    await updateDoc(userRef, {
+        coins: increment(10),
+        lastCheckIn: now
+    });
+    alert("১০ কয়েন যোগ হয়েছে!");
+    location.reload();
+}
+
+// Watch Ad Logic
+async function handleWatchAd() {
+    const user = auth.currentUser;
+    if (!user) {
+        alert("আগে লগইন করুন!");
+        window.location.href = 'login.html';
+        return;
+    }
+
+    const userRef = doc(db, "users", user.uid);
+    const snap = await getDoc(userRef);
+    const lastAd = snap.data().lastAdClick || 0;
+    const now = Date.now();
+
+    if (now - lastAd < 30000) {
         alert("দয়া করে ৩০ সেকেন্ড অপেক্ষা করুন!");
         return;
     }
 
-    // Adsterra Direct Link ওপেন হবে
+    // অ্যাড ডাইরেক্ট লিঙ্ক
     window.open("https://middayopened.com/rmm8pbwe?key=a42d11bce0966c10bc9b3f909ae44009", "_blank");
 
-    // কয়েন যোগ করা এবং সময় সেভ করা
     await updateDoc(userRef, {
         coins: increment(5),
-        lastAdClick: Date.now()
+        lastAdClick: now
     });
-    
-    alert("অভিনন্দন! ৫ কয়েন যোগ হয়েছে।");
+    alert("৫ কয়েন যোগ হয়েছে!");
     location.reload();
-});
+}
 
-// ২. Daily Check-in (+10) লজিক
-document.getElementById('checkInBtn')?.addEventListener('click', async () => {
-    const user = auth.currentUser;
-    if (!user) return alert("Please Login!");
-
-    const userRef = doc(db, "users", user.uid);
-    const snap = await getDoc(userRef);
-    const lastCheckIn = snap.data().lastCheckIn || 0;
-
-    // ২৪ ঘণ্টার সিকিউরিটি চেক (২৪ ঘণ্টা = ৮৬,৪০০,০০০ মিলিসেকেন্ড)
-    const oneDay = 24 * 60 * 60 * 1000;
-    if (Date.now() - lastCheckIn < oneDay) {
-        alert("আপনি আজকের বোনাস নিয়ে নিয়েছেন! আগামীকাল আবার চেষ্টা করুন।");
-        return;
-    }
-
-    // ১০ কয়েন যোগ করা
-    await updateDoc(userRef, {
-        coins: increment(10),
-        lastCheckIn: Date.now()
-    });
-
-    alert("আজকের ডেইলি বোনাস ১০ কয়েন যোগ হয়েছে!");
-    location.reload();
-});
+// বাটনগুলোর সাথে ফাংশন কানেক্ট করা
+document.getElementById('checkInBtn')?.addEventListener('click', handleCheckIn);
+document.getElementById('watchAdBtn')?.addEventListener('click', handleWatchAd);
