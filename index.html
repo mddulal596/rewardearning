@@ -1,7 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Home - EarnPro</title>
@@ -9,10 +8,21 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 <body>
-    <div class="card balance-card">
-        <p>Total Balance</p>
-        <h1 id="userCoins">...</h1>
-        <small>Coins</small>
+    <div class="card profile-balance-bar" style="display: flex; align-items: center; justify-content: space-between; padding: 15px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border-radius: 15px; margin: 10px;">
+        <div style="display: flex; align-items: center; gap: 10px;">
+            <i class="fa fa-user-circle" style="font-size: 35px;"></i>
+            <div>
+                <span id="topUserName" style="font-size: 14px; display: block; font-weight: bold;">Loading...</span>
+                <small style="font-size: 10px; background: rgba(255,255,255,0.2); padding: 2px 8px; border-radius: 10px;">Verified User</small>
+            </div>
+        </div>
+        <div style="text-align: right;">
+            <span style="font-size: 11px; display: block; opacity: 0.9;">My Balance</span>
+            <div style="display: flex; align-items: center; justify-content: flex-end; gap: 5px;">
+                <i class="fa fa-coins" style="color: #ffd700;"></i>
+                <h2 id="userCoins" style="margin: 0; font-size: 22px;">0</h2>
+            </div>
+        </div>
     </div>
 
     <div class="card">
