@@ -1,6 +1,73 @@
-// profile.html এর স্ক্রিপ্টে যোগ করুন
-onAuthStateChanged(auth, (user) => {
-    if (user) {
-        document.getElementById('userEmail').innerText = user.email;
-    }
-});
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profile - EarnPro</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <div class="card balance-card">
+        <i class="fa fa-user-circle" style="font-size: 50px; margin-bottom: 10px;"></i>
+        <h3 id="userEmail">Loading...</h3>
+        <p>User ID: <span id="userId">...</span></p>
+    </div>
+
+    <div class="card">
+        <h4>Account Statistics</h4>
+        <p>Total Balance: <strong id="profileCoins">0</strong> Coins</p>
+    </div>
+
+    <div class="card">
+        <button id="logoutBtn" class="btn-main" style="background: #e74c3c;">
+            <i class="fa fa-sign-out-alt"></i> Logout Account
+        </button>
+    </div>
+
+    <nav class="bottom-nav">
+        <a href="index.html" class="nav-item"><i class="fa fa-home"></i>Home</a>
+        <a href="earn.html" class="nav-item"><i class="fa fa-gamepad"></i>Earn</a>
+        <a href="tasks.html" class="nav-item"><i class="fa fa-tasks"></i>Tasks</a>
+        <a href="withdraw.html" class="nav-item"><i class="fa fa-wallet"></i>Withdraw</a>
+        <a href="profile.html" class="nav-item active"><i class="fa fa-user"></i>Profile</a>
+    </nav>
+
+    <script type="module">
+        import { auth, db } from './firebase.js';
+        import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-auth.js";
+        import { doc, getDoc } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore.js";
+
+        // ইউজার তথ্য দেখানো
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                document.getElementById('userEmail').innerText = user.email;
+                document.getElementById('userId').innerText = user.uid.substring(0, 8) + "...";
+
+                // ডাটাবেস থেকে কয়েন আনা
+                const userRef = doc(db, "users", user.uid);
+                const snap = await getDoc(userRef);
+                if (snap.exists()) {
+                    document.getElementById('profileCoins').innerText = snap.data().coins || 0;
+                }
+            } else {
+                // লগইন না থাকলে লগইন পেজে পাঠানো
+                window.location.href = "login.html";
+            }
+        });
+
+        // লগআউট ফাংশন
+        document.getElementById('logoutBtn').onclick = async () => {
+            if (confirm("আপনি কি নিশ্চিতভাবে লগআউট করতে চান?")) {
+                try {
+                    await signOut(auth);
+                    alert("Logged out successfully!");
+                    window.location.href = "login.html";
+                } catch (err) {
+                    alert("Error: " + err.message);
+                }
+            }
+        };
+    </script>
+</body>
+</html>
