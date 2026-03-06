@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - EarnPro</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="card" style="margin-top: 50px; text-align: center;">
+        <h2>Login</h2>
+        <input type="email" id="email" placeholder="Email" class="input-field">
+        <input type="password" id="pass" placeholder="Password" class="input-field">
+        <button id="loginBtn" class="btn-main">Login</button>
+        <p>New user? <a href="signup.html">Create Account</a></p>
+    </div>
+    <script type="module">
+        import { auth } from './firebase.js';
+        import { signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-auth.js";
+        document.getElementById('loginBtn').onclick = async () => {
+            try {
+                await signInWithEmailAndPassword(auth, document.getElementById('email').value, document.getElementById('pass').value);
+                window.location.href = "index.html";
+            } catch (err) { alert("Invalid Login!"); }
+        };
+    </script>
+</body>
+</html>
