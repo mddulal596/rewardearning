@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8"><title>Admin Panel</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="card">
+        <h2>Withdrawal Requests</h2>
+        <div id="adminData">Loading...</div>
+    </div>
+    <script type="module">
+        import { db } from './firebase.js';
+        import { collection, getDocs, updateDoc, doc } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore.js";
+        async function load() {
+            const snap = await getDocs(collection(db, "withdrawals"));
+            let html = "<table border='1' width='100%'><tr><th>Method</th><th>Number</th><th>Amount</th><th>Status</th></tr>";
+            snap.forEach(d => {
+                html += `<tr><td>${d.data().method}</td><td>${d.data().number}</td><td>${d.data().amount}</td><td>${d.data().status}</td></tr>`;
+            });
+            document.getElementById('adminData').innerHTML = html + "</table>";
+        }
+        load();
+    </script>
+</body>
+</html>
