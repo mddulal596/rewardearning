@@ -1,20 +1,6 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Earn - EarnPro</title>
-    <link rel="stylesheet" href="style.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-</head>
-<body>
-    <div class="card"><h2>More Tasks Coming Soon...</h2></div>
-    <nav class="bottom-nav">
-        <a href="index.html" class="nav-item"><i class="fa fa-home"></i>Home</a>
-        <a href="earn.html" class="nav-item active"><i class="fa fa-gamepad"></i>Earn</a>
-        <a href="tasks.html" class="nav-item"><i class="fa fa-tasks"></i>Tasks</a>
-        <a href="withdraw.html" class="nav-item"><i class="fa fa-wallet"></i>Withdraw</a>
-        <a href="profile.html" class="nav-item"><i class="fa fa-user"></i>Profile</a>
-    </nav>
-</body>
-</html>
+// profile.html এর স্ক্রিপ্টে যোগ করুন
+onAuthStateChanged(auth, (user) => {
+    if (user) {
+        document.getElementById('userEmail').innerText = user.email;
+    }
+});
