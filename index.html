@@ -1,20 +1,38 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Reward Earning App</title>
-    <link rel="stylesheet" href="css/style.css">
-    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
-    <script src="js/firebase.js"></script>
-    <script src="js/auth.js"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EarnCash Pro</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 <body>
-<h2>Reward Earning App</h2>
-<input id="email" placeholder="Email">
-<input id="pass" type="password" placeholder="Password">
-<br><br>
-<button onclick="signup()">Signup</button>
-<button onclick="login()">Login</button>
+
+    <div class="card balance-card">
+        <h3>Total Balance</h3>
+        <h1 id="userCoins">0</h1>
+        <p>Coins</p>
+    </div>
+
+    <div class="card">
+        <h4>Daily Tasks</h4>
+        <button class="btn-main" onclick="claimDailyBonus()">Daily Check-in (+10)</button>
+        <br><br>
+        <button class="btn-main" style="background: #27ae60;" onclick="watchAd()">Watch Ad & Earn (+5)</button>
+    </div>
+
+    <div id="container-44ea16fb3bf3a48a9a140ddd4fa5dc93"></div>
+
+    <nav class="bottom-nav">
+        <a href="index.html" class="nav-item active"><i class="fa fa-home"></i>Home</a>
+        <a href="earn.html" class="nav-item"><i class="fa fa-gamepad"></i>Earn</a>
+        <a href="tasks.html" class="nav-item"><i class="fa fa-list"></i>Tasks</a>
+        <a href="withdraw.html" class="nav-item"><i class="fa fa-wallet"></i>Withdraw</a>
+        <a href="profile.html" class="nav-item"><i class="fa fa-user"></i>Profile</a>
+    </nav>
+
+    <script type="module" src="app.js"></script>
+    <script async="async" data-cfasync="false" src="https://middayopened.com/44ea16fb3bf3a48a9a140ddd4fa5dc93/invoke.js"></script>
 </body>
 </html>
