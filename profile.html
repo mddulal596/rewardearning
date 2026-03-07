@@ -9,21 +9,19 @@
 </head>
 <body>
 
-    <div style="text-align: center; padding: 40px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border-bottom-left-radius: 30px; border-bottom-right-radius: 30px;">
-        <div style="font-size: 100px; margin-bottom: 10px;">
-            <i class="fas fa-user-circle"></i>
-        </div>
-        <h2 id="userNameDisplay">Loading...</h2>
-        <p id="userEmailDisplay">...</p>
-        <div style="margin-top: 15px; background: rgba(255,255,255,0.2); display: inline-block; padding: 8px 25px; border-radius: 20px;">
-            Total Coins: <span id="userBalanceDisplay">0</span>
+    <div class="balance-card" style="border-bottom-left-radius: 30px; border-bottom-right-radius: 30px;">
+        <i class="fas fa-user-circle" style="font-size: 100px; margin-bottom: 10px; opacity: 0.9;"></i>
+        <h2 id="userNameDisplay" style="margin: 10px 0 5px;">Loading...</h2>
+        <p id="userEmailDisplay" style="margin: 0; font-size: 14px; opacity: 0.8;">...</p>
+        <div style="margin-top: 20px; background: rgba(255,255,255,0.2); display: inline-block; padding: 10px 30px; border-radius: 25px; font-weight: bold;">
+            Total Balance: <span id="userBalanceDisplay">0</span> 💰
         </div>
     </div>
 
-    <div class="card" style="margin-top: 20px;">
-        <h4 style="margin-bottom: 15px; color: #333;">Update Name</h4>
-        <input type="text" id="nameInput" placeholder="Enter new name" class="input-field" style="width: 100%; padding: 12px; margin-bottom: 15px; border: 1px solid #ddd; border-radius: 10px; box-sizing: border-box;">
-        <button id="updateBtn" class="btn-main" style="width: 100%; background: #764ba2;">Save Changes</button>
+    <div class="card" style="margin-top: -20px; border-radius: 20px;">
+        <h4 style="color: #333; margin-bottom: 15px;">Edit Profile Name</h4>
+        <input type="text" id="nameInput" placeholder="Enter full name" class="input-field">
+        <button id="updateBtn" class="btn-main" style="margin-top: 10px;">Save Changes</button>
     </div>
 
     <nav class="bottom-nav">
@@ -52,13 +50,12 @@
         document.getElementById('updateBtn').onclick = async () => {
             const user = auth.currentUser;
             const newName = document.getElementById('nameInput').value;
-            if(!newName) return alert("Enter a name");
-            
+            if(!newName) return;
             try {
                 await updateDoc(doc(db, "users", user.uid), { name: newName });
-                alert("Name updated successfully!");
+                alert("Profile Updated!");
                 location.reload();
-            } catch (e) { alert("Error updating name."); }
+            } catch (e) { alert("Error!"); }
         };
     </script>
 </body>
