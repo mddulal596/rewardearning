@@ -68,28 +68,28 @@
                 const snap = await getDoc(userRef);
                 
                 if (snap.exists()) {
-                    const code = snap.data().referCode || "PRO" + Math.floor(1000 + Math.random() * 9000);
+                    const code = snap.data().referCode || "N/A";
                     document.getElementById('referCodeBox').innerText = code;
 
-                    // অটোমেটিক সঠিক লিঙ্ক তৈরি (GitHub 404 সমাধান)
-                    // এটি 'refer.html' থেকে লিঙ্ক সরিয়ে 'index.html' যুক্ত করবে
+                    // অটোমেটিক সঠিক লিঙ্ক তৈরি (GitHub Pages 404 সমাধান)
+                    // এটি 'refer.html' এর বদলে 'index.html' কে পয়েন্ট করবে
                     const currentUrl = window.location.href;
                     const cleanUrl = currentUrl.replace('refer.html', 'index.html').split('?')[0];
                     const finalInviteLink = `${cleanUrl}?ref=${code}`;
 
-                    // WhatsApp Share
+                    // WhatsApp Share লজিক
                     document.getElementById('shareWhatsapp').onclick = () => {
                         const text = `🔥 EarnPro অ্যাপে জয়েন করে প্রতিদিন টাকা ইনকাম করুন! \n🎁 আমার রেফার কোড: ${code}\n🚀 জয়েনিং লিঙ্ক: ${finalInviteLink}`;
                         window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(text)}`, '_blank');
                     };
 
-                    // Copy Code
+                    // রেফার কোড ক্লিক করলে কপি হওয়ার লজিক
                     document.getElementById('referCodeBox').onclick = () => {
                         navigator.clipboard.writeText(code);
-                        alert("রেফার কোড কপি হয়েছে: " + code);
+                        alert("রেফার কোড কপি করা হয়েছে!");
                     };
                     
-                    // Copy Link
+                    // ইনভাইট লিঙ্ক কপি করার লজিক
                     document.getElementById('copyLink').onclick = () => {
                         navigator.clipboard.writeText(finalInviteLink);
                         alert("আপনার ইনভাইট লিঙ্ক কপি হয়েছে!");
