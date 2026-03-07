@@ -3,62 +3,121 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Earn Money</title>
+    <title>Earn Money - EarnPro</title>
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        body { background: #f4f7f6; padding-bottom: 80px; }
-        .task-container { padding: 20px; }
-        .btn-task {
-            width: 100%;
-            padding: 15px;
-            margin-bottom: 15px;
-            border: none;
-            border-radius: 12px;
-            color: white;
-            font-weight: bold;
-            font-size: 16px;
-            cursor: pointer;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-        }
+        body { background: #f4f7f6; padding-bottom: 90px; }
+        .earn-card { background: white; padding: 20px; border-radius: 20px; margin: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); text-align: center; }
+        .btn-earn { width: 100%; padding: 15px; margin-bottom: 15px; border: none; border-radius: 12px; color: white; font-weight: bold; font-size: 16px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: 0.3s; }
+        .btn-earn:active { transform: scale(0.95); }
     </style>
 </head>
 <body>
 
-    <div style="background: var(--primary); color: white; padding: 20px; text-align: center; border-bottom-left-radius: 20px; border-bottom-right-radius: 20px;">
-        <h3>Earn Money</h3>
+    <div style="background: var(--primary); color: white; padding: 30px 20px; text-align: center; border-bottom-left-radius: 30px; border-bottom-right-radius: 30px;">
+        <h2 style="margin: 0;">Earn Coins</h2>
+        <p style="opacity: 0.8;">টাস্ক পূরণ করুন আর কয়েন ইনকাম করুন</p>
     </div>
 
-    <div class="task-container">
-        <button id="checkInBtn" class="btn-task" style="background: #5c6bc0;">
-            <i class="fa fa-calendar-check"></i> Daily Check-in (+10)
+    <div style="padding: 10px;">
+        <button id="checkInBtn" class="btn-earn" style="background: #5c6bc0;">
+            <i class="fa fa-calendar-check" style="margin-right: 10px;"></i> Daily Check-in (+10)
         </button>
 
-        <button id="watchAdBtn" class="btn-task" style="background: #2e7d32;">
-            <i class="fa fa-play-circle"></i> Watch Ad & Earn (+5)
+        <button id="watchAdBtn" class="btn-earn" style="background: #2e7d32;">
+            <i class="fa fa-play-circle" style="margin-right: 10px;"></i> Watch Ad & Earn (+5)
         </button>
 
-        <div class="card" style="text-align: center; margin-top: 20px;">
+        <div class="earn-card">
             <h4>Lucky Spin</h4>
-            <div id="wheel-container" style="font-size: 60px; margin: 10px 0;">🎡</div>
-            <button id="spinBtn" class="btn-main" style="background: #f39c12; width: 100%;">Spin Now</button>
+            <div id="wheel-container" style="font-size: 60px; margin: 15px 0; transition: transform 3s ease-out; display: inline-block;">🎡</div>
+            <button id="spinBtn" class="btn-earn" style="background: #f39c12; width: 100%; margin-top: 10px;">
+                <i class="fa fa-sync-alt" style="margin-right: 10px;"></i> Spin Now
+            </button>
         </div>
     </div>
 
     <nav class="bottom-nav" style="position: fixed; bottom: 0; width: 100%; background: white; display: flex; justify-content: space-around; align-items: center; padding: 10px 0; box-shadow: 0 -2px 10px rgba(0,0,0,0.1); z-index: 1000;">
         <a href="index.html" style="text-decoration: none; color: #888; text-align: center; flex: 1;">
-            <i class="fa fa-home"></i><br><span style="font-size: 10px;">Home</span>
+            <i class="fa fa-home" style="font-size: 20px;"></i><br><span style="font-size: 10px;">Home</span>
         </a>
         <a href="earn.html" style="text-decoration: none; color: var(--primary); text-align: center; flex: 1;">
-            <div style="background: var(--primary); color: white; width: 50px; height: 50px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: -30px auto 5px; border: 5px solid white;">
+            <div style="background: var(--primary); color: white; width: 50px; height: 50px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: -35px auto 5px; border: 5px solid white;">
                 <i class="fa fa-bolt"></i>
             </div>
             <span style="font-size: 10px; font-weight: bold;">Earn</span>
         </a>
         <a href="profile.html" style="text-decoration: none; color: #888; text-align: center; flex: 1;">
-            <i class="fa fa-user"></i><br><span style="font-size: 10px;">Profile</span>
+            <i class="fa fa-user" style="font-size: 20px;"></i><br><span style="font-size: 10px;">Profile</span>
         </a>
     </nav>
 
+    <script type="module">
+        import { auth, db } from './firebase.js';
+        import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-auth.js";
+        import { doc, getDoc, updateDoc, increment } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore.js";
+
+        // আপনার দেওয়া অ্যাডস্টারা লিঙ্কটি এখানে বসান
+        const ADSTERRA_LINK = "https://middayopened.com/uuh65fp1c?key=0d0044249c1cef410a86dcfa8f7e3460";
+
+        // ইউজার লগইন চেক
+        onAuthStateChanged(auth, (user) => {
+            if (!user) window.location.href = "login.html";
+        });
+
+        // ১. Watch Ad লজিক
+        document.getElementById('watchAdBtn').onclick = async () => {
+            const user = auth.currentUser;
+            window.open(ADSTERRA_LINK, '_blank');
+            if (user) {
+                await updateDoc(doc(db, "users", user.uid), { coins: increment(5) });
+                alert("৫ কয়েন যোগ করা হয়েছে!");
+            }
+        };
+
+        // ২. Daily Check-in লজিক
+        document.getElementById('checkInBtn').onclick = async () => {
+            const user = auth.currentUser;
+            if (user) {
+                const userRef = doc(db, "users", user.uid);
+                const snap = await getDoc(userRef);
+                const lastDate = snap.data().lastCheckIn;
+                const today = new Date().toDateString();
+
+                if (lastDate === today) {
+                    alert("আপনি আজ অলরেডি বোনাস নিয়েছেন!");
+                } else {
+                    await updateDoc(userRef, { 
+                        coins: increment(10), 
+                        lastCheckIn: today 
+                    });
+                    alert("১০ কয়েন ডেইলি বোনাস পেলেন!");
+                }
+            }
+        };
+
+        // ৩. Lucky Spin লজিক
+        let canSpin = true;
+        document.getElementById('spinBtn').onclick = async () => {
+            if (!canSpin) return;
+            const user = auth.currentUser;
+            const wheel = document.getElementById('wheel-container');
+            
+            canSpin = false;
+            const randomDeg = Math.floor(Math.random() * 360) + 1440; // ৪ বার ঘুরবে
+            wheel.style.transform = `rotate(${randomDeg}deg)`;
+
+            setTimeout(async () => {
+                const bonus = Math.floor(Math.random() * 5) + 1; // ১ থেকে ৫ কয়েন
+                if (user) {
+                    await updateDoc(doc(db, "users", user.uid), { coins: increment(bonus) });
+                    alert(`অভিনন্দন! আপনি ${bonus} কয়েন জিতেছেন।`);
+                }
+                wheel.style.transform = `rotate(0deg)`;
+                canSpin = true;
+            }, 3000);
+        };
+    </script>
 </body>
 </html>
