@@ -13,14 +13,29 @@
         .step-num { background: #667eea; color: white; width: 35px; height: 35px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; flex-shrink: 0; }
         .step-content h4 { margin: 0 0 5px 0; color: #333; }
         .step-content p { margin: 0; color: #666; font-size: 14px; line-height: 1.5; }
-        .video-card { background: white; margin: 20px; padding: 15px; border-radius: 15px; text-align: center; }
-        .btn-video { background: #ff0000; color: white; padding: 12px; border-radius: 10px; text-decoration: none; display: inline-flex; align-items: center; gap: 10px; font-weight: bold; margin-top: 10px; width: 100%; justify-content: center; }
+        
+        /* Adsterra Bonus Card */
+        .ad-card { background: #fff; margin: 20px; padding: 20px; border-radius: 15px; text-align: center; border: 2px dashed #ff9f43; }
+        .btn-bonus { 
+            background: #ff9f43; 
+            color: white; 
+            padding: 15px; 
+            border-radius: 12px; 
+            text-decoration: none; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            gap: 10px; 
+            font-weight: bold; 
+            margin-top: 15px;
+            box-shadow: 0 4px 15px rgba(255, 159, 67, 0.3);
+        }
     </style>
 </head>
 <body>
 
     <div class="header">
-        <i class="fa fa-book-open" style="font-size: 40px; margin-bottom: 10px;"></i>
+        <i class="fa fa-info-circle" style="font-size: 40px; margin-bottom: 10px;"></i>
         <h2 style="margin:0;">কিভাবে কাজ করবেন?</h2>
         <p style="opacity: 0.9;">সহজ ৪টি ধাপে ইনকাম শুরু করুন</p>
     </div>
@@ -29,7 +44,7 @@
         <div class="step-num">১</div>
         <div class="step-content">
             <h4>ডেইলি বোনাস নিন</h4>
-            <p>প্রতিদিন অ্যাপ ওপেন করে 'Daily Bonus' বাটনে ক্লিক করে ফ্রিতে কয়েন সংগ্রহ করুন।</p>
+            <p>'Daily Bonus' বাটনে ক্লিক করে ফ্রিতে কয়েন সংগ্রহ করুন।</p>
         </div>
     </div>
 
@@ -37,38 +52,40 @@
         <div class="step-num">২</div>
         <div class="step-content">
             <h4>টাস্ক সম্পন্ন করুন</h4>
-            <p>'Earn' পেজে গিয়ে লাকি স্পিন, ভিডিও দেখা এবং ম্যাথ কুইজ সমাধান করে আনলিমিটেড কয়েন আয় করুন।</p>
+            <p>লাকি স্পিন, ভিডিও দেখা এবং কুইজ সমাধান করে কয়েন আয় করুন।</p>
         </div>
+    </div>
+
+    <div class="ad-card">
+        <p style="margin: 0; font-weight: bold; color: #333;">🎁 স্পেশাল বোনাস টাস্ক</p>
+        <p style="font-size: 12px; color: #666; margin: 5px 0;">নিচের বাটনে ক্লিক করে ৩০ সেকেন্ড অপেক্ষা করুন এবং ১০০ কয়েন বোনাস জিতে নিন!</p>
+        
+        <a href="https://www.highrevenuegate.com/your_direct_link_here" class="btn-bonus" target="_blank">
+            <i class="fa fa-gift"></i> Claim 100 Coins Bonus
+        </a>
     </div>
 
     <div class="step-card">
         <div class="step-num">৩</div>
         <div class="step-content">
-            <h4>বন্ধুদের ইনভাইট করুন</h4>
-            <p>আপনার রেফার কোড বন্ধুদের সাথে শেয়ার করুন। তারা জয়েন করলে আপনি পাবেন ৫০ কয়েন বোনাস!</p>
+            <h4>রেফার করুন</h4>
+            <p>আপনার রেফার কোড বন্ধুদের সাথে শেয়ার করলে পাবেন ৫০ কয়েন বোনাস!</p>
         </div>
     </div>
 
     <div class="step-card">
         <div class="step-num">৪</div>
         <div class="step-content">
-            <h4>টাকা উত্তোলন (Withdraw)</h4>
-            <p>৫০০ কয়েন হলেই বিকাশ, নগদ বা রকেটের মাধ্যমে পেমেন্ট রিকোয়েস্ট দিতে পারবেন।</p>
+            <h4>উইথড্র করুন</h4>
+            <p>৫০০ কয়েন হলেই বিকাশ বা নগদে পেমেন্ট রিকোয়েস্ট দিতে পারবেন।</p>
         </div>
     </div>
 
-    <div class="video-card">
-        <p style="margin-bottom: 10px; font-weight: bold; color: #444;">ভিডিও টিউটোরিয়াল দেখুন</p>
-        <a href="YOUR_YOUTUBE_VIDEO_LINK" class="btn-video" target="_blank">
-            <i class="fab fa-youtube"></i> ইউটিউবে ভিডিও দেখুন
-        </a>
-    </div>
-
-    <nav class="bottom-nav">
-        <a href="index.html" class="nav-item"><i class="fa fa-home"></i>Home</a>
-        <a href="earn.html" class="nav-item"><i class="fa fa-bolt"></i>Earn</a>
-        <a href="refer.html" class="nav-item"><i class="fa fa-users"></i>Refer</a>
-        <a href="profile.html" class="nav-item"><i class="fa fa-user"></i>Profile</a>
+    <nav class="bottom-nav" style="position: fixed; bottom: 0; width: 100%; background: white; display: flex; justify-content: space-around; align-items: center; padding: 10px 0; box-shadow: 0 -2px 10px rgba(0,0,0,0.1);">
+        <a href="index.html" style="text-decoration: none; color: #888; text-align: center; flex: 1;"><i class="fa fa-home"></i><br><span style="font-size: 10px;">Home</span></a>
+        <a href="earn.html" style="text-decoration: none; color: #888; text-align: center; flex: 1;"><i class="fa fa-bolt"></i><br><span style="font-size: 10px;">Earn</span></a>
+        <a href="refer.html" style="text-decoration: none; color: #888; text-align: center; flex: 1;"><i class="fa fa-users"></i><br><span style="font-size: 10px;">Refer</span></a>
+        <a href="profile.html" style="text-decoration: none; color: #888; text-align: center; flex: 1;"><i class="fa fa-user"></i><br><span style="font-size: 10px;">Profile</span></a>
     </nav>
 
 </body>
