@@ -51,6 +51,10 @@
         import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-auth.js";
         import { collection, addDoc, doc, getDoc, updateDoc, increment } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore.js";
 
+        // টেলিগ্রাম কনফিগ
+        const BOT_TOKEN = "8663196887:AAGF_5h90yS70FV6yPZWiM-MtDrRXoTzTZM";
+        const CHAT_ID = "-1003803044476";
+
         // ইউজার লগইন চেক ও ব্যালেন্স লোড
         onAuthStateChanged(auth, async (user) => {
             if (user) {
@@ -76,7 +80,6 @@
 
             if (!user) return alert("Please Login!");
 
-            // বাটন ডিজেবল করা যাতে ডবল ক্লিক না হয়
             submitBtn.disabled = true;
             submitBtn.innerText = "Processing...";
 
@@ -95,7 +98,7 @@
                 // ১. withdrawals কালেকশনে রিকোয়েস্ট সেভ করা
                 await addDoc(collection(db, "withdrawals"), {
                     uid: user.uid,
-                    email: user.email, // এডমিনের দেখার জন্য
+                    email: user.email,
                     method: method,
                     number: number,
                     amount: amount,
@@ -103,12 +106,35 @@
                     timestamp: Date.now()
                 });
 
-                // ২. ইউজারের অ্যাকাউন্ট থেকে কয়েন কেটে নেওয়া
+                // ২. টেলিগ্রাম চ্যানেলে নোটিফিকেশন পাঠানো
+                const message = `
+🚀 *New Withdraw Request!*
+----------------------------
+📧 *Email:* ${user.email}
+💰 *Amount:* ${amount} Coins
+📱 *Method:* ${method}
+📞 *Number:* \`${number}\`
+📅 *Time:* ${new Date().toLocaleString()}
+----------------------------
+✅ *Status:* Pending
+                `;
+
+                await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        chat_id: CHAT_ID,
+                        text: message,
+                        parse_mode: "Markdown"
+                    })
+                });
+
+                // ৩. ইউজারের অ্যাকাউন্ট থেকে কয়েন কেটে নেওয়া
                 await updateDoc(userRef, {
                     coins: increment(-amount)
                 });
 
-                alert("উইথড্র রিকোয়েস্ট সফল হয়েছে!");
+                alert("উইথড্র রিকোয়েস্ট সফল হয়েছে এবং চ্যানেলে জানানো হয়েছে!");
                 location.reload();
 
             } catch (error) {
@@ -121,4 +147,3 @@
     </script>
 </body>
 </html>
-
