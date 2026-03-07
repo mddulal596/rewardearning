@@ -1,8 +1,8 @@
 import { auth, db } from './firebase.js';
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-auth.js";
-import { doc, getDoc, updateDoc, increment } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore.js";
+import { doc, getDoc, updateDoc, increment, serverTimestamp } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore.js";
 
-// ইউজারের ব্যালেন্স ও ছবি লোড করা
+// ইউজারের ব্যালেন্স ও ডাটা লোড করা
 onAuthStateChanged(auth, async (user) => {
     if (user) {
         const userRef = doc(db, "users", user.uid);
@@ -12,6 +12,7 @@ onAuthStateChanged(auth, async (user) => {
             document.getElementById('topUserName').innerText = data.name || "User";
             document.getElementById('userCoins').innerText = data.coins || 0;
 
+            // প্রোফাইল ছবি দেখানো
             if (data.photoURL) {
                 const pic = document.getElementById('topUserProfilePic');
                 const icon = document.getElementById('topUserIcon');
@@ -21,20 +22,61 @@ onAuthStateChanged(auth, async (user) => {
                     icon.style.display = 'none';
                 }
             }
+
+            // বাটনগুলোর লিমিট চেক করা
+            checkLimit(data.lastCheckIn, 'checkInBtn', 24 * 60 * 60 * 1000, "Daily Check-in (+10)"); // ২৪ ঘণ্টা
+            checkLimit(data.lastAdWatch, 'watchAdBtn', 1 * 60 * 60 * 1000, "Watch Ad & Earn (+5)"); // ১ ঘণ্টা
         }
     } else {
         window.location.href = "login.html";
     }
 });
 
-// ১০ কয়েন যোগ করার বাটন (Daily Check-in)
+// সময় চেক করার ফাংশন
+function checkLimit(lastTime, btnId, limitMs, originalText) {
+    const btn = document.getElementById(btnId);
+    if (!lastTime) return;
+
+    const lastDate = lastTime.toDate().getTime();
+    const now = new Date().getTime();
+    const diff = now - lastDate;
+
+    if (diff < limitMs) {
+        btn.disabled = true;
+        const remaining = limitMs - diff;
+        
+        // টাইমার আপডেট করা
+        const timer = setInterval(() => {
+            const currentNow = new Date().getTime();
+            const currentDiff = limitMs - (currentNow - lastDate);
+            
+            if (currentDiff <= 0) {
+                clearInterval(timer);
+                btn.disabled = false;
+                btn.innerText = originalText;
+            } else {
+                const hours = Math.floor(currentDiff / (1000 * 60 * 60));
+                const mins = Math.floor((currentDiff % (1000 * 60 * 60)) / (1000 * 60));
+                const secs = Math.floor((currentDiff % (1000 * 60)) / 1000);
+                btn.innerText = `Wait: ${hours}h ${mins}m ${secs}s`;
+            }
+        }, 1000);
+    }
+}
+
+// ডেইলি চেক-ইন বাটন লজিক
 document.getElementById('checkInBtn').onclick = async () => {
     const user = auth.currentUser;
     if (!user) return;
     const btn = document.getElementById('checkInBtn');
     btn.disabled = true;
+
     try {
-        await updateDoc(doc(db, "users", user.uid), { coins: increment(10) });
+        const userRef = doc(db, "users", user.uid);
+        await updateDoc(userRef, { 
+            coins: increment(10),
+            lastCheckIn: serverTimestamp() 
+        });
         alert("Success! 10 Coins Added.");
         location.reload();
     } catch (e) { 
@@ -43,23 +85,25 @@ document.getElementById('checkInBtn').onclick = async () => {
     }
 };
 
-// বিজ্ঞাপন দেখে ৫ কয়েন পাওয়ার বাটন
+// অ্যাড দেখে কয়েন নেওয়ার বাটন লজিক
 document.getElementById('watchAdBtn').onclick = async () => {
     const user = auth.currentUser;
-    if (!user) return alert("Please Login!");
+    if (!user) return;
+    const btn = document.getElementById('watchAdBtn');
 
-    // বিজ্ঞাপনের লিঙ্ক (এখানে আপনার অ্যাড লিঙ্কটি বসান)
-    const adLink = "https://middayopened.com/44ea16fb3bf3a48a9a140ddd4fa5dc93/invoke.js"; 
-    
-    // বিজ্ঞাপনটি নতুন ট্যাবে ওপেন হবে
+    // আপনার অ্যাড লিঙ্কটি এখানে দিন
+    const adLink = "আপনার_অ্যাড_লিঙ্ক"; 
     window.open(adLink, '_blank');
 
     try {
         const userRef = doc(db, "users", user.uid);
-        await updateDoc(userRef, { coins: increment(5) });
-        alert("Success! 5 Coins added for watching ad.");
+        await updateDoc(userRef, { 
+            coins: increment(5),
+            lastAdWatch: serverTimestamp() 
+        });
+        alert("Success! 5 Coins Added.");
         location.reload();
     } catch (e) { 
-        alert("Error: " + e.message); 
+        alert(e.message); 
     }
 };
