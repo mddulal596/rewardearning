@@ -18,16 +18,15 @@ onAuthStateChanged(auth, async (user) => {
     } else { window.location.href = "login.html"; }
 });
 
-// Lucky Spin Logic
+// Lucky Spin
 document.getElementById('spinBtn').onclick = () => {
     const wheel = document.getElementById('wheel-container');
     const btn = document.getElementById('spinBtn');
     btn.disabled = true;
     const deg = Math.floor(Math.random() * 360) + 1800; 
     wheel.style.transform = `rotate(${deg}deg)`;
-
     setTimeout(() => {
-        if(confirm("অভিনন্দন! আপনি বোনাস জিতেছেন। ৫ কয়েন পেতে বিজ্ঞাপনটি দেখুন।")) {
+        if(confirm("অভিনন্দন! ৫ কয়েন বোনাস পেতে বিজ্ঞাপনটি দেখুন।")) {
             window.open(AD_LINK, '_blank');
             addCoins(5, 'lastAdWatch'); 
         }
@@ -36,7 +35,7 @@ document.getElementById('spinBtn').onclick = () => {
     }, 3500);
 };
 
-// Chatbot Logic
+// --- উন্নত চ্যাটবট লজিক ---
 const chatIcon = document.getElementById('chat-icon');
 const chatWindow = document.getElementById('chat-window');
 const closeChat = document.getElementById('close-chat');
@@ -49,16 +48,33 @@ closeChat.onclick = () => chatWindow.style.display = 'none';
 
 function getBotReply(msg) {
     msg = msg.toLowerCase();
-    if (msg.includes("টাকা") || msg.includes("withdraw")) return "আপনি ১০০০ কয়েন হলে বিকাশ বা নগদে টাকা তুলতে পারবেন।";
-    if (msg.includes("কয়েন") || msg.includes("coin")) return "চেক-ইন করলে ১০ কয়েন এবং অ্যাড দেখলে ৫ কয়েন পাওয়া যায়।";
-    if (msg.includes("স্পিন") || msg.includes("spin")) return "স্পিন করে আপনি বাড়তি বোনাস কয়েন আয় করতে পারেন।";
-    return "দুঃখিত, আমি এটি বুঝতে পারছি না। দয়া করে ইনকাম বা উইথড্র নিয়ে প্রশ্ন করুন।";
+    // অভিবাদন
+    if (msg.includes("hello") || msg.includes("hi") || msg.includes("সালাম") || msg.includes("হ্যালো")) 
+        return "সালাম! আমি EarnPro AI। আপনার দিনটি শুভ হোক। আমি আপনাকে কীভাবে সাহায্য করতে পারি?";
+    
+    // পেমেন্ট/টাকা
+    if (msg.includes("টাকা") || msg.includes("withdraw") || msg.includes("উইথড্র") || msg.includes("পেমেন্ট")) 
+        return "আপনি ১০০০ কয়েন জমালে বিকাশ বা নগদে টাকা তুলতে পারবেন। উইথড্র পেজ থেকে রিকোয়েস্ট দিন।";
+    
+    // বিকাশ/নগদ
+    if (msg.includes("বিকাশ") || msg.includes("নগদ") || msg.includes("bkash") || msg.includes("nagad")) 
+        return "হ্যাঁ, আমরা বিকাশ এবং নগদে পেমেন্ট করি। আপনার নম্বর সঠিক দিয়ে রিকোয়েস্ট করবেন।";
+    
+    // কয়েন/ইনকাম
+    if (msg.includes("কয়েন") || msg.includes("coin") || msg.includes("আয়") || msg.includes("ইনকাম")) 
+        return "ডেইলি চেক-ইন থেকে ১০ কয়েন এবং অ্যাড দেখলে ৫ কয়েন পাবেন। এছাড়া স্পিন তো আছেই!";
+    
+    // স্পিন
+    if (msg.includes("স্পিন") || msg.includes("spin")) 
+        return "লাকি স্পিন খেলে আপনি প্রতিবার বোনাস কয়েন জেতার সুযোগ পাবেন।";
+
+    return "দুঃখিত, আমি আপনার কথাটি ঠিক বুঝতে পারিনি। দয়া করে ইনকাম বা টাকা তোলা নিয়ে প্রশ্ন করুন।";
 }
 
 sendChat.onclick = () => {
     const text = chatInput.value.trim();
     if (!text) return;
-    chatContent.innerHTML += `<div style="background: #764ba2; color: white; padding: 8px 12px; border-radius: 12px; margin-bottom: 10px; align-self: flex-end; max-width: 80%;">${text}</div>`;
+    chatContent.innerHTML += `<div style="background: var(--primary); color: white; padding: 8px 12px; border-radius: 12px; margin-bottom: 10px; align-self: flex-end; max-width: 80%;">${text}</div>`;
     chatInput.value = "";
     setTimeout(() => {
         const reply = getBotReply(text);
@@ -67,13 +83,13 @@ sendChat.onclick = () => {
     }, 800);
 };
 
-// Coin Update Function
+// Coin Functions
 async function addCoins(amount, field) {
     const user = auth.currentUser;
     if (!user) return;
     try {
         await updateDoc(doc(db, "users", user.uid), { coins: increment(amount), [field]: serverTimestamp() });
-        alert(`সফল হয়েছে! ${amount} কয়েন যোগ করা হলো।`);
+        alert(`অভিনন্দন! ${amount} কয়েন যোগ হয়েছে।`);
         location.reload();
     } catch (e) { alert("Error updating coins."); }
 }
@@ -92,7 +108,7 @@ function checkLimit(last, id, ms, txt) {
         if (diff > 0) {
             btn.disabled = true;
             const h = Math.floor(diff/3600000), m = Math.floor((diff%3600000)/60000), s = Math.floor((diff%60000)/1000);
-            btn.innerText = `অপেক্ষা করুন: ${h}h ${m}m ${s}s`;
+            btn.innerText = `অপেক্ষা: ${h}h ${m}m ${s}s`;
             setTimeout(update, 1000);
         } else { btn.disabled = false; btn.innerText = txt; }
     };
