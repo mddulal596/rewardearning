@@ -3,59 +3,45 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Home - EarnPro</title>
+    <title>EarnPro - Home</title>
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 <body>
-    <div class="card profile-balance-bar" style="display: flex; align-items: center; justify-content: space-between; padding: 15px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border-radius: 15px; margin: 10px;">
-        <div style="display: flex; align-items: center; gap: 10px;">
-            <div id="profilePhotoContainer" style="width: 45px; height: 45px; border-radius: 50%; overflow: hidden; background: rgba(255,255,255,0.2); display: flex; align-items: center; justify-content: center; border: 2px solid white;">
-                <i class="fa fa-user-circle" id="topUserIcon" style="font-size: 35px;"></i>
-                <img id="topUserProfilePic" src="" style="width: 100%; height: 100%; object-fit: cover; display: none;">
-            </div>
+
+    <div class="top-bar">
+        <div class="user-info">
+            <i class="fa fa-user-circle" style="font-size: 40px; color: white; margin-right: 10px;"></i>
             <div>
-                <span id="topUserName" style="font-size: 14px; display: block; font-weight: bold;">Loading...</span>
-                <small style="font-size: 10px; background: rgba(255,255,255,0.2); padding: 2px 8px; border-radius: 10px;">Verified User</small>
+                <span id="topUserName">Loading...</span><br>
+                <small>Verified User</small>
             </div>
         </div>
-        <div style="text-align: right;">
-            <span style="font-size: 11px; display: block; opacity: 0.9;">My Balance</span>
-            <div style="display: flex; align-items: center; justify-content: flex-end; gap: 5px;">
-                <i class="fa fa-coins" style="color: #ffd700;"></i>
-                <h2 id="userCoins" style="margin: 0; font-size: 22px;">0</h2>
-            </div>
+        <div class="balance-info">
+            <small>My Balance</small><br>
+            <strong><span id="userCoins">0</span> 💰</strong>
         </div>
     </div>
 
-    <div class="card" style="margin: 10px; padding: 15px; background: white; border-radius: 15px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
-        <h4 style="margin-top: 0; color: #333;">Daily Tasks</h4>
-        <button class="btn-main" id="checkInBtn" style="margin-bottom: 10px; width: 100%; padding: 12px; border-radius: 10px; border: none; background: #667eea; color: white; font-weight: bold; cursor: pointer;">
-            Daily Check-in (+10)
-        </button>
-        <button class="btn-main" id="watchAdBtn" style="width: 100%; padding: 12px; border-radius: 10px; border: none; background: #27ae60; color: white; font-weight: bold; cursor: pointer;">
-            Watch Ad & Earn (+5)
-        </button>
+    <div class="card" style="margin-top: 20px;">
+        <h3>Daily Tasks</h3>
+        <button id="checkInBtn" class="btn-main" style="background: #6c5ce7; margin-bottom: 10px; width: 100%;">Daily Check-in (+10)</button>
+        <button id="watchAdBtn" class="btn-main" style="background: #27ae60; margin-bottom: 10px; width: 100%;">Watch Ad & Earn (+5)</button>
+        
+        <hr style="margin: 20px 0; border: 0; border-top: 1px solid #eee;">
+
+        <div style="text-align: center;">
+            <h4>Lucky Spin</h4>
+            <div id="wheel-container" style="font-size: 80px; margin: 15px auto; transition: transform 3s cubic-bezier(0.17, 0.67, 0.83, 0.67); width: fit-content;">
+                🎡
+            </div>
+            <button id="spinBtn" class="btn-main" style="background: #f39c12; width: 80%;">Spin Now</button>
+        </div>
     </div>
 
-    <div id="container-44ea16fb3bf3a48a9a140ddd4fa5dc93" style="text-align: center; margin-top: 15px;"></div>
-
-    <nav class="bottom-nav" style="position: fixed; bottom: 0; width: 100%; display: flex; justify-content: space-around; background: white; padding: 10px 0; border-top: 1px solid #eee;">
-        <a href="index.html" class="nav-item active" style="text-decoration: none; color: #764ba2; text-align: center; font-size: 12px;">
-            <i class="fa fa-home" style="display: block; font-size: 20px;"></i>Home
-        </a>
-        <a href="earn.html" class="nav-item" style="text-decoration: none; color: #999; text-align: center; font-size: 12px;">
-            <i class="fa fa-gamepad" style="display: block; font-size: 20px;"></i>Earn
-        </a>
-        <a href="tasks.html" class="nav-item" style="text-decoration: none; color: #999; text-align: center; font-size: 12px;">
-            <i class="fa fa-tasks" style="display: block; font-size: 20px;"></i>Tasks
-        </a>
-        <a href="withdraw.html" class="nav-item" style="text-decoration: none; color: #999; text-align: center; font-size: 12px;">
-            <i class="fa fa-wallet" style="display: block; font-size: 20px;"></i>Withdraw
-        </a>
-        <a href="profile.html" class="nav-item" style="text-decoration: none; color: #999; text-align: center; font-size: 12px;">
-            <i class="fa fa-user" style="display: block; font-size: 20px;"></i>Profile
-        </a>
+    <nav class="bottom-nav">
+        <a href="index.html" class="nav-item active"><i class="fa fa-home"></i>Home</a>
+        <a href="profile.html" class="nav-item"><i class="fa fa-user"></i>Profile</a>
     </nav>
 
     <script type="module" src="app.js"></script>
