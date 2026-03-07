@@ -92,7 +92,7 @@ document.getElementById('watchAdBtn').onclick = async () => {
     const btn = document.getElementById('watchAdBtn');
 
     // আপনার অ্যাড লিঙ্কটি এখানে দিন
-    const adLink = "আপনার_অ্যাড_লিঙ্ক"; 
+    const adLink = "https://middayopened.com/rmm8pbwe?key=a42d11bce0966c10bc9b3f909ae44009"; 
     window.open(adLink, '_blank');
 
     try {
