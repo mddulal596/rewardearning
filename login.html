@@ -5,23 +5,65 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login - EarnPro</title>
     <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
-<body>
-    <div class="card" style="margin-top: 50px; text-align: center;">
-        <h2>Login</h2>
-        <input type="email" id="email" placeholder="Email" class="input-field">
-        <input type="password" id="pass" placeholder="Password" class="input-field">
-        <button id="loginBtn" class="btn-main">Login</button>
-        <p>New user? <a href="signup.html">Create Account</a></p>
+<body style="background: #f4f7f6; display: flex; align-items: center; justify-content: center; height: 100vh; margin: 0;">
+
+    <div style="background: white; padding: 30px; border-radius: 25px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); text-align: center; width: 90%; max-width: 400px;">
+        <i class="fa fa-coins" style="font-size: 50px; color: #667eea; margin-bottom: 20px;"></i>
+        <h2 style="margin: 0; color: #333;">EarnPro Login</h2>
+        <p style="color: #888; font-size: 14px; margin-bottom: 30px;">নিচের বাটনটি ব্যবহার করে দ্রুত লগইন করুন</p>
+
+        <div id="telegram-login-container">
+            <script async src="https://telegram.org/js/telegram-widget.js?22" 
+                    data-telegram-login="earnpropfficial1_Bot" 
+                    data-size="large" 
+                    data-onauth="onTelegramAuth(user)" 
+                    data-auth-url="https://mddulal596.github.io/rewardearning" 
+                    data-request-access="write"></script>
+        </div>
+
+        <p style="margin-top: 20px; font-size: 12px; color: #bbb;">By logging in, you agree to our Privacy Policy</p>
     </div>
+
     <script type="module">
-        import { auth } from './firebase.js';
-        import { signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-auth.js";
-        document.getElementById('loginBtn').onclick = async () => {
+        import { db } from './firebase.js';
+        import { doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore.js";
+
+        // টেলিগ্রাম থেকে ডাটা পাওয়ার পর এই ফাংশনটি চলবে
+        window.onTelegramAuth = async function(user) {
+            const userId = "tg_" + user.id;
+            const userRef = doc(db, "users", userId);
+            
             try {
-                await signInWithEmailAndPassword(auth, document.getElementById('email').value, document.getElementById('pass').value);
+                const snap = await getDoc(userRef);
+
+                if (!snap.exists()) {
+                    // নতুন ইউজার ডাটাবেসে সেভ করা
+                    await setDoc(userRef, {
+                        uid: userId,
+                        name: user.first_name + (user.last_name ? " " + user.last_name : ""),
+                        username: user.username || "N/A",
+                        coins: 50, // জয়েনিং বোনাস
+                        referCode: "PRO" + user.id,
+                        referCount: 0,
+                        method: "Telegram",
+                        photo: user.photo_url || "",
+                        joinedAt: new Date().toISOString()
+                    });
+                    alert("Account Created Successfully!");
+                }
+
+                // লোকাল স্টোরেজে আইডি সেভ রাখা (সেশন)
+                localStorage.setItem("user_uid", userId);
+                
+                // হোমপেজে পাঠিয়ে দেওয়া
                 window.location.href = "index.html";
-            } catch (err) { alert("Invalid Login!"); }
+
+            } catch (error) {
+                console.error("Login Error:", error);
+                alert("Login Failed! Please try again.");
+            }
         };
     </script>
 </body>
