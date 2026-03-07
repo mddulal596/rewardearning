@@ -9,7 +9,7 @@
 </head>
 <body style="background: #f4f7f6; font-family: 'Segoe UI', sans-serif; margin: 0; padding-bottom: 100px;">
 
-    <div class="balance-card" style="border-bottom-left-radius: 30px; border-bottom-right-radius: 30px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 50px 20px; color: white; text-align: center; box-shadow: 0 4px 15px rgba(0,0,0,0.1);">
+    <div style="border-bottom-left-radius: 30px; border-bottom-right-radius: 30px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 50px 20px; color: white; text-align: center; box-shadow: 0 4px 15px rgba(0,0,0,0.1);">
         <div style="position: relative; display: inline-block;">
             <img id="userImgDisp" src="https://via.placeholder.com/100" style="width: 100px; height: 100px; border-radius: 50%; border: 4px solid rgba(255,255,255,0.3); object-fit: cover; margin-bottom: 10px;">
             <div style="position: absolute; bottom: 15px; right: 5px; background: #27ae60; width: 18px; height: 18px; border-radius: 50%; border: 2px solid white;"></div>
@@ -22,13 +22,13 @@
         </div>
     </div>
 
-    <div class="card" style="margin: -25px 20px 20px; background: white; padding: 25px; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); position: relative; z-index: 10;">
+    <div style="margin: -25px 20px 20px; background: white; padding: 25px; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); position: relative; z-index: 10;">
         <h4 style="color: #333; margin-top: 0; margin-bottom: 15px;"><i class="fa fa-edit"></i> Edit Name</h4>
         <input type="text" id="nameInput" placeholder="Enter your name" style="width: 100%; padding: 12px; border: 1px solid #eee; border-radius: 10px; margin-bottom: 15px; box-sizing: border-box; outline: none;">
         <button id="updateBtn" style="width: 100%; padding: 12px; background: #667eea; color: white; border: none; border-radius: 10px; font-weight: bold; cursor: pointer;">Update Name</button>
     </div>
 
-    <div class="card" style="margin: 0 20px; background: white; padding: 20px; border-radius: 20px; display: flex; justify-content: space-around; text-align: center; box-shadow: 0 5px 15px rgba(0,0,0,0.03);">
+    <div style="margin: 0 20px; background: white; padding: 20px; border-radius: 20px; display: flex; justify-content: space-around; text-align: center; box-shadow: 0 5px 15px rgba(0,0,0,0.03);">
         <div>
             <span style="display: block; font-size: 18px; font-weight: bold; color: #764ba2;" id="referCount">0</span>
             <small style="color: #888;">Refers</small>
@@ -66,11 +66,12 @@
         import { db } from './firebase.js';
         import { doc, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore.js";
 
-        // ১. লোকাল স্টোরেজ থেকে আইডি নেওয়া
+        // লোকাল স্টোরেজ থেকে ইউজারের ইউনিক আইডি নেওয়া
         const userId = localStorage.getItem("user_uid");
 
         async function loadProfile() {
             if (!userId) {
+                // আইডি না থাকলে লগইন পেজে নিয়ে যাবে
                 window.location.href = "login.html";
                 return;
             }
@@ -81,26 +82,28 @@
                 if (snap.exists()) {
                     const data = snap.data();
                     
-                    // ২. ডাটা ডিসপ্লে করা
+                    // UI তে ডাটা সেট করা
                     document.getElementById('userNameDisp').innerText = data.name || "User";
                     document.getElementById('nameInput').value = data.name || "";
-                    document.getElementById('userUsernameDisp').innerText = "@" + (data.username || "username");
+                    document.getElementById('userUsernameDisp').innerText = "@" + (data.username || "n/a");
                     document.getElementById('userCoinsDisp').innerText = data.coins || 0;
                     document.getElementById('referCount').innerText = data.referCount || 0;
                     
-                    // টেলিগ্রাম প্রোফাইল পিকচার সেট করা
+                    // টেলিগ্রাম থেকে পাওয়া ছবি সেট করা
                     if (data.photo) {
                         document.getElementById('userImgDisp').src = data.photo;
                     }
                 } else {
+                    // ডাটাবেসে ইউজার না থাকলে সেশন ক্লিয়ার করে লগইন পেজে পাঠানো
+                    localStorage.removeItem("user_uid");
                     window.location.href = "login.html";
                 }
             } catch (e) {
-                console.error("Error loading profile:", e);
+                console.error("Profile Load Error:", e);
             }
         }
 
-        // নাম আপডেট করার লজিক
+        // নাম আপডেট করার ফাংশন
         document.getElementById('updateBtn').onclick = async () => {
             const newName = document.getElementById('nameInput').value.trim();
             if(!newName) {
@@ -110,19 +113,22 @@
             try {
                 const userRef = doc(db, "users", userId);
                 await updateDoc(userRef, { name: newName });
-                alert("Profile Updated!");
+                alert("Profile Updated Successfully!");
                 location.reload();
             } catch (e) {
-                alert("Failed to update.");
+                alert("Failed to update name.");
             }
         };
 
-        // লগআউট লজিক
+        // লগআউট ফাংশন
         document.getElementById('logoutBtn').onclick = () => {
-            localStorage.removeItem("user_uid");
-            window.location.href = "login.html";
+            if(confirm("Are you sure you want to log out?")) {
+                localStorage.removeItem("user_uid");
+                window.location.href = "login.html";
+            }
         };
 
+        // পেজ লোড হওয়ার সময় কল করা
         loadProfile();
     </script>
 </body>
