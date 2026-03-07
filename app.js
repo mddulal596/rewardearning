@@ -15,9 +15,11 @@ onAuthStateChanged(auth, async (user) => {
             if (data.photoURL) {
                 const pic = document.getElementById('topUserProfilePic');
                 const icon = document.getElementById('topUserIcon');
-                pic.src = data.photoURL;
-                pic.style.display = 'block';
-                icon.style.display = 'none';
+                if(pic && icon) {
+                    pic.src = data.photoURL;
+                    pic.style.display = 'block';
+                    icon.style.display = 'none';
+                }
             }
         }
     } else {
@@ -25,24 +27,39 @@ onAuthStateChanged(auth, async (user) => {
     }
 });
 
-// ১০ কয়েন যোগ করার বাটন
+// ১০ কয়েন যোগ করার বাটন (Daily Check-in)
 document.getElementById('checkInBtn').onclick = async () => {
     const user = auth.currentUser;
     if (!user) return;
+    const btn = document.getElementById('checkInBtn');
+    btn.disabled = true;
     try {
         await updateDoc(doc(db, "users", user.uid), { coins: increment(10) });
-        alert("Success! 10 Coins added.");
+        alert("Success! 10 Coins Added.");
         location.reload();
-    } catch (e) { alert(e.message); }
+    } catch (e) { 
+        alert(e.message); 
+        btn.disabled = false;
+    }
 };
 
-// ৫ কয়েন যোগ করার বাটন
+// বিজ্ঞাপন দেখে ৫ কয়েন পাওয়ার বাটন
 document.getElementById('watchAdBtn').onclick = async () => {
     const user = auth.currentUser;
-    if (!user) return;
+    if (!user) return alert("Please Login!");
+
+    // বিজ্ঞাপনের লিঙ্ক (এখানে আপনার অ্যাড লিঙ্কটি বসান)
+    const adLink = "https://middayopened.com/44ea16fb3bf3a48a9a140ddd4fa5dc93/invoke.js"; 
+    
+    // বিজ্ঞাপনটি নতুন ট্যাবে ওপেন হবে
+    window.open(adLink, '_blank');
+
     try {
-        await updateDoc(doc(db, "users", user.uid), { coins: increment(5) });
-        alert("Success! 5 Coins added.");
+        const userRef = doc(db, "users", user.uid);
+        await updateDoc(userRef, { coins: increment(5) });
+        alert("Success! 5 Coins added for watching ad.");
         location.reload();
-    } catch (e) { alert(e.message); }
+    } catch (e) { 
+        alert("Error: " + e.message); 
+    }
 };
