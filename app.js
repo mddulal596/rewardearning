@@ -23,48 +23,43 @@ onAuthStateChanged(auth, async (user) => {
                 }
             }
 
-            // বাটনগুলোর লিমিট চেক করা
-            checkLimit(data.lastCheckIn, 'checkInBtn', 24 * 60 * 60 * 1000, "Daily Check-in (+10)"); // ২৪ ঘণ্টা
-            checkLimit(data.lastAdWatch, 'watchAdBtn', 1 * 60 * 60 * 1000, "Watch Ad & Earn (+5)"); // ১ ঘণ্টা
+            // বাটনগুলোর লিমিট ও টাইমার চেক করা
+            checkLimit(data.lastCheckIn, 'checkInBtn', 24 * 60 * 60 * 1000, "Daily Check-in (+10)"); 
+            checkLimit(data.lastAdWatch, 'watchAdBtn', 1 * 60 * 60 * 1000, "Watch Ad & Earn (+5)"); 
         }
     } else {
         window.location.href = "login.html";
     }
 });
 
-// সময় চেক করার ফাংশন
+// টাইমার ফাংশন
 function checkLimit(lastTime, btnId, limitMs, originalText) {
     const btn = document.getElementById(btnId);
-    if (!lastTime) return;
+    if (!lastTime || !btn) return;
 
     const lastDate = lastTime.toDate().getTime();
-    const now = new Date().getTime();
-    const diff = now - lastDate;
-
-    if (diff < limitMs) {
-        btn.disabled = true;
+    
+    const updateTimer = () => {
+        const now = new Date().getTime();
+        const diff = now - lastDate;
         const remaining = limitMs - diff;
-        
-        // টাইমার আপডেট করা
-        const timer = setInterval(() => {
-            const currentNow = new Date().getTime();
-            const currentDiff = limitMs - (currentNow - lastDate);
-            
-            if (currentDiff <= 0) {
-                clearInterval(timer);
-                btn.disabled = false;
-                btn.innerText = originalText;
-            } else {
-                const hours = Math.floor(currentDiff / (1000 * 60 * 60));
-                const mins = Math.floor((currentDiff % (1000 * 60 * 60)) / (1000 * 60));
-                const secs = Math.floor((currentDiff % (1000 * 60)) / 1000);
-                btn.innerText = `Wait: ${hours}h ${mins}m ${secs}s`;
-            }
-        }, 1000);
-    }
+
+        if (remaining > 0) {
+            btn.disabled = true;
+            const hours = Math.floor(remaining / (1000 * 60 * 60));
+            const mins = Math.floor((remaining % (1000 * 60 * 60)) / (1000 * 60));
+            const secs = Math.floor((remaining % (1000 * 60)) / 1000);
+            btn.innerText = `Wait: ${hours}h ${mins}m ${secs}s`;
+            setTimeout(updateTimer, 1000);
+        } else {
+            btn.disabled = false;
+            btn.innerText = originalText;
+        }
+    };
+    updateTimer();
 }
 
-// ডেইলি চেক-ইন বাটন লজিক
+// ডেইলি চেক-ইন লজিক
 document.getElementById('checkInBtn').onclick = async () => {
     const user = auth.currentUser;
     if (!user) return;
@@ -72,8 +67,7 @@ document.getElementById('checkInBtn').onclick = async () => {
     btn.disabled = true;
 
     try {
-        const userRef = doc(db, "users", user.uid);
-        await updateDoc(userRef, { 
+        await updateDoc(doc(db, "users", user.uid), { 
             coins: increment(10),
             lastCheckIn: serverTimestamp() 
         });
@@ -85,25 +79,35 @@ document.getElementById('checkInBtn').onclick = async () => {
     }
 };
 
-// অ্যাড দেখে কয়েন নেওয়ার বাটন লজিক
+// আপনার দেওয়া নতুন অ্যাড লিঙ্ক দিয়ে অ্যাড লজিক
 document.getElementById('watchAdBtn').onclick = async () => {
     const user = auth.currentUser;
-    if (!user) return;
+    if (!user) return alert("Please Login!");
+    
     const btn = document.getElementById('watchAdBtn');
-
-    // আপনার অ্যাড লিঙ্কটি এখানে দিন
-    const adLink = "https://middayopened.com/rmm8pbwe?key=a42d11bce0966c10bc9b3f909ae44009"; 
+    
+    // আপনার নতুন অ্যাড লিঙ্ক এখানে বসানো হয়েছে
+    const adLink = "https://middayopened.com/uuh65fp1c?key=0d0044249c1cef410a86dcfa8f7e3460"; 
+    
+    // বিজ্ঞাপনটি নতুন ট্যাবে ওপেন হবে
     window.open(adLink, '_blank');
 
-    try {
-        const userRef = doc(db, "users", user.uid);
-        await updateDoc(userRef, { 
-            coins: increment(5),
-            lastAdWatch: serverTimestamp() 
-        });
-        alert("Success! 5 Coins Added.");
-        location.reload();
-    } catch (e) { 
-        alert(e.message); 
-    }
+    btn.disabled = true;
+    btn.innerText = "Processing...";
+
+    // ৩ সেকেন্ড পর কয়েন যোগ হবে যাতে বিজ্ঞাপনটি লোড হওয়ার সময় পায়
+    setTimeout(async () => {
+        try {
+            await updateDoc(doc(db, "users", user.uid), { 
+                coins: increment(5),
+                lastAdWatch: serverTimestamp() 
+            });
+            alert("Success! 5 Coins added.");
+            location.reload();
+        } catch (e) { 
+            alert("Error: " + e.message); 
+            btn.disabled = false;
+            btn.innerText = "Watch Ad & Earn (+5)";
+        }
+    }, 3000);
 };
