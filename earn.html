@@ -1,20 +1,26 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Earn - EarnPro</title>
-    <link rel="stylesheet" href="style.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-</head>
-<body>
-    <div class="card"><h2>More Tasks Coming Soon...</h2></div>
-    <nav class="bottom-nav">
-        <a href="index.html" class="nav-item"><i class="fa fa-home"></i>Home</a>
-        <a href="earn.html" class="nav-item active"><i class="fa fa-gamepad"></i>Earn</a>
-        <a href="tasks.html" class="nav-item"><i class="fa fa-tasks"></i>Tasks</a>
-        <a href="withdraw.html" class="nav-item"><i class="fa fa-wallet"></i>Withdraw</a>
-        <a href="profile.html" class="nav-item"><i class="fa fa-user"></i>Profile</a>
-    </nav>
-</body>
-</html>
+<div class="card">
+    <h3>Earn Money</h3>
+    <button id="checkInBtn" class="btn-main" style="margin-bottom: 15px;">Daily Check-in (+10)</button>
+    <button id="watchAdBtn" class="btn-main" style="background: #27ae60; margin-bottom: 25px;">Watch Ad (+5)</button>
+    
+    <div style="text-align: center; border-top: 1px solid #eee; padding-top: 20px;">
+        <h4>Lucky Spin</h4>
+        <div id="wheel-container" style="font-size: 70px; margin: 15px auto; transition: transform 3s; width: fit-content;">🎡</div>
+        <button id="spinBtn" class="btn-main" style="background: #f39c12; width: 80%;">Spin Now</button>
+    </div>
+</div>
+
+<nav class="bottom-nav" style="position: fixed; bottom: 0; width: 100%; background: white; display: flex; justify-content: space-around; align-items: center; padding: 5px 0; box-shadow: 0 -2px 10px rgba(0,0,0,0.1); z-index: 1000;">
+    <a href="index.html" class="nav-item" style="text-align: center; text-decoration: none; flex: 1; color: #888;">
+        <i class="fa fa-home" style="font-size: 20px;"></i><br><span style="font-size: 10px;">Home</span>
+    </a>
+    <a href="earn.html" class="nav-item active" style="text-align: center; text-decoration: none; flex: 1; color: #667eea;">
+        <div style="background: var(--primary); color: white; width: 50px; height: 50px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: -25px auto 0; box-shadow: 0 4px 10px rgba(118, 75, 162, 0.3); border: 4px solid white;">
+            <i class="fa fa-bolt"></i>
+        </div>
+        <span style="font-size: 10px; font-weight: bold;">Earn</span>
+    </a>
+    <a href="profile.html" class="nav-item" style="text-align: center; text-decoration: none; flex: 1; color: #888;">
+        <i class="fa fa-user" style="font-size: 20px;"></i><br><span style="font-size: 10px;">Profile</span>
+    </a>
+</nav>
