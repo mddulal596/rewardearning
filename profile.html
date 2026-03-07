@@ -7,28 +7,28 @@
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
-<body>
+<body style="background: #f4f7f6; font-family: 'Segoe UI', sans-serif; margin: 0; padding-bottom: 100px;">
 
-    <div class="balance-card" style="border-bottom-left-radius: 30px; border-bottom-right-radius: 30px; background: var(--primary); padding: 50px 20px; color: white; text-align: center; box-shadow: 0 4px 15px rgba(0,0,0,0.1);">
+    <div class="balance-card" style="border-bottom-left-radius: 30px; border-bottom-right-radius: 30px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 50px 20px; color: white; text-align: center; box-shadow: 0 4px 15px rgba(0,0,0,0.1);">
         <div style="position: relative; display: inline-block;">
-            <i class="fas fa-user-circle" style="font-size: 100px; margin-bottom: 10px; opacity: 0.9;"></i>
-            <div style="position: absolute; bottom: 15px; right: 5px; background: #27ae60; width: 20px; height: 20px; border-radius: 50%; border: 3px solid white;"></div>
+            <img id="userImgDisp" src="https://via.placeholder.com/100" style="width: 100px; height: 100px; border-radius: 50%; border: 4px solid rgba(255,255,255,0.3); object-fit: cover; margin-bottom: 10px;">
+            <div style="position: absolute; bottom: 15px; right: 5px; background: #27ae60; width: 18px; height: 18px; border-radius: 50%; border: 2px solid white;"></div>
         </div>
         <h2 id="userNameDisp" style="margin: 10px 0 5px; font-weight: 600;">Loading...</h2>
-        <p id="userEmailDisp" style="margin: 0; font-size: 14px; opacity: 0.8;">user@example.com</p>
+        <p id="userUsernameDisp" style="margin: 0; font-size: 14px; opacity: 0.8;">@username</p>
         
         <div style="margin-top: 25px; background: rgba(255,255,255,0.2); display: inline-block; padding: 12px 35px; border-radius: 25px; font-weight: bold; border: 1px solid rgba(255,255,255,0.3);">
-            Total Balance: <span id="userCoinsDisp" style="color: #f1c40f; font-size: 20px;">0</span> 💰
+            Balance: <span id="userCoinsDisp" style="color: #f1c40f; font-size: 20px;">0</span> 💰
         </div>
     </div>
 
-    <div class="card" style="margin-top: -25px; position: relative; z-index: 10;">
-        <h4 style="color: #333; margin-bottom: 15px;"><i class="fa fa-edit"></i> Edit Profile Name</h4>
-        <input type="text" id="nameInput" placeholder="Enter your full name" class="input-field" style="margin-bottom: 15px;">
-        <button id="updateBtn" class="btn-main">Update Name</button>
+    <div class="card" style="margin: -25px 20px 20px; background: white; padding: 25px; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); position: relative; z-index: 10;">
+        <h4 style="color: #333; margin-top: 0; margin-bottom: 15px;"><i class="fa fa-edit"></i> Edit Name</h4>
+        <input type="text" id="nameInput" placeholder="Enter your name" style="width: 100%; padding: 12px; border: 1px solid #eee; border-radius: 10px; margin-bottom: 15px; box-sizing: border-box; outline: none;">
+        <button id="updateBtn" style="width: 100%; padding: 12px; background: #667eea; color: white; border: none; border-radius: 10px; font-weight: bold; cursor: pointer;">Update Name</button>
     </div>
 
-    <div class="card" style="display: flex; justify-content: space-around; text-align: center; padding: 15px;">
+    <div class="card" style="margin: 0 20px; background: white; padding: 20px; border-radius: 20px; display: flex; justify-content: space-around; text-align: center; box-shadow: 0 5px 15px rgba(0,0,0,0.03);">
         <div>
             <span style="display: block; font-size: 18px; font-weight: bold; color: #764ba2;" id="referCount">0</span>
             <small style="color: #888;">Refers</small>
@@ -43,65 +43,87 @@
         </div>
     </div>
 
-    <nav class="bottom-nav" style="position: fixed; bottom: 0; width: 100%; background: white; display: flex; justify-content: space-around; align-items: center; padding: 5px 0; box-shadow: 0 -2px 15px rgba(0,0,0,0.1); z-index: 1000; height: 65px;">
-        <a href="index.html" class="nav-item" style="text-align: center; text-decoration: none; flex: 1; color: #888;">
+    <div style="padding: 20px;">
+        <button id="logoutBtn" style="width: 100%; padding: 12px; background: #fff; color: #e74c3c; border: 1px solid #e74c3c; border-radius: 10px; font-weight: bold; cursor: pointer;">Log Out</button>
+    </div>
+
+    <nav style="position: fixed; bottom: 0; width: 100%; background: white; display: flex; justify-content: space-around; align-items: center; padding: 5px 0; box-shadow: 0 -2px 15px rgba(0,0,0,0.1); z-index: 1000; height: 65px;">
+        <a href="index.html" style="text-align: center; text-decoration: none; flex: 1; color: #888;">
             <i class="fa fa-home" style="font-size: 22px;"></i><br><span style="font-size: 10px;">Home</span>
         </a>
-        
-        <a href="earn.html" class="nav-item" style="text-align: center; text-decoration: none; flex: 1;">
-            <div style="background: var(--primary); color: white; width: 55px; height: 55px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: -35px auto 0; box-shadow: 0 5px 15px rgba(118, 75, 162, 0.4); border: 5px solid white;">
-                <i class="fa fa-bolt" style="font-size: 20px;"></i>
+        <a href="earn.html" style="text-align: center; text-decoration: none; flex: 1;">
+            <div style="background: #667eea; color: white; width: 50px; height: 50px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: -30px auto 0; border: 4px solid white;">
+                <i class="fa fa-bolt" style="font-size: 18px;"></i>
             </div>
             <span style="font-size: 10px; color: #888; font-weight: bold; display: block; margin-top: 2px;">Earn</span>
         </a>
-
-        <a href="profile.html" class="nav-item active" style="text-align: center; text-decoration: none; flex: 1; color: #667eea;">
+        <a href="profile.html" style="text-align: center; text-decoration: none; flex: 1; color: #667eea;">
             <i class="fa fa-user" style="font-size: 22px;"></i><br><span style="font-size: 10px;">Profile</span>
         </a>
     </nav>
 
     <script type="module">
-        import { auth, db } from './firebase.js';
-        import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-auth.js";
+        import { db } from './firebase.js';
         import { doc, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore.js";
 
-        onAuthStateChanged(auth, async (user) => {
-            if (user) {
-                const userRef = doc(db, "users", user.uid);
+        // ১. লোকাল স্টোরেজ থেকে আইডি নেওয়া
+        const userId = localStorage.getItem("user_uid");
+
+        async function loadProfile() {
+            if (!userId) {
+                window.location.href = "login.html";
+                return;
+            }
+
+            const userRef = doc(db, "users", userId);
+            try {
                 const snap = await getDoc(userRef);
                 if (snap.exists()) {
                     const data = snap.data();
+                    
+                    // ২. ডাটা ডিসপ্লে করা
                     document.getElementById('userNameDisp').innerText = data.name || "User";
                     document.getElementById('nameInput').value = data.name || "";
-                    document.getElementById('userEmailDisp').innerText = user.email;
+                    document.getElementById('userUsernameDisp').innerText = "@" + (data.username || "username");
                     document.getElementById('userCoinsDisp').innerText = data.coins || 0;
+                    document.getElementById('referCount').innerText = data.referCount || 0;
                     
-                    // Extra Stats (If available in DB)
-                    if(data.referrals) document.getElementById('referCount').innerText = data.referrals;
-                    if(data.completedTasks) document.getElementById('taskCount').innerText = data.completedTasks;
+                    // টেলিগ্রাম প্রোফাইল পিকচার সেট করা
+                    if (data.photo) {
+                        document.getElementById('userImgDisp').src = data.photo;
+                    }
+                } else {
+                    window.location.href = "login.html";
                 }
-            } else { 
-                window.location.href = "login.html"; 
+            } catch (e) {
+                console.error("Error loading profile:", e);
             }
-        });
+        }
 
-        // Update Name Logic
+        // নাম আপডেট করার লজিক
         document.getElementById('updateBtn').onclick = async () => {
-            const user = auth.currentUser;
             const newName = document.getElementById('nameInput').value.trim();
             if(!newName) {
-                alert("Please enter a valid name.");
+                alert("Please enter a name.");
                 return;
             }
             try {
-                const userRef = doc(db, "users", user.uid);
+                const userRef = doc(db, "users", userId);
                 await updateDoc(userRef, { name: newName });
-                alert("Success! Your name has been updated.");
+                alert("Profile Updated!");
                 location.reload();
-            } catch (e) { 
-                alert("Error: Name could not be updated."); 
+            } catch (e) {
+                alert("Failed to update.");
             }
         };
+
+        // লগআউট লজিক
+        document.getElementById('logoutBtn').onclick = () => {
+            localStorage.removeItem("user_uid");
+            window.location.href = "login.html";
+        };
+
+        loadProfile();
     </script>
 </body>
 </html>
