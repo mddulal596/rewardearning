@@ -1,1 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profile - EarnPro</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        .profile-container {
+            text-align: center;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 40px 20px;
+            border-bottom-left-radius: 30px;
+            border-bottom-right-radius: 30px;
+        }
+        .profile-img-wrapper {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.2);
+            margin: 0 auto 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            border: 4px solid #fff;
+            position: relative;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+        .profile-img-wrapper img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: none;
+        }
+        .profile-img-wrapper i {
+            font-size: 80px;
+            color: #fff;
+        }
+        .change-photo-text {
+            position: absolute;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            width: 100%;
+            font-size: 10px;
+            padding: 2px 0;
+            color: #fff;
+        }
+    </style>
+</head>
+<body>
 
+    <div class="profile-container">
+        <div class="profile-img-wrapper" onclick="document.getElementById('profilePicInput').click()">
+            <i class="fa fa-user-circle" id="defaultIcon"></i>
+            <img id="profileDisplay" src="" alt="Profile">
+            <div class="change-photo-text">Change Photo</div>
+        </div>
+        <input type="file" id="profilePicInput" style="display: none;" accept="image/*">
+        <h2 id="displayUserName" style="margin: 5px 0;">Loading...</h2>
+        <p id="userEmail" style="font-size: 14px; opacity: 0.9; margin: 0;">...</p>
+    </div>
+
+    <div class="card" style="margin-top: -20px; border-radius: 20px;">
+        <h4 style="color: #333; margin-bottom: 15px;">Edit Profile</h4>
+        <div style="text-align: left; margin-bottom: 15px;">
+            <label style="font-size: 12px; color: #666; font-weight: bold;">Full Name</label>
+            <input type="text" id="userNameInput" placeholder="Enter your name" class="input-field" 
+                   style="width: 100%; padding: 12px; margin-top: 5px; border: 1px solid #ddd; border-radius: 10px; box-sizing: border-box;">
+        </div>
+        <button id="saveProfileBtn" class="btn-main" 
+                style="width: 100%; padding: 12px; background: #764ba2; color: white; border: none; border-radius: 10px; font-weight: bold; cursor: pointer;">
+            Update Profile
+        </button>
+    </div>
+
+    <div class="card" style="text-align: center; background: #f9f9f9; border: 1px solid #eee;">
+        <p style="margin: 0; color: #555;">Total Balance: <strong id="profileCoins" style="color: #27ae60; font-size: 18px;">0</strong> Coins</p>
+    </div>
+
+    <nav class="bottom-nav">
+        <a href="index.html" class="nav-item"><i class="fa fa-home"></i>Home</a>
+        <a href="profile.html" class="nav-item active"><i class="fa fa-user"></i>Profile</a>
+    </nav>
+
+    <script type="module">
+        import { auth, db, storage } from './firebase.js';
+        import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-auth.js";
+        import { doc, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore.js";
+        import { ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-storage.js";
+
+        const profileDisplay = document.getElementById('profileDisplay');
+        const defaultIcon = document.getElementById('defaultIcon');
+        const btn = document.getElementById('saveProfileBtn');
+
+        // ইউজারের তথ্য লোড করা
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                try {
+                    const userRef = doc(db, "users", user.uid);
+                    const snap = await getDoc(userRef);
+                    if (snap.exists()) {
+                        const data = snap.data();
+                        document.getElementById('displayUserName').innerText = data.name || "User";
+                        document.getElementById('userNameInput').value = data.name || "";
+                        document.getElementById('userEmail').innerText = user.email;
+                        document.getElementById('profileCoins').innerText = data.coins || 0;
+
+                        if (data.photoURL) {
+                            profileDisplay.src = data.photoURL;
+                            profileDisplay.style.display = 'block';
+                            defaultIcon.style.display = 'none';
+                        }
+                    }
+                } catch (err) { console.error("Error loading profile:", err); }
+            } else {
+                window.location.href = "login.html";
+            }
+        });
+
+        // প্রোফাইল আপডেট লজিক
+        btn.onclick = async () => {
+            const user = auth.currentUser;
+            const name = document.getElementById('userNameInput').value;
+            const file = document.getElementById('profilePicInput').files[0];
+
+            if (!name.trim()) return alert("Please enter your name!");
+            
+            btn.disabled = true;
+            btn.innerText = "Updating...";
+
+            try {
+                let updateData = { name: name };
+
+                // ছবি থাকলে স্টোরেজে আপলোড করা
+                if (file) {
+                    const storageRef = ref(storage, `profiles/${user.uid}`);
+                    const uploadTask = await uploadBytes(storageRef, file);
+                    const photoURL = await getDownloadURL(uploadTask.ref);
+                    updateData.photoURL = photoURL;
+                }
+
+                // ফায়ারস্টোর আপডেট করা
+                await updateDoc(doc(db, "users", user.uid), updateData);
+                
+                alert("Profile successfully updated!");
+                location.reload();
+            } catch (err) {
+                console.error(err);
+                alert("Error: " + err.message);
+                btn.disabled = false;
+                btn.innerText = "Update Profile";
+            }
+        };
+
+        // ছবি সিলেক্ট করলে সাথে সাথে প্রিভিউ দেখানো
+        document.getElementById('profilePicInput').onchange = (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                profileDisplay.src = URL.createObjectURL(file);
+                profileDisplay.style.display = 'block';
+                defaultIcon.style.display = 'none';
+            }
+        };
+    </script>
+</body>
+</html>
