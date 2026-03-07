@@ -9,30 +9,32 @@
 </head>
 <body>
 
-    <div class="top-bar">
-        <div class="user-info">
-            <i class="fa fa-user-circle" style="font-size: 40px; color: white; margin-right: 10px;"></i>
-            <div>
-                <span id="topUserName">Loading...</span><br>
-                <small>Verified User</small>
+    <div style="display: flex; justify-content: space-between; align-items: center; padding: 20px; background: var(--primary); color: white; border-bottom-left-radius: 25px; border-bottom-right-radius: 25px; box-shadow: 0 4px 15px rgba(0,0,0,0.1);">
+        <div style="display: flex; align-items: center;">
+            <i class="fa fa-user-circle" style="font-size: 40px; margin-right: 12px;"></i>
+            <div style="text-align: left;">
+                <span id="topUserName" style="font-weight: bold; font-size: 16px; display: block;">Loading...</span>
+                <small style="background: rgba(255,255,255,0.2); padding: 2px 8px; border-radius: 10px; font-size: 10px;">Verified User</small>
             </div>
         </div>
-        <div class="balance-info">
-            <small>My Balance</small><br>
-            <strong><span id="userCoins">0</span> 💰</strong>
+        <div style="text-align: right; background: rgba(255,255,255,0.15); padding: 5px 15px; border-radius: 15px; border: 1px solid rgba(255,255,255,0.3);">
+            <small style="font-size: 10px; display: block; opacity: 0.8;">BALANCE</small>
+            <span style="font-size: 18px; font-weight: 800; color: #f1c40f;">
+                <span id="userCoins">0</span> <i class="fa fa-coins"></i>
+            </span>
         </div>
     </div>
 
-    <div class="card" style="margin-top: 20px;">
-        <h3>Daily Tasks</h3>
-        <button id="checkInBtn" class="btn-main" style="background: #6c5ce7; margin-bottom: 10px; width: 100%;">Daily Check-in (+10)</button>
-        <button id="watchAdBtn" class="btn-main" style="background: #27ae60; margin-bottom: 10px; width: 100%;">Watch Ad & Earn (+5)</button>
+    <div class="card">
+        <h3 style="margin-top: 0; color: #444;"><i class="fa fa-tasks"></i> Daily Tasks</h3>
+        <button id="checkInBtn" class="btn-main" style="margin-bottom: 12px;">Daily Check-in (+10)</button>
+        <button id="watchAdBtn" class="btn-main" style="background: #27ae60; margin-bottom: 10px;">Watch Ad & Earn (+5)</button>
         
-        <hr style="margin: 20px 0; border: 0; border-top: 1px solid #eee;">
+        <hr style="border: 0; border-top: 1px solid #eee; margin: 20px 0;">
 
         <div style="text-align: center;">
-            <h4>Lucky Spin</h4>
-            <div id="wheel-container" style="font-size: 80px; margin: 15px auto; transition: transform 3s cubic-bezier(0.17, 0.67, 0.83, 0.67); width: fit-content;">
+            <h4 style="margin: 0; color: #555;">Lucky Spin</h4>
+            <div id="wheel-container" style="font-size: 70px; margin: 15px auto; transition: transform 3s cubic-bezier(0.17, 0.67, 0.83, 0.67); width: fit-content; filter: drop-shadow(0 5px 10px rgba(0,0,0,0.1));">
                 🎡
             </div>
             <button id="spinBtn" class="btn-main" style="background: #f39c12; width: 80%;">Spin Now</button>
