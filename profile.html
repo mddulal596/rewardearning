@@ -14,13 +14,13 @@
         <h2 id="userNameDisp" style="margin: 5px 0;">Loading...</h2>
         <p id="userEmailDisp" style="margin: 0; font-size: 14px; opacity: 0.8;">...</p>
         <div style="margin-top: 20px; background: rgba(255,255,255,0.2); display: inline-block; padding: 10px 25px; border-radius: 20px; font-weight: bold;">
-            ব্যালেন্স: <span id="userCoinsDisp">0</span> 💰
+            আমার ব্যালেন্স: <span id="userCoinsDisp">0</span> 💰
         </div>
     </div>
 
     <div class="card" style="margin-top: -20px;">
-        <h4 style="color: #333; margin-bottom: 15px;">নাম পরিবর্তন করুন</h4>
-        <input type="text" id="nameInput" placeholder="আপনার নাম লিখুন" class="input-field">
+        <h4 style="color: #333; margin-bottom: 15px;">নাম পরিবর্তন</h4>
+        <input type="text" id="nameInput" placeholder="আপনার নতুন নাম" class="input-field">
         <button id="updateBtn" class="btn-main">সেভ করুন</button>
     </div>
 
@@ -53,7 +53,7 @@
             if(!newName) return;
             try {
                 await updateDoc(doc(db, "users", user.uid), { name: newName });
-                alert("নাম সফলভাবে পরিবর্তন করা হয়েছে!");
+                alert("আপনার নাম আপডেট হয়েছে!");
                 location.reload();
             } catch (e) { alert("Error!"); }
         };
