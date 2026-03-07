@@ -7,38 +7,12 @@
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        body { 
-            background: #f4f7f6; 
-            display: flex; 
-            align-items: center; 
-            justify-content: center; 
-            height: 100vh; 
-            margin: 0; 
-            font-family: 'Segoe UI', sans-serif;
-        }
-        .login-card {
-            background: white; 
-            padding: 40px 30px; 
-            border-radius: 30px; 
-            box-shadow: 0 15px 35px rgba(0,0,0,0.1); 
-            text-align: center; 
-            width: 90%; 
-            max-width: 380px;
-        }
-        .logo-icon {
-            font-size: 60px; 
-            color: #667eea; 
-            margin-bottom: 20px;
-            display: inline-block;
-            animation: bounce 2s infinite;
-        }
-        @keyframes bounce {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-10px); }
-        }
+        body { background: #f4f7f6; display: flex; align-items: center; justify-content: center; height: 100vh; margin: 0; font-family: 'Segoe UI', sans-serif; }
+        .login-card { background: white; padding: 40px 30px; border-radius: 30px; box-shadow: 0 15px 35px rgba(0,0,0,0.1); text-align: center; width: 90%; max-width: 380px; }
+        .logo-icon { font-size: 60px; color: #667eea; margin-bottom: 20px; display: inline-block; animation: bounce 2s infinite; }
+        @keyframes bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
         h2 { margin: 0; color: #333; font-size: 24px; }
         p { color: #888; font-size: 14px; margin-bottom: 30px; line-height: 1.5; }
-        #telegram-login-container { margin-top: 10px; }
     </style>
 </head>
 <body>
@@ -52,8 +26,8 @@
             <script async src="https://telegram.org/js/telegram-widget.js?22" 
                     data-telegram-login="earnpropfficial1_Bot" 
                     data-size="large" 
+                    data-userpic="true"
                     data-onauth="onTelegramAuth(user)" 
-                    data-auth-url="https://mddulal596.github.io/rewardearning/index.html" 
                     data-request-access="write"></script>
         </div>
 
@@ -66,42 +40,28 @@
         import { db } from './firebase.js';
         import { doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore.js";
 
-        // ইউজার যখন Accept বাটনে ক্লিক করবে এই ফাংশনটি কল হবে
         window.onTelegramAuth = async function(user) {
-            console.log("User Data Received:", user);
-            
             const userId = "tg_" + user.id;
             const userRef = doc(db, "users", userId);
             
             try {
-                // ১. চেক করা ইউজার আগে থেকে আছে কি না
                 const snap = await getDoc(userRef);
-
                 if (!snap.exists()) {
-                    // ২. নতুন ইউজার হলে Firestore-এ সেভ করা
                     await setDoc(userRef, {
                         uid: userId,
                         name: user.first_name + (user.last_name ? " " + user.last_name : ""),
                         username: user.username || "N/A",
-                        coins: 50, // নতুন ইউজার বোনাস
+                        coins: 50,
                         referCode: "PRO" + user.id,
                         referCount: 0,
-                        method: "Telegram",
                         photo: user.photo_url || "",
                         joinedAt: new Date().toISOString()
                     });
-                    console.log("New user registered via Telegram");
                 }
-
-                // ৩. সেশন সেভ করা (LocalStorage)
                 localStorage.setItem("user_uid", userId);
-                
-                // ৪. সরাসরি হোমপেজে রিডাইরেক্ট করা
-                window.location.href = "index.html";
-
+                window.location.href = "index.html"; 
             } catch (error) {
-                console.error("Firestore Error:", error);
-                alert("লগইন করতে সমস্যা হয়েছে। দয়া করে আবার চেষ্টা করুন।");
+                alert("Login Error! Please try again.");
             }
         };
     </script>
