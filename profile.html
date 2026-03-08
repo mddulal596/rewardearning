@@ -23,9 +23,10 @@
     </div>
 
     <div style="margin: -25px 20px 20px; background: white; padding: 25px; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); position: relative; z-index: 10;">
-        <h4 style="color: #333; margin-top: 0; margin-bottom: 15px;"><i class="fa fa-edit"></i> Edit Name</h4>
-        <input type="text" id="nameInput" placeholder="Enter your name" style="width: 100%; padding: 12px; border: 1px solid #eee; border-radius: 10px; margin-bottom: 15px; box-sizing: border-box; outline: none;">
-        <button id="updateBtn" style="width: 100%; padding: 12px; background: #667eea; color: white; border: none; border-radius: 10px; font-weight: bold; cursor: pointer;">Update Name</button>
+        <h4 style="color: #333; margin-top: 0; margin-bottom: 15px;"><i class="fa fa-user-edit"></i> Profile Settings</h4>
+        <label style="font-size: 12px; color: #888; font-weight: bold;">Full Name</label>
+        <input type="text" id="nameInput" placeholder="Enter your name" style="width: 100%; padding: 12px; border: 1px solid #eee; border-radius: 10px; margin-bottom: 15px; margin-top: 5px; box-sizing: border-box; outline: none;">
+        <button id="updateBtn" style="width: 100%; padding: 12px; background: #667eea; color: white; border: none; border-radius: 10px; font-weight: bold; cursor: pointer;">Update Profile</button>
     </div>
 
     <div style="margin: 0 20px; background: white; padding: 20px; border-radius: 20px; display: flex; justify-content: space-around; text-align: center; box-shadow: 0 5px 15px rgba(0,0,0,0.03);">
@@ -35,33 +36,32 @@
         </div>
         <div style="border-left: 1px solid #eee; border-right: 1px solid #eee; padding: 0 20px;">
             <span style="display: block; font-size: 18px; font-weight: bold; color: #27ae60;" id="taskCount">0</span>
-            <small style="color: #888;">Tasks</small>
+            <small style="color: #888;">Tasks Done</small>
         </div>
         <div>
-            <span style="display: block; font-size: 18px; font-weight: bold; color: #e74c3c;">Vip</span>
-            <small style="color: #888;">Status</small>
+            <span style="display: block; font-size: 18px; font-weight: bold; color: #e74c3c;">Active</span>
+            <small style="color: #888;">Account</small>
         </div>
     </div>
 
     <div style="padding: 20px;">
-        <button id="logoutBtn" style="width: 100%; padding: 12px; background: #fff; color: #e74c3c; border: 1px solid #e74c3c; border-radius: 10px; font-weight: bold; cursor: pointer;">Log Out</button>
+        <button id="logoutBtn" style="width: 100%; padding: 12px; background: #fff; color: #e74c3c; border: 1px solid #e74c3c; border-radius: 10px; font-weight: bold; cursor: pointer; transition: 0.3s;">
+            <i class="fa fa-sign-out-alt"></i> Log Out
+        </button>
     </div>
 
-    <nav style="position: fixed; bottom: 0; width: 100%; background: white; display: flex; justify-content: space-around; align-items: center; padding: 5px 0; box-shadow: 0 -2px 15px rgba(0,0,0,0.1); z-index: 1000; height: 65px;">
+    <nav style="position: fixed; bottom: 0; width: 100%; background: white; display: flex; justify-content: space-around; align-items: center; padding: 10px 0; box-shadow: 0 -2px 15px rgba(0,0,0,0.1); z-index: 1000; height: 65px;">
         <a href="index.html" style="text-align: center; text-decoration: none; flex: 1; color: #888;">
-            <i class="fa fa-home" style="font-size: 22px;"></i><br><span style="font-size: 10px;">Home</span>
+            <i class="fa fa-home" style="font-size: 20px;"></i><br><span style="font-size: 10px;">Home</span>
         </a>
-        <a href="earn.html" style="text-align: center; text-decoration: none; flex: 1;">
-            <div style="background: #667eea; color: white; width: 45px; height: 45px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: -25px auto 0; border: 4px solid white;">
-                <i class="fa fa-bolt" style="font-size: 18px;"></i>
-            </div>
-            <span style="font-size: 10px; color: #888; font-weight: bold; display: block; margin-top: 2px;">Earn</span>
+        <a href="earn.html" style="text-align: center; text-decoration: none; flex: 1; color: #888;">
+            <i class="fa fa-bolt" style="font-size: 20px;"></i><br><span style="font-size: 10px;">Earn</span>
         </a>
         <a href="withdraw.html" style="text-align: center; text-decoration: none; flex: 1; color: #888;">
-            <i class="fa fa-wallet" style="font-size: 22px;"></i><br><span style="font-size: 10px;">Withdraw</span>
+            <i class="fa fa-wallet" style="font-size: 20px;"></i><br><span style="font-size: 10px;">Withdraw</span>
         </a>
         <a href="profile.html" style="text-align: center; text-decoration: none; flex: 1; color: #667eea;">
-            <i class="fa fa-user" style="font-size: 22px;"></i><br><span style="font-size: 10px;">Profile</span>
+            <i class="fa fa-user" style="font-size: 20px;"></i><br><span style="font-size: 10px;">Profile</span>
         </a>
     </nav>
 
@@ -83,56 +83,18 @@
                 if (snap.exists()) {
                     const data = snap.data();
                     
-                    // Display Data
-                    document.getElementById('userNameDisp').innerText = data.name || "No Name";
+                    // Display User Info
+                    document.getElementById('userNameDisp').innerText = data.name || "User Name";
                     document.getElementById('nameInput').value = data.name || "";
                     document.getElementById('userUsernameDisp').innerText = data.username ? "@" + data.username : "@mddulal596";
                     document.getElementById('userCoinsDisp').innerText = data.coins || 0;
                     document.getElementById('referCount').innerText = data.referCount || 0;
                     document.getElementById('taskCount').innerText = data.taskCount || 0;
                     
-                    // Photo Logic: If no photo in DB, use UI-Avatar with user's name
-                    if (data.photo) {
-                        document.getElementById('userImgDisp').src = data.photo;
+                    // Profile Photo Logic
+                    const profileImg = document.getElementById('userImgDisp');
+                    if (data.photo && data.photo.trim() !== "") {
+                        profileImg.src = data.photo;
                     } else {
-                        const avatarName = data.name ? encodeURIComponent(data.name) : "User";
-                        document.getElementById('userImgDisp').src = `https://ui-avatars.com/api/?name=${avatarName}&background=random&color=fff`;
-                    }
-                } else {
-                    localStorage.removeItem("user_uid");
-                    window.location.href = "login.html";
-                }
-            } catch (e) {
-                console.error("Profile Load Error:", e);
-            }
-        }
-
-        // Update Name
-        document.getElementById('updateBtn').onclick = async () => {
-            const newName = document.getElementById('nameInput').value.trim();
-            if(!newName) {
-                alert("Please enter a name.");
-                return;
-            }
-            try {
-                const userRef = doc(db, "users", userId);
-                await updateDoc(userRef, { name: newName });
-                alert("Profile Updated Successfully!");
-                location.reload();
-            } catch (e) {
-                alert("Failed to update name.");
-            }
-        };
-
-        // Logout
-        document.getElementById('logoutBtn').onclick = () => {
-            if(confirm("Are you sure you want to log out?")) {
-                localStorage.removeItem("user_uid");
-                window.location.href = "login.html";
-            }
-        };
-
-        loadProfile();
-    </script>
-</body>
-</html>
+                        // If no photo, use high-quality avatar generator
+                        const avatarName = data.name ? encodeURIComponent(data.name) : "
