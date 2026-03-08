@@ -6,6 +6,7 @@
     <title>Earn Money - EarnPro</title>
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         body { background: #f4f7f6; padding-bottom: 90px; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; }
         .header-section { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 40px 20px; text-align: center; border-bottom-left-radius: 30px; border-bottom-right-radius: 30px; }
@@ -53,12 +54,23 @@
         import { db } from './firebase.js';
         import { doc, getDoc, updateDoc, increment } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore.js";
 
-        // Adsterra Direct Links
+        // Adsterra Links
         const LINK_DAILY_CHECK = "https://middayopened.com/rmm8pbwe?key=a42d11bce0966c10bc9b3f909ae44009";
         const LINK_WATCH_VIDEO = "https://middayopened.com/c95t5ad9nb?key=9e9e3820d54db2d2cbe11cbfc394a5e9";
         const LINK_LUCKY_SPIN  = "https://middayopened.com/uuh65fp1c?key=0d0044249c1cef410a86dcfa8f7e3460";
 
-        const userId = localStorage.getItem("user_uid");
+        // ১. সঠিক আইডি নেওয়া (user_uid থেকে পরিবর্তন করে tg_user_id করা হয়েছে)
+        const userId = localStorage.getItem("tg_user_id");
+
+        // ২. টেলিগ্রাম ব্যাক বাটন সক্রিয় করা
+        if (window.Telegram && window.Telegram.WebApp) {
+            const tele = window.Telegram.WebApp;
+            tele.ready();
+            tele.BackButton.show();
+            tele.BackButton.onClick(() => {
+                window.location.href = "index.html";
+            });
+        }
 
         async function checkStatus() {
             if (!userId) {
@@ -78,31 +90,35 @@
             } catch (e) { console.error(e); }
         }
 
-        // ১. Daily Check-in
+        // ৩. Daily Check-in ফিক্সড
         document.getElementById('checkInBtn').onclick = async () => {
             window.open(LINK_DAILY_CHECK, '_blank');
             const userRef = doc(db, "users", userId);
-            await updateDoc(userRef, { 
-                coins: increment(10), 
-                taskCount: increment(1),
-                lastCheckIn: new Date().toDateString() 
-            });
-            alert("১০ কয়েন যোগ হয়েছে!");
-            location.reload();
+            try {
+                await updateDoc(userRef, { 
+                    coins: increment(10), 
+                    taskCount: increment(1),
+                    lastCheckIn: new Date().toDateString() 
+                });
+                alert("১০ কয়েন যোগ হয়েছে!");
+                location.reload();
+            } catch (e) { alert("Error adding coins!"); }
         };
 
-        // ২. Watch Video
+        // ৪. Watch Video ফিক্সড
         document.getElementById('watchAdBtn').onclick = async () => {
             window.open(LINK_WATCH_VIDEO, '_blank');
             const userRef = doc(db, "users", userId);
-            await updateDoc(userRef, { 
-                coins: increment(5),
-                taskCount: increment(1)
-            });
-            alert("৫ কয়েন যোগ হয়েছে!");
+            try {
+                await updateDoc(userRef, { 
+                    coins: increment(5),
+                    taskCount: increment(1)
+                });
+                alert("৫ কয়েন যোগ হয়েছে!");
+            } catch (e) { alert("Error adding coins!"); }
         };
 
-        // ৩. Lucky Spin
+        // ৫. Lucky Spin ফিক্সড
         let spinning = false;
         document.getElementById('spinBtn').onclick = async () => {
             if (spinning) return;
@@ -113,15 +129,17 @@
 
             setTimeout(async () => {
                 const bonus = Math.floor(Math.random() * 10) + 1;
-                alert(`অভিনন্দন! আপনি ${bonus} কয়েন পেয়েছেন। কয়েনটি কালেক্ট করতে বিজ্ঞাপনটি দেখুন।`);
+                alert(`অভিনন্দন! আপনি ${bonus} কয়েন পেয়েছেন। বিজ্ঞাপনটি দেখে কয়েন কালেক্ট করুন।`);
                 
                 window.open(LINK_LUCKY_SPIN, '_blank');
 
                 const userRef = doc(db, "users", userId);
-                await updateDoc(userRef, { 
-                    coins: increment(bonus),
-                    taskCount: increment(1)
-                });
+                try {
+                    await updateDoc(userRef, { 
+                        coins: increment(bonus),
+                        taskCount: increment(1)
+                    });
+                } catch (e) { console.error(e); }
                 
                 spinning = false;
                 wheel.style.transform = `rotate(0deg)`;
