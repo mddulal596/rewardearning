@@ -3,147 +3,133 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Withdraw - EarnPro</title>
+    <title>EarnPro - Profile</title>
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
-<body>
-    <div class="card balance-card">
-        <p>Available Balance</p>
-        <h2 id="userCoins">...</h2>
-        <small>Coins</small>
+<body style="background: #f4f7f6; font-family: 'Segoe UI', sans-serif; margin: 0; padding-bottom: 100px;">
+
+    <div style="border-bottom-left-radius: 30px; border-bottom-right-radius: 30px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 50px 20px; color: white; text-align: center; box-shadow: 0 4px 15px rgba(0,0,0,0.1);">
+        <div style="position: relative; display: inline-block;">
+            <img id="userImgDisp" src="https://via.placeholder.com/100" style="width: 100px; height: 100px; border-radius: 50%; border: 4px solid rgba(255,255,255,0.3); object-fit: cover; margin-bottom: 10px;">
+            <div style="position: absolute; bottom: 15px; right: 5px; background: #27ae60; width: 18px; height: 18px; border-radius: 50%; border: 2px solid white;"></div>
+        </div>
+        <h2 id="userNameDisp" style="margin: 10px 0 5px; font-weight: 600;">Loading...</h2>
+        <p id="userUsernameDisp" style="margin: 0; font-size: 14px; opacity: 0.8;">@username</p>
+        
+        <div style="margin-top: 25px; background: rgba(255,255,255,0.2); display: inline-block; padding: 12px 35px; border-radius: 25px; font-weight: bold; border: 1px solid rgba(255,255,255,0.3);">
+            Balance: <span id="userCoinsDisp" style="color: #f1c40f; font-size: 20px;">0</span> 💰
+        </div>
     </div>
 
-    <div class="card">
-        <h4>Withdraw Request</h4>
-        <form id="withdrawForm">
-            <label>Payment Method</label>
-            <select id="method" class="input-field">
-                <option value="bKash">bKash</option>
-                <option value="Nagad">Nagad</option>
-                <option value="Rocket">Rocket</option>
-            </select>
-
-            <label>Account Number</label>
-            <input type="number" id="num" placeholder="017xxxxxxxx" class="input-field" required>
-
-            <label>Amount (Minimum 500 Coins)</label>
-            <input type="number" id="amount" placeholder="Minimum 500" class="input-field" min="500" required>
-
-            <button type="submit" class="btn-main" id="submitBtn">Submit Request</button>
-        </form>
+    <div style="margin: -25px 20px 20px; background: white; padding: 25px; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); position: relative; z-index: 10;">
+        <h4 style="color: #333; margin-top: 0; margin-bottom: 15px;"><i class="fa fa-edit"></i> Edit Name</h4>
+        <input type="text" id="nameInput" placeholder="Enter your name" style="width: 100%; padding: 12px; border: 1px solid #eee; border-radius: 10px; margin-bottom: 15px; box-sizing: border-box; outline: none;">
+        <button id="updateBtn" style="width: 100%; padding: 12px; background: #667eea; color: white; border: none; border-radius: 10px; font-weight: bold; cursor: pointer;">Update Name</button>
     </div>
 
-    <div class="card" style="font-size: 12px; color: #666;">
-        <p><i class="fa fa-info-circle"></i> পেমেন্ট রিকোয়েস্ট দেওয়ার ২৪-৪৮ ঘণ্টার মধ্যে পেমেন্ট কমপ্লিট করা হবে।</p>
+    <div style="margin: 0 20px; background: white; padding: 20px; border-radius: 20px; display: flex; justify-content: space-around; text-align: center; box-shadow: 0 5px 15px rgba(0,0,0,0.03);">
+        <div>
+            <span style="display: block; font-size: 18px; font-weight: bold; color: #764ba2;" id="referCount">0</span>
+            <small style="color: #888;">Refers</small>
+        </div>
+        <div style="border-left: 1px solid #eee; border-right: 1px solid #eee; padding: 0 20px;">
+            <span style="display: block; font-size: 18px; font-weight: bold; color: #27ae60;" id="taskCount">0</span>
+            <small style="color: #888;">Tasks</small>
+        </div>
+        <div>
+            <span style="display: block; font-size: 18px; font-weight: bold; color: #e74c3c;">Vip</span>
+            <small style="color: #888;">Status</small>
+        </div>
     </div>
 
-    <nav class="bottom-nav">
-        <a href="index.html" class="nav-item"><i class="fa fa-home"></i>Home</a>
-        <a href="earn.html" class="nav-item"><i class="fa fa-gamepad"></i>Earn</a>
-        <a href="tasks.html" class="nav-item"><i class="fa fa-tasks"></i>Tasks</a>
-        <a href="withdraw.html" class="nav-item active"><i class="fa fa-wallet"></i>Withdraw</a>
-        <a href="profile.html" class="nav-item"><i class="fa fa-user"></i>Profile</a>
+    <div style="padding: 20px;">
+        <button id="logoutBtn" style="width: 100%; padding: 12px; background: #fff; color: #e74c3c; border: 1px solid #e74c3c; border-radius: 10px; font-weight: bold; cursor: pointer;">Log Out</button>
+    </div>
+
+    <nav style="position: fixed; bottom: 0; width: 100%; background: white; display: flex; justify-content: space-around; align-items: center; padding: 5px 0; box-shadow: 0 -2px 15px rgba(0,0,0,0.1); z-index: 1000; height: 65px;">
+        <a href="index.html" style="text-align: center; text-decoration: none; flex: 1; color: #888;">
+            <i class="fa fa-home" style="font-size: 22px;"></i><br><span style="font-size: 10px;">Home</span>
+        </a>
+        <a href="earn.html" style="text-align: center; text-decoration: none; flex: 1;">
+            <div style="background: #667eea; color: white; width: 50px; height: 50px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: -30px auto 0; border: 4px solid white;">
+                <i class="fa fa-bolt" style="font-size: 18px;"></i>
+            </div>
+            <span style="font-size: 10px; color: #888; font-weight: bold; display: block; margin-top: 2px;">Earn</span>
+        </a>
+        <a href="profile.html" style="text-align: center; text-decoration: none; flex: 1; color: #667eea;">
+            <i class="fa fa-user" style="font-size: 22px;"></i><br><span style="font-size: 10px;">Profile</span>
+        </a>
     </nav>
 
     <script type="module">
-        import { auth, db } from './firebase.js';
-        import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-auth.js";
-        import { collection, addDoc, doc, getDoc, updateDoc, increment } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore.js";
+        import { db } from './firebase.js';
+        import { doc, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore.js";
 
-        // টেলিগ্রাম কনফিগ
-        const BOT_TOKEN = "8663196887:AAGF_5h90yS70FV6yPZWiM-MtDrRXoTzTZM";
-        const CHAT_ID = "-1003803044476";
+        // লোকাল স্টোরেজ থেকে ইউজারের ইউনিক আইডি নেওয়া
+        const userId = localStorage.getItem("user_uid");
 
-        // ইউজার লগইন চেক ও ব্যালেন্স লোড
-        onAuthStateChanged(auth, async (user) => {
-            if (user) {
-                const userRef = doc(db, "users", user.uid);
+        async function loadProfile() {
+            if (!userId) {
+                // আইডি না থাকলে লগইন পেজে নিয়ে যাবে
+                window.location.href = "login.html";
+                return;
+            }
+
+            const userRef = doc(db, "users", userId);
+            try {
                 const snap = await getDoc(userRef);
                 if (snap.exists()) {
-                    document.getElementById('userCoins').innerText = snap.data().coins || 0;
+                    const data = snap.data();
+                    
+                    // UI তে ডাটা সেট করা
+                    document.getElementById('userNameDisp').innerText = data.name || "User";
+                    document.getElementById('nameInput').value = data.name || "";
+                    document.getElementById('userUsernameDisp').innerText = "@" + (data.username || "n/a");
+                    document.getElementById('userCoinsDisp').innerText = data.coins || 0;
+                    document.getElementById('referCount').innerText = data.referCount || 0;
+                    
+                    // টেলিগ্রাম থেকে পাওয়া ছবি সেট করা
+                    if (data.photo) {
+                        document.getElementById('userImgDisp').src = data.photo;
+                    }
+                } else {
+                    // ডাটাবেসে ইউজার না থাকলে সেশন ক্লিয়ার করে লগইন পেজে পাঠানো
+                    localStorage.removeItem("user_uid");
+                    window.location.href = "login.html";
                 }
-            } else {
-                window.location.href = "login.html";
+            } catch (e) {
+                console.error("Profile Load Error:", e);
             }
-        });
+        }
 
-        // উইথড্র ফর্ম সাবমিট লজিক
-        document.getElementById('withdrawForm').onsubmit = async (e) => {
-            e.preventDefault();
-            
-            const user = auth.currentUser;
-            const method = document.getElementById('method').value;
-            const number = document.getElementById('num').value;
-            const amount = parseInt(document.getElementById('amount').value);
-            const submitBtn = document.getElementById('submitBtn');
-
-            if (!user) return alert("Please Login!");
-
-            submitBtn.disabled = true;
-            submitBtn.innerText = "Processing...";
-
+        // নাম আপডেট করার ফাংশন
+        document.getElementById('updateBtn').onclick = async () => {
+            const newName = document.getElementById('nameInput').value.trim();
+            if(!newName) {
+                alert("Please enter a name.");
+                return;
+            }
             try {
-                const userRef = doc(db, "users", user.uid);
-                const snap = await getDoc(userRef);
-                const currentCoins = snap.data().coins || 0;
-
-                if (currentCoins < amount) {
-                    alert("আপনার পর্যাপ্ত কয়েন নেই!");
-                    submitBtn.disabled = false;
-                    submitBtn.innerText = "Submit Request";
-                    return;
-                }
-
-                // ১. withdrawals কালেকশনে রিকোয়েস্ট সেভ করা
-                await addDoc(collection(db, "withdrawals"), {
-                    uid: user.uid,
-                    email: user.email,
-                    method: method,
-                    number: number,
-                    amount: amount,
-                    status: "Pending",
-                    timestamp: Date.now()
-                });
-
-                // ২. টেলিগ্রাম চ্যানেলে নোটিফিকেশন পাঠানো
-                const message = `
-🚀 *New Withdraw Request!*
-----------------------------
-📧 *Email:* ${user.email}
-💰 *Amount:* ${amount} Coins
-📱 *Method:* ${method}
-📞 *Number:* \`${number}\`
-📅 *Time:* ${new Date().toLocaleString()}
-----------------------------
-✅ *Status:* Pending
-                `;
-
-                await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({
-                        chat_id: CHAT_ID,
-                        text: message,
-                        parse_mode: "Markdown"
-                    })
-                });
-
-                // ৩. ইউজারের অ্যাকাউন্ট থেকে কয়েন কেটে নেওয়া
-                await updateDoc(userRef, {
-                    coins: increment(-amount)
-                });
-
-                alert("উইথড্র রিকোয়েস্ট সফল হয়েছে এবং চ্যানেলে জানানো হয়েছে!");
+                const userRef = doc(db, "users", userId);
+                await updateDoc(userRef, { name: newName });
+                alert("Profile Updated Successfully!");
                 location.reload();
-
-            } catch (error) {
-                console.error("Error:", error);
-                alert("কিছু একটা ভুল হয়েছে। আবার চেষ্টা করুন।");
-                submitBtn.disabled = false;
-                submitBtn.innerText = "Submit Request";
+            } catch (e) {
+                alert("Failed to update name.");
             }
         };
+
+        // লগআউট ফাংশন
+        document.getElementById('logoutBtn').onclick = () => {
+            if(confirm("Are you sure you want to log out?")) {
+                localStorage.removeItem("user_uid");
+                window.location.href = "login.html";
+            }
+        };
+
+        // পেজ লোড হওয়ার সময় কল করা
+        loadProfile();
     </script>
 </body>
 </html>
