@@ -6,12 +6,13 @@
     <title>Withdraw History - EarnPro</title>
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         body { background: #f4f7f6; font-family: 'Segoe UI', sans-serif; margin: 0; padding-bottom: 80px; }
         .top-header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 30px 20px; text-align: center; border-bottom-left-radius: 25px; border-bottom-right-radius: 25px; }
         
         .history-container { padding: 15px; }
-        .history-card { background: white; border-radius: 15px; padding: 15px; margin-bottom: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.03); display: flex; justify-content: space-between; align-items: center; border-left: 5px solid #ccc; }
+        .history-card { background: white; border-radius: 15px; padding: 15px; margin-bottom: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.03); display: flex; justify-content: space-between; align-items: center; border-left: 5px solid #ccc; transition: 0.3s; }
         
         .history-info h4 { margin: 0; color: #333; font-size: 16px; }
         .history-info p { margin: 3px 0 0; color: #888; font-size: 12px; }
@@ -50,18 +51,28 @@
         </div>
     </div>
 
-    <nav style="position: fixed; bottom: 0; width: 100%; background: white; display: flex; justify-content: space-around; padding: 15px 0; box-shadow: 0 -2px 15px rgba(0,0,0,0.1); z-index: 1000;">
-        <a href="index.html" style="color:#888; text-decoration: none;"><i class="fa fa-home fa-lg"></i></a>
-        <a href="earn.html" style="color:#888; text-decoration: none;"><i class="fa fa-bolt fa-lg"></i></a>
-        <a href="withdraw.html" style="color:#667eea; text-decoration: none;"><i class="fa fa-wallet fa-lg"></i></a>
-        <a href="profile.html" style="color:#888; text-decoration: none;"><i class="fa fa-user fa-lg"></i></a>
+    <nav style="position: fixed; bottom: 0; width: 100%; background: white; display: flex; justify-content: space-around; padding: 10px 0; box-shadow: 0 -2px 15px rgba(0,0,0,0.1); z-index: 1000; border-top: 1px solid #eee;">
+        <a href="index.html" style="color:#888; text-decoration: none; text-align: center; flex: 1;"><i class="fa fa-home fa-lg"></i><br><span style="font-size: 10px;">Home</span></a>
+        <a href="earn.html" style="color:#888; text-decoration: none; text-align: center; flex: 1;"><i class="fa fa-bolt fa-lg"></i><br><span style="font-size: 10px;">Earn</span></a>
+        <a href="withdraw.html" style="color:#667eea; text-decoration: none; text-align: center; flex: 1;"><i class="fa fa-wallet fa-lg"></i><br><span style="font-size: 10px;">Withdraw</span></a>
+        <a href="profile.html" style="color:#888; text-decoration: none; text-align: center; flex: 1;"><i class="fa fa-user fa-lg"></i><br><span style="font-size: 10px;">Profile</span></a>
     </nav>
 
     <script type="module">
         import { db } from './firebase.js';
         import { collection, query, where, orderBy, getDocs } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore.js";
 
-        const userId = localStorage.getItem("user_uid");
+        // ১. সঠিক আইডি নিশ্চিত করা (tg_user_id)
+        const userId = localStorage.getItem("tg_user_id");
+
+        // ২. টেলিগ্রাম ব্যাক বাটন (হোম পেজে যাওয়ার জন্য)
+        if (window.Telegram && window.Telegram.WebApp) {
+            window.Telegram.WebApp.ready();
+            window.Telegram.WebApp.BackButton.show();
+            window.Telegram.WebApp.BackButton.onClick(() => {
+                window.location.href = "index.html";
+            });
+        }
 
         async function loadHistory() {
             const listDiv = document.getElementById('historyList');
@@ -74,7 +85,7 @@
             }
 
             try {
-                // ১. Firestore থেকে ইউজারের উইথড্র রিকোয়েস্টগুলো নেওয়া
+                // ৩. Firestore থেকে ডাটা ফিল্টার করা
                 const q = query(
                     collection(db, "withdrawals"), 
                     where("uid", "==", userId),
@@ -101,7 +112,7 @@
                         <div class="history-info">
                             <h4>${data.method} - ${data.amount} Coins</h4>
                             <p><i class="fas fa-phone-alt"></i> ${data.number}</p>
-                            <p><i class="far fa-clock"></i> ${new Date(data.timestamp).toLocaleString()}</p>
+                            <p><i class="far fa-clock"></i> ${new Date(data.timestamp).toLocaleString('en-US', { hour12: true })}</p>
                         </div>
                         <div class="status ${statusClass}">${status}</div>
                     `;
@@ -110,7 +121,7 @@
 
             } catch (error) {
                 console.error("History Error:", error);
-                loader.innerHTML = "<p style='color:red;'>Failed to load history.</p>";
+                loader.innerHTML = "<p style='color:red;'>Failed to load history. Please try again.</p>";
             }
         }
 
