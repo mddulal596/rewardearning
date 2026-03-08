@@ -6,66 +6,84 @@
     <title>EarnPro - Profile</title>
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         body { background: #f4f7f6; font-family: 'Segoe UI', sans-serif; margin: 0; padding-bottom: 90px; }
         .profile-header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 50px 20px; text-align: center; border-bottom-left-radius: 30px; border-bottom-right-radius: 30px; }
-        .profile-img { width: 100px; height: 100px; border-radius: 50%; border: 4px solid white; margin-bottom: 10px; }
+        .profile-img { width: 80px; height: 80px; border-radius: 50%; border: 4px solid rgba(255,255,255,0.3); margin: 0 auto 10px; display: flex; align-items: center; justify-content: center; background: rgba(255,255,255,0.2); font-size: 30px; font-weight: bold; }
         .card { background: white; margin: -30px 20px 20px; padding: 25px; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); }
-        .logout-btn { width: 100%; padding: 12px; background: #fff; border: 1px solid #ff4757; color: #ff4757; border-radius: 12px; font-weight: bold; cursor: pointer; margin-top: 20px; }
+        .info-row { display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid #f0f0f0; }
+        .info-row:last-child { border-bottom: none; }
+        .logout-btn { width: 100%; padding: 12px; background: #fff; border: 1px solid #ff4757; color: #ff4757; border-radius: 12px; font-weight: bold; cursor: pointer; margin-top: 10px; transition: 0.3s; }
+        .logout-btn:active { background: #ff4757; color: white; }
     </style>
 </head>
 <body>
     <div class="profile-header">
-        <div id="userAvatar" class="profile-img" style="background:#444; display:inline-flex; align-items:center; justify-content:center; font-size:40px;">US</div>
-        <h2 id="profileName">Loading...</h2>
-        <p id="profileEmail">@username</p>
-        <div style="background: rgba(255,255,255,0.2); display: inline-block; padding: 5px 15px; border-radius: 20px;">Balance: <span id="profileBalance">0</span> 💰</div>
+        <div id="userAvatar" class="profile-img">U</div>
+        <h2 id="profileName" style="margin: 5px 0;">Loading...</h2>
+        <p id="profileEmail" style="margin: 0; opacity: 0.8; font-size: 14px;">@username</p>
     </div>
 
     <div class="card">
-        <button id="btnLogOut" class="logout-btn"><i class="fas fa-sign-out-alt"></i> Log Out</button>
+        <div class="info-row">
+            <span>Current Balance</span>
+            <span style="font-weight: bold; color: #667eea;"><span id="profileBalance">0</span> 💰</span>
+        </div>
+        <div class="info-row">
+            <span>Refer Code</span>
+            <span id="profileRefer" style="font-weight: bold; color: #2ecc71;">---</span>
+        </div>
+        <div class="info-row">
+            <span>Account Status</span>
+            <span style="color: #2ecc71; font-weight: bold;">Active</span>
+        </div>
+        
+        <button id="btnLogOut" class="logout-btn"><i class="fas fa-sign-out-alt"></i> Exit App</button>
     </div>
 
-    <nav style="position: fixed; bottom: 0; width: 100%; background: white; display: flex; justify-content: space-around; padding: 15px 0; box-shadow: 0 -2px 15px rgba(0,0,0,0.1); z-index: 1000;">
-        <a href="index.html" style="color:#888;"><i class="fa fa-home fa-lg"></i></a>
-        <a href="earn.html" style="color:#888;"><i class="fa fa-play-circle fa-lg"></i></a>
-        <a href="#" id="profileShareBtn" style="color:#888;"><i class="fa fa-share-alt fa-lg"></i></a>
-        <a href="profile.html" style="color:#667eea;"><i class="fa fa-user fa-lg"></i></a>
+    <nav class="bottom-nav">
+        <a href="index.html" class="nav-item"><i class="fas fa-home"></i>Home</a>
+        <a href="withdraw.html" class="nav-item"><i class="fas fa-wallet"></i>Withdraw</a>
+        <a href="profile.html" class="nav-item active"><i class="fas fa-user"></i>Profile</a>
     </nav>
 
     <script type="module">
-        import { auth, db } from './firebase.js';
-        import { signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-auth.js";
-        import { doc, getDoc } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore.js";
+        import { db } from './firebase.js';
+        import { doc, onSnapshot } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore.js";
 
-        onAuthStateChanged(auth, async (user) => {
-            if (user) {
-                const userRef = doc(db, "users", user.uid);
-                const snap = await getDoc(userRef);
+        // ১. লোকাল স্টোরেজ থেকে আইডি নেওয়া
+        const tgId = localStorage.getItem("tg_user_id");
+
+        if (tgId) {
+            // ২. রিয়েল-টাইম ডাটা লিসেনার
+            onSnapshot(doc(db, "users", tgId), (snap) => {
                 if (snap.exists()) {
                     const data = snap.data();
                     document.getElementById('profileName').innerText = data.name || "User";
                     document.getElementById('profileBalance').innerText = data.coins || 0;
                     document.getElementById('profileEmail').innerText = "@" + (data.username || "user");
-
-                    // শেয়ার বাটন রিডাইরেক্ট লজিক
-                    document.getElementById('profileShareBtn').onclick = (e) => {
-                        e.preventDefault();
-                        const botUser = "earnpropfficial1_Bot";
-                        window.location.href = `https://t.me/${botUser}?start=${data.referCode || ''}`;
-                    };
-                }
-            } else { window.location.href = "login.html"; }
-        });
-
-        // লগআউট লজিক (পেন্ডিং সমস্যা সমাধান)
-        document.getElementById('btnLogOut').onclick = async () => {
-            if(confirm("আপনি কি লগআউট করতে চান?")) {
-                try {
-                    await signOut(auth);
-                    localStorage.clear();
+                    document.getElementById('profileRefer').innerText = data.referCode || "N/A";
+                    
+                    // নামের প্রথম অক্ষর দিয়ে অবতার তৈরি
+                    document.getElementById('userAvatar').innerText = data.name ? data.name.charAt(0).toUpperCase() : "U";
+                } else {
                     window.location.replace("login.html");
-                } catch (e) { alert("Error logging out!"); }
+                }
+            });
+        } else {
+            window.location.replace("login.html");
+        }
+
+        // ৩. এক্সিট লজিক (যেহেতু এটি টেলিগ্রাম অ্যাপ, সেশন ক্লিয়ার করে ক্লোজ করা)
+        document.getElementById('btnLogOut').onclick = () => {
+            if(confirm("আপনি কি অ্যাপ থেকে বের হতে চান?")) {
+                localStorage.clear();
+                if (window.Telegram?.WebApp) {
+                    window.Telegram.WebApp.close(); // টেলিগ্রাম অ্যাপ সরাসরি বন্ধ করে দেবে
+                } else {
+                    window.location.replace("login.html");
+                }
             }
         };
     </script>
