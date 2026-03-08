@@ -11,7 +11,7 @@
 
     <div style="border-bottom-left-radius: 30px; border-bottom-right-radius: 30px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 50px 20px; color: white; text-align: center; box-shadow: 0 4px 15px rgba(0,0,0,0.1);">
         <div style="position: relative; display: inline-block;">
-            <img id="userImgDisp" src="https://via.placeholder.com/100" style="width: 100px; height: 100px; border-radius: 50%; border: 4px solid rgba(255,255,255,0.3); object-fit: cover; margin-bottom: 10px;">
+            <img id="userImgDisp" src="https://ui-avatars.com/api/?name=User&background=random" style="width: 100px; height: 100px; border-radius: 50%; border: 4px solid rgba(255,255,255,0.3); object-fit: cover; margin-bottom: 10px;">
             <div style="position: absolute; bottom: 15px; right: 5px; background: #27ae60; width: 18px; height: 18px; border-radius: 50%; border: 2px solid white;"></div>
         </div>
         <h2 id="userNameDisp" style="margin: 10px 0 5px; font-weight: 600;">Loading...</h2>
@@ -52,10 +52,13 @@
             <i class="fa fa-home" style="font-size: 22px;"></i><br><span style="font-size: 10px;">Home</span>
         </a>
         <a href="earn.html" style="text-align: center; text-decoration: none; flex: 1;">
-            <div style="background: #667eea; color: white; width: 50px; height: 50px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: -30px auto 0; border: 4px solid white;">
+            <div style="background: #667eea; color: white; width: 45px; height: 45px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: -25px auto 0; border: 4px solid white;">
                 <i class="fa fa-bolt" style="font-size: 18px;"></i>
             </div>
             <span style="font-size: 10px; color: #888; font-weight: bold; display: block; margin-top: 2px;">Earn</span>
+        </a>
+        <a href="withdraw.html" style="text-align: center; text-decoration: none; flex: 1; color: #888;">
+            <i class="fa fa-wallet" style="font-size: 22px;"></i><br><span style="font-size: 10px;">Withdraw</span>
         </a>
         <a href="profile.html" style="text-align: center; text-decoration: none; flex: 1; color: #667eea;">
             <i class="fa fa-user" style="font-size: 22px;"></i><br><span style="font-size: 10px;">Profile</span>
@@ -66,12 +69,10 @@
         import { db } from './firebase.js';
         import { doc, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore.js";
 
-        // লোকাল স্টোরেজ থেকে ইউজারের ইউনিক আইডি নেওয়া
         const userId = localStorage.getItem("user_uid");
 
         async function loadProfile() {
             if (!userId) {
-                // আইডি না থাকলে লগইন পেজে নিয়ে যাবে
                 window.location.href = "login.html";
                 return;
             }
@@ -82,19 +83,22 @@
                 if (snap.exists()) {
                     const data = snap.data();
                     
-                    // UI তে ডাটা সেট করা
-                    document.getElementById('userNameDisp').innerText = data.name || "User";
+                    // Display Data
+                    document.getElementById('userNameDisp').innerText = data.name || "No Name";
                     document.getElementById('nameInput').value = data.name || "";
-                    document.getElementById('userUsernameDisp').innerText = "@" + (data.username || "n/a");
+                    document.getElementById('userUsernameDisp').innerText = data.username ? "@" + data.username : "@mddulal596";
                     document.getElementById('userCoinsDisp').innerText = data.coins || 0;
                     document.getElementById('referCount').innerText = data.referCount || 0;
+                    document.getElementById('taskCount').innerText = data.taskCount || 0;
                     
-                    // টেলিগ্রাম থেকে পাওয়া ছবি সেট করা
+                    // Photo Logic: If no photo in DB, use UI-Avatar with user's name
                     if (data.photo) {
                         document.getElementById('userImgDisp').src = data.photo;
+                    } else {
+                        const avatarName = data.name ? encodeURIComponent(data.name) : "User";
+                        document.getElementById('userImgDisp').src = `https://ui-avatars.com/api/?name=${avatarName}&background=random&color=fff`;
                     }
                 } else {
-                    // ডাটাবেসে ইউজার না থাকলে সেশন ক্লিয়ার করে লগইন পেজে পাঠানো
                     localStorage.removeItem("user_uid");
                     window.location.href = "login.html";
                 }
@@ -103,7 +107,7 @@
             }
         }
 
-        // নাম আপডেট করার ফাংশন
+        // Update Name
         document.getElementById('updateBtn').onclick = async () => {
             const newName = document.getElementById('nameInput').value.trim();
             if(!newName) {
@@ -120,7 +124,7 @@
             }
         };
 
-        // লগআউট ফাংশন
+        // Logout
         document.getElementById('logoutBtn').onclick = () => {
             if(confirm("Are you sure you want to log out?")) {
                 localStorage.removeItem("user_uid");
@@ -128,7 +132,6 @@
             }
         };
 
-        // পেজ লোড হওয়ার সময় কল করা
         loadProfile();
     </script>
 </body>
