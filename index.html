@@ -3,118 +3,64 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>EarnPro - Profile</title>
+    <title>EarnPro - Home</title>
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         body { background: #f4f7f6; font-family: 'Segoe UI', sans-serif; margin: 0; padding-bottom: 90px; }
-        .profile-header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 50px 20px; text-align: center; border-bottom-left-radius: 30px; border-bottom-right-radius: 30px; }
-        .profile-img { width: 80px; height: 80px; border-radius: 50%; border: 4px solid rgba(255,255,255,0.3); margin: 0 auto 10px; display: flex; align-items: center; justify-content: center; background: rgba(255,255,255,0.2); font-size: 30px; font-weight: bold; overflow: hidden; }
-        .profile-img img { width: 100%; height: 100%; object-fit: cover; }
-        .card { background: white; margin: -30px 20px 20px; padding: 25px; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); }
-        .info-row { display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid #f0f0f0; }
-        .info-row:last-child { border-bottom: none; }
-        .logout-btn { width: 100%; padding: 12px; background: #fff; border: 1px solid #ff4757; color: #ff4757; border-radius: 12px; font-weight: bold; cursor: pointer; margin-top: 10px; transition: 0.3s; }
-        .logout-btn:active { background: #ff4757; color: white; }
-        .bottom-nav { position: fixed; bottom: 0; width: 100%; background: white; display: flex; justify-content: space-around; padding: 10px 0; box-shadow: 0 -2px 15px rgba(0,0,0,0.1); border-top: 1px solid #eee; z-index: 1000; }
+        .home-header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 40px 20px; text-align: center; border-bottom-left-radius: 30px; border-bottom-right-radius: 30px; }
+        .balance-card { background: white; margin: -30px 20px 20px; padding: 20px; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); text-align: center; }
+        .grid-container { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; padding: 0 20px; }
+        .grid-item { background: white; padding: 25px 15px; border-radius: 15px; text-align: center; box-shadow: 0 5px 15px rgba(0,0,0,0.03); text-decoration: none; color: #333; transition: 0.3s; }
+        .grid-item:active { transform: scale(0.95); }
+        .grid-item i { font-size: 30px; margin-bottom: 10px; display: block; }
+        .bottom-nav { position: fixed; bottom: 0; width: 100%; background: white; display: flex; justify-content: space-around; padding: 10px 0; border-top: 1px solid #eee; z-index: 1000; }
         .nav-item { color: #888; text-decoration: none; text-align: center; flex: 1; font-size: 10px; }
         .nav-item i { display: block; font-size: 18px; margin-bottom: 2px; }
         .nav-item.active { color: #667eea; }
     </style>
 </head>
 <body>
-    <div class="profile-header">
-        <div id="userAvatar" class="profile-img">U</div>
-        <h2 id="profileName" style="margin: 5px 0;">Loading...</h2>
-        <p id="profileEmail" style="margin: 0; opacity: 0.8; font-size: 14px;">@username</p>
+    <div class="home-header">
+        <h2 id="welcomeName">Hi, User</h2>
+        <p style="opacity: 0.8; font-size: 14px;">Welcome to EarnPro!</p>
     </div>
 
-    <div class="card">
-        <div class="info-row">
-            <span>Current Balance</span>
-            <span style="font-weight: bold; color: #667eea;"><span id="profileBalance">0</span> 💰</span>
-        </div>
-        <div class="info-row">
-            <span>Refer Code</span>
-            <span id="profileRefer" style="font-weight: bold; color: #2ecc71;">---</span>
-        </div>
-        <div class="info-row">
-            <span>Account Status</span>
-            <span style="color: #2ecc71; font-weight: bold;">Active</span>
-        </div>
-        <button id="btnLogOut" class="logout-btn"><i class="fas fa-sign-out-alt"></i> Exit App</button>
+    <div class="balance-card">
+        <p style="color: #888; font-size: 12px; margin-bottom: 5px; text-transform: uppercase;">Available Balance</p>
+        <h1 id="homeBalance" style="margin: 0; color: #667eea;">0</h1>
+        <div style="background:#f1c40f; display:inline-block; padding:2px 12px; border-radius:10px; font-size:11px; font-weight:bold; margin-top:5px;">💰 COINS</div>
+    </div>
+
+    <div class="grid-container">
+        <a href="earn.html" class="grid-item"><i class="fas fa-play" style="color: #667eea;"></i><strong>Start Task</strong></a>
+        <a href="refer.html" class="grid-item"><i class="fas fa-share-alt" style="color: #2ecc71;"></i><strong>Share App</strong></a>
+        <a href="leaderboard.html" class="grid-item"><i class="fas fa-trophy" style="color: #f1c40f;"></i><strong>Leaderboard</strong></a>
+        <a href="history.html" class="grid-item"><i class="fas fa-history" style="color: #e74c3c;"></i><strong>History</strong></a>
     </div>
 
     <nav class="bottom-nav">
-        <a href="index.html" class="nav-item"><i class="fas fa-home"></i>Home</a>
+        <a href="index.html" class="nav-item active"><i class="fas fa-home"></i>Home</a>
         <a href="earn.html" class="nav-item"><i class="fas fa-bolt"></i>Earn</a>
         <a href="withdraw.html" class="nav-item"><i class="fas fa-wallet"></i>Withdraw</a>
-        <a href="profile.html" class="nav-item active"><i class="fas fa-user"></i>Profile</a>
+        <a href="profile.html" class="nav-item"><i class="fas fa-user"></i>Profile</a>
     </nav>
 
     <script type="module">
         import { db } from './firebase.js';
-        import { doc, onSnapshot, updateDoc } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore.js";
+        import { doc, onSnapshot } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore.js";
 
-        const tg = window.Telegram?.WebApp;
-        const tgUser = tg?.initDataUnsafe?.user;
-        const tgId = localStorage.getItem("tg_user_id") || tgUser?.id?.toString();
+        const tgId = localStorage.getItem("tg_user_id");
+        if (!tgId) window.location.replace("login.html");
 
-        // ১. টেলিগ্রাম ব্যাক বাটন এবং UI সেটআপ
-        if (tg) {
-            tg.ready();
-            tg.expand();
-            tg.BackButton.show();
-            tg.BackButton.onClick(() => window.location.href = "index.html");
-        }
-
-        if (tgId) {
-            // ২. রিয়েল-টাইম ডাটা লিসেনার
-            onSnapshot(doc(db, "users", tgId), (snap) => {
-                if (snap.exists()) {
-                    const data = snap.data();
-                    
-                    // UI আপডেট
-                    document.getElementById('profileName').innerText = data.name || (tgUser ? tgUser.first_name : "User");
-                    document.getElementById('profileBalance').innerText = data.coins || 0;
-                    document.getElementById('profileEmail').innerText = "@" + (data.username || tgUser?.username || "user");
-                    document.getElementById('profileRefer').innerText = data.referCode || "N/A";
-                    
-                    const avatarDiv = document.getElementById('userAvatar');
-                    
-                    // ৩. প্রোফাইল ছবি লজিক (টেলিগ্রাম থেকে নতুন ছবি থাকলে আপডেট করা)
-                    const currentPhoto = data.photo || tgUser?.photo_url;
-                    
-                    if (currentPhoto) {
-                        avatarDiv.innerHTML = `<img src="${currentPhoto}" alt="Profile">`;
-                        
-                        // যদি ডাটাবেসে ছবি না থাকে কিন্তু টেলিগ্রামে থাকে, তবে আপডেট করে দেওয়া
-                        if (!data.photo && tgUser?.photo_url) {
-                            updateDoc(doc(db, "users", tgId), { photo: tgUser.photo_url });
-                        }
-                    } else {
-                        avatarDiv.innerText = data.name ? data.name.charAt(0).toUpperCase() : "U";
-                    }
-                } else {
-                    window.location.replace("login.html");
-                }
-            });
-        } else {
-            window.location.replace("login.html");
-        }
-
-        // ৪. এক্সিট বাটন
-        document.getElementById('btnLogOut').onclick = () => {
-            if(confirm("আপনি কি অ্যাপ থেকে বের হতে চান?")) {
-                if (tg) {
-                    tg.close(); 
-                } else {
-                    localStorage.clear();
-                    window.location.replace("login.html");
-                }
+        onSnapshot(doc(db, "users", tgId), (snap) => {
+            if (snap.exists()) {
+                const data = snap.data();
+                document.getElementById('welcomeName').innerText = "Hi, " + (data.name || "User");
+                document.getElementById('homeBalance').innerText = data.coins || 0;
             }
-        };
+        });
     </script>
 </body>
 </html>
