@@ -5,183 +5,65 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Withdraw - EarnPro</title>
     <link rel="stylesheet" href="style.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <style>
-        body { background: #f4f7f6; font-family: 'Segoe UI', sans-serif; margin: 0; padding-bottom: 90px; }
-        .top-header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 40px 20px; text-align: center; border-bottom-left-radius: 30px; border-bottom-right-radius: 30px; }
-        .balance-card { background: white; margin: -25px 20px 20px; padding: 25px; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); text-align: center; position: relative; z-index: 10; }
-        .balance-card h3 { margin: 5px 0; color: #667eea; font-size: 32px; font-weight: 800; }
-        .form-card { background: white; margin: 0 20px; padding: 25px; border-radius: 20px; box-shadow: 0 5px 15px rgba(0,0,0,0.03); }
-        .input-group { margin-bottom: 15px; }
-        .input-group label { display: block; margin-bottom: 5px; font-weight: bold; color: #555; font-size: 14px; }
-        .input-field { width: 100%; padding: 12px; border: 1px solid #eee; border-radius: 10px; box-sizing: border-box; outline: none; font-size: 15px; }
-        .btn-withdraw { width: 100%; padding: 15px; background: #667eea; color: white; border: none; border-radius: 10px; font-weight: bold; font-size: 16px; cursor: pointer; transition: 0.3s; }
-        .btn-withdraw:disabled { background: #ccc; }
-    </style>
 </head>
 <body>
-
-    <div class="top-header">
-        <h2 style="margin: 0;">Withdraw</h2>
-        <p style="opacity: 0.8; font-size: 14px;">আপনার উপার্জিত কয়েন টাকা হিসেবে নিন</p>
+    <div class="header" style="background:#667eea;color:white;padding:30px;text-align:center;">
+        <h2>Withdraw</h2>
     </div>
 
-    <div class="balance-card">
-        <p style="margin: 0; color: #888; font-size: 12px; text-transform: uppercase;">Available Balance</p>
-        <h3 id="userCoins">0</h3>
-        <div style="background: #f1c40f; color: #000; display: inline-block; padding: 3px 12px; border-radius: 10px; font-size: 11px; font-weight: bold;">💰 COINS</div>
-    </div>
-
-    <div class="form-card">
+    <div class="card" style="margin:20px;padding:20px;background:white;border-radius:15px;box-shadow:0 5px 15px rgba(0,0,0,0.05);">
+        <p>Your Balance: <b id="userCoins">0</b> Coins</p>
         <form id="withdrawForm">
-            <div class="input-group">
-                <label>Payment Method</label>
-                <select id="method" class="input-field">
-                    <option value="bKash">bKash</option>
-                    <option value="Nagad">Nagad</option>
-                    <option value="Rocket">Rocket</option>
-                </select>
-            </div>
-
-            <div class="input-group">
-                <label>Account Number</label>
-                <input type="number" id="num" placeholder="017xxxxxxxx" class="input-field" required>
-            </div>
-
-            <div class="input-group">
-                <label>Amount (Min 500 Coins)</label>
-                <input type="number" id="amount" placeholder="Minimum 500" class="input-field" min="500" required>
-            </div>
-
-            <button type="submit" id="submitBtn" class="btn-withdraw">Submit Request</button>
+            <select id="method" class="input-field" style="width:100%;padding:10px;margin:10px 0;">
+                <option value="bKash">bKash</option>
+                <option value="Nagad">Nagad</option>
+            </select>
+            <input type="number" id="num" placeholder="Account Number" class="input-field" style="width:100%;padding:10px;margin:10px 0;" required>
+            <input type="number" id="amount" placeholder="Min 500 Coins" class="input-field" style="width:100%;padding:10px;margin:10px 0;" required>
+            <button type="submit" id="submitBtn" class="btn-main" style="background:#667eea;color:white;border:none;width:100%;padding:15px;border-radius:10px;">Submit</button>
         </form>
     </div>
-
-    <div style="margin: 20px; padding: 15px; background: #fffbe6; border-left: 5px solid #f1c40f; border-radius: 10px; font-size: 12px; color: #856404;">
-        <i class="fa fa-info-circle"></i> ২৪ থেকে ৪৮ ঘণ্টার মধ্যে পেমেন্ট সফল করা হবে। সঠিক নম্বর দিন।
-    </div>
-
-    <nav style="position: fixed; bottom: 0; width: 100%; background: white; display: flex; justify-content: space-around; padding: 15px 0; box-shadow: 0 -2px 15px rgba(0,0,0,0.1); z-index: 1000;">
-        <a href="index.html" style="color:#888; text-decoration: none; text-align: center; flex: 1;">
-            <i class="fa fa-home fa-lg"></i><br><span style="font-size: 10px;">Home</span>
-        </a>
-        <a href="earn.html" style="color:#888; text-decoration: none; text-align: center; flex: 1;">
-            <i class="fa fa-play-circle fa-lg"></i><br><span style="font-size: 10px;">Earn</span>
-        </a>
-        <a href="withdraw.html" style="color:#667eea; text-decoration: none; text-align: center; flex: 1;">
-            <i class="fa fa-wallet fa-lg"></i><br><span style="font-size: 10px;">Withdraw</span>
-        </a>
-        <a href="profile.html" style="color:#888; text-decoration: none; text-align: center; flex: 1;">
-            <i class="fa fa-user fa-lg"></i><br><span style="font-size: 10px;">Profile</span>
-        </a>
-    </nav>
 
     <script type="module">
         import { db } from './firebase.js';
         import { collection, addDoc, doc, getDoc, updateDoc, increment } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore.js";
 
-        // টেলিগ্রাম কনফিগ
-        const BOT_TOKEN = "8663196887:AAGF_5h90yS70FV6yPZWiM-MtDrRXoTzTZM";
-        const CHAT_ID = "-1003803044476";
+        const tgId = localStorage.getItem("tg_user_id");
 
-        // লোকাল স্টোরেজ থেকে আইডি নেওয়া
-        const userId = localStorage.getItem("user_uid");
-
-        async function initWithdraw() {
-            if (!userId) {
-                window.location.href = "login.html";
-                return;
-            }
-
-            // ব্যালেন্স লোড করা
-            try {
-                const userRef = doc(db, "users", userId);
-                const snap = await getDoc(userRef);
-                if (snap.exists()) {
-                    document.getElementById('userCoins').innerText = snap.data().coins || 0;
-                } else {
-                    window.location.href = "login.html";
-                }
-            } catch (e) {
-                console.error(e);
-            }
+        async function load() {
+            if (!tgId) return window.location.replace("login.html");
+            const snap = await getDoc(doc(db, "users", tgId));
+            if (snap.exists()) document.getElementById('userCoins').innerText = snap.data().coins || 0;
         }
 
         document.getElementById('withdrawForm').onsubmit = async (e) => {
             e.preventDefault();
-            
             const method = document.getElementById('method').value;
             const number = document.getElementById('num').value;
             const amount = parseInt(document.getElementById('amount').value);
-            const submitBtn = document.getElementById('submitBtn');
-
-            submitBtn.disabled = true;
-            submitBtn.innerText = "Processing...";
-
-            try {
-                const userRef = doc(db, "users", userId);
-                const snap = await getDoc(userRef);
-                const currentCoins = snap.data().coins || 0;
-                const userName = snap.data().name || "Unknown";
-
-                if (currentCoins < amount) {
-                    alert("আপনার পর্যাপ্ত কয়েন নেই!");
-                    submitBtn.disabled = false;
-                    submitBtn.innerText = "Submit Request";
-                    return;
-                }
-
-                // ১. ডাটাবেসে সেভ
-                await addDoc(collection(db, "withdrawals"), {
-                    uid: userId,
-                    name: userName,
-                    method: method,
-                    number: number,
-                    amount: amount,
-                    status: "Pending",
-                    timestamp: new Date().toISOString()
-                });
-
-                // ২. টেলিগ্রামে মেসেজ পাঠানো
-                const message = `
-💰 *New Withdraw Request!*
-----------------------------
-👤 *Name:* ${userName}
-🆔 *ID:* \`${userId}\`
-💵 *Amount:* ${amount} Coins
-📱 *Method:* ${method}
-📞 *Number:* \`${number}\`
-📅 *Date:* ${new Date().toLocaleString()}
-----------------------------
-🚀 *Status:* Pending
-                `;
-
-                await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({
-                        chat_id: CHAT_ID,
-                        text: message,
-                        parse_mode: "Markdown"
-                    })
-                });
-
-                // ৩. ব্যালেন্স আপডেট
-                await updateDoc(userRef, {
-                    coins: increment(-amount)
-                });
-
-                alert("উইথড্র রিকোয়েস্ট সফল হয়েছে!");
-                location.reload();
-
-            } catch (error) {
-                alert("Error: " + error.message);
-                submitBtn.disabled = false;
-                submitBtn.innerText = "Submit Request";
+            
+            const snap = await getDoc(doc(db, "users", tgId));
+            if (snap.data().coins < amount || amount < 500) {
+                alert("Insufficient coins or below minimum!");
+                return;
             }
-        };
 
-        initWithdraw();
+            await addDoc(collection(db, "withdrawals"), {
+                uid: tgId,
+                name: snap.data().name,
+                method, number, amount, status: "Pending", timestamp: new Date().toISOString()
+            });
+
+            await updateDoc(doc(db, "users", tgId), { coins: increment(-amount) });
+
+            // Telegram Notification
+            const msg = `💰 *New Request*\nUser: ${snap.data().name}\nAmount: ${amount}\nMethod: ${method}\nNumber: ${number}`;
+            fetch(`https://api.telegram.org/bot8663196887:AAGF_5h90yS70FV6yPZWiM-MtDrRXoTzTZM/sendMessage?chat_id=-1003803044476&text=${encodeURIComponent(msg)}&parse_mode=Markdown`);
+
+            alert("Request sent successfully!");
+            location.reload();
+        };
+        load();
     </script>
 </body>
 </html>
