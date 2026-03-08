@@ -13,6 +13,7 @@
         @keyframes bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
         h2 { margin: 0; color: #333; font-size: 24px; }
         p { color: #888; font-size: 14px; margin-bottom: 30px; line-height: 1.5; }
+        #loader { display: none; margin-top: 20px; color: #667eea; }
     </style>
 </head>
 <body>
@@ -31,6 +32,11 @@
                     data-request-access="write"></script>
         </div>
 
+        <div id="loader">
+            <i class="fas fa-circle-notch fa-spin fa-2x"></i>
+            <p>Logging in, please wait...</p>
+        </div>
+
         <div style="margin-top: 30px; font-size: 11px; color: #ccc; border-top: 1px solid #eee; padding-top: 15px;">
             Secure Login via Telegram Official API
         </div>
@@ -38,30 +44,53 @@
 
     <script type="module">
         import { db } from './firebase.js';
-        import { doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore.js";
+        import { doc, setDoc, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore.js";
 
         window.onTelegramAuth = async function(user) {
+            // UI কন্ট্রোল
+            document.getElementById('telegram-login-container').style.display = 'none';
+            document.getElementById('loader').style.display = 'block';
+
             const userId = "tg_" + user.id;
             const userRef = doc(db, "users", userId);
             
             try {
                 const snap = await getDoc(userRef);
+                const fullName = user.first_name + (user.last_name ? " " + user.last_name : "");
+                const photo = user.photo_url || ""; // টেলিগ্রাম থেকে আসা ছবি
+                const username = user.username || "";
+
                 if (!snap.exists()) {
+                    // নতুন ইউজার হলে ডাটা ক্রিয়েট হবে
                     await setDoc(userRef, {
                         uid: userId,
-                        name: user.first_name + (user.last_name ? " " + user.last_name : ""),
-                        username: user.username || "N/A",
-                        coins: 50,
+                        name: fullName,
+                        username: username,
+                        photo: photo,
+                        coins: 50, // সাইনআপ বোনাস
                         referCode: "PRO" + user.id,
                         referCount: 0,
-                        photo: user.photo_url || "",
+                        taskCount: 0,
                         joinedAt: new Date().toISOString()
                     });
+                } else {
+                    // পুরাতন ইউজার হলেও নাম এবং ছবি আপডেট হবে (যদি টেলিগ্রামে চেঞ্জ করে)
+                    await updateDoc(userRef, {
+                        name: fullName,
+                        username: username,
+                        photo: photo
+                    });
                 }
+
+                // লোকাল স্টোরেজে আইডি সেভ এবং রিডাইরেক্ট
                 localStorage.setItem("user_uid", userId);
                 window.location.href = "index.html"; 
+
             } catch (error) {
+                console.error("Login Error:", error);
                 alert("Login Error! Please try again.");
+                document.getElementById('telegram-login-container').style.display = 'block';
+                document.getElementById('loader').style.display = 'none';
             }
         };
     </script>
