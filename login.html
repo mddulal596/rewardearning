@@ -3,96 +3,37 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login - EarnPro</title>
+    <title>EarnPro - Login</title>
     <link rel="stylesheet" href="style.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        body { background: #f4f7f6; display: flex; align-items: center; justify-content: center; height: 100vh; margin: 0; font-family: 'Segoe UI', sans-serif; }
-        .login-card { background: white; padding: 40px 30px; border-radius: 30px; box-shadow: 0 15px 35px rgba(0,0,0,0.1); text-align: center; width: 90%; max-width: 380px; }
-        .logo-icon { font-size: 60px; color: #667eea; margin-bottom: 20px; display: inline-block; animation: bounce 2s infinite; }
-        @keyframes bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
-        h2 { margin: 0; color: #333; font-size: 24px; }
-        p { color: #888; font-size: 14px; margin-bottom: 30px; line-height: 1.5; }
-        #loader { display: none; margin-top: 20px; color: #667eea; }
+        body { background: #f4f7f6; font-family: 'Segoe UI', sans-serif; display: flex; align-items: center; justify-content: center; height: 100vh; margin: 0; }
+        .login-card { background: white; padding: 40px; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); text-align: center; width: 85%; max-width: 400px; }
+        .login-card img { width: 80px; margin-bottom: 20px; }
+        .login-card h2 { margin: 0 0 10px; color: #333; }
+        .login-card p { color: #777; font-size: 14px; margin-bottom: 30px; }
     </style>
 </head>
 <body>
-
     <div class="login-card">
-        <div class="logo-icon"><i class="fa fa-coins"></i></div>
+        <img src="https://cdn-icons-png.flaticon.com/512/2489/2489756.png" alt="Logo">
         <h2>EarnPro Login</h2>
         <p>টেলিগ্রাম দিয়ে এক ক্লিকে লগইন করুন এবং ইনকাম শুরু করুন!</p>
-
-        <div id="telegram-login-container">
-            <script async src="https://telegram.org/js/telegram-widget.js?22" 
-                    data-telegram-login="earnpropfficial1_Bot" 
-                    data-size="large" 
-                    data-userpic="true"
-                    data-onauth="onTelegramAuth(user)" 
-                    data-request-access="write"></script>
-        </div>
-
-        <div id="loader">
-            <i class="fas fa-circle-notch fa-spin fa-2x"></i>
-            <p>Logging in, please wait...</p>
-        </div>
-
-        <div style="margin-top: 30px; font-size: 11px; color: #ccc; border-top: 1px solid #eee; padding-top: 15px;">
-            Secure Login via Telegram Official API
-        </div>
+        
+        <div id="telegram-login-container"></div>
     </div>
 
     <script type="module">
-        import { db } from './firebase.js';
-        import { doc, setDoc, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore.js";
+        import { auth } from './firebase.js';
+        import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-auth.js";
 
-        window.onTelegramAuth = async function(user) {
-            // UI কন্ট্রোল
-            document.getElementById('telegram-login-container').style.display = 'none';
-            document.getElementById('loader').style.display = 'block';
-
-            const userId = "tg_" + user.id;
-            const userRef = doc(db, "users", userId);
-            
-            try {
-                const snap = await getDoc(userRef);
-                const fullName = user.first_name + (user.last_name ? " " + user.last_name : "");
-                const photo = user.photo_url || ""; // টেলিগ্রাম থেকে আসা ছবি
-                const username = user.username || "";
-
-                if (!snap.exists()) {
-                    // নতুন ইউজার হলে ডাটা ক্রিয়েট হবে
-                    await setDoc(userRef, {
-                        uid: userId,
-                        name: fullName,
-                        username: username,
-                        photo: photo,
-                        coins: 50, // সাইনআপ বোনাস
-                        referCode: "PRO" + user.id,
-                        referCount: 0,
-                        taskCount: 0,
-                        joinedAt: new Date().toISOString()
-                    });
-                } else {
-                    // পুরাতন ইউজার হলেও নাম এবং ছবি আপডেট হবে (যদি টেলিগ্রামে চেঞ্জ করে)
-                    await updateDoc(userRef, {
-                        name: fullName,
-                        username: username,
-                        photo: photo
-                    });
-                }
-
-                // লোকাল স্টোরেজে আইডি সেভ এবং রিডাইরেক্ট
-                localStorage.setItem("user_uid", userId);
-                window.location.href = "index.html"; 
-
-            } catch (error) {
-                console.error("Login Error:", error);
-                alert("Login Error! Please try again.");
-                document.getElementById('telegram-login-container').style.display = 'block';
-                document.getElementById('loader').style.display = 'none';
+        // ইউজার লগইন হওয়ার সাথে সাথে অটোমেটিক হোমপেজে (index.html) চলে যাবে
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                window.location.replace("index.html"); 
             }
-        };
+        });
+
+        // এখানে আপনার টেলিগ্রাম লগইন স্ক্রিপ্ট কোডটি বসান (যেমন: script src="https://telegram.org/js/telegram-widget.js"...)
     </script>
 </body>
 </html>
