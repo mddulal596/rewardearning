@@ -10,71 +10,68 @@
         body { background: #f4f7f6; font-family: 'Segoe UI', sans-serif; margin: 0; padding-bottom: 90px; }
         .header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 40px 20px; text-align: center; border-bottom-left-radius: 30px; border-bottom-right-radius: 30px; }
         .balance-card { background: white; margin: -25px 20px 20px; padding: 25px; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); text-align: center; position: relative; z-index: 10; }
-        .balance-card h3 { margin: 5px 0; color: #667eea; font-size: 32px; font-weight: 800; }
-        .menu-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; padding: 0 20px; }
-        .menu-item { background: white; padding: 25px 15px; border-radius: 20px; text-align: center; box-shadow: 0 5px 15px rgba(0,0,0,0.03); cursor: pointer; transition: 0.3s; border: 1px solid #f0f0f0; }
         #loading-overlay { position: fixed; top:0; left:0; width:100%; height:100%; background:white; display:flex; flex-direction:column; align-items:center; justify-content:center; z-index:9999; }
     </style>
 </head>
 <body>
-    <div id="loading-overlay"><i class="fas fa-circle-notch fa-spin" style="font-size: 50px; color: #667eea;"></i><p>Loading Data...</p></div>
+    <div id="loading-overlay"><i class="fas fa-circle-notch fa-spin" style="font-size: 50px; color: #667eea;"></i><p>Syncing Data...</p></div>
 
     <div class="header">
-        <h2 id="userNameDisplay">Welcome!</h2>
-        <p style="opacity: 0.8; font-size: 14px;">কাজ করুন এবং আনলিমিটেড ইনকাম করুন</p>
+        <h2 id="userName">Welcome!</h2>
+        <p>ব্যালেন্স চেক করুন এবং কাজ শুরু করুন</p>
     </div>
 
     <div class="balance-card">
-        <p style="margin: 0; color: #888; font-size: 12px; text-transform: uppercase; font-weight: bold;">Current Balance</p>
-        <h3 id="userCoinsDisplay">0</h3>
-        <div style="background: #f1c40f; color: #000; display: inline-block; padding: 3px 12px; border-radius: 10px; font-size: 11px; font-weight: bold;">💰 COINS</div>
+        <p style="color: #888; font-size: 12px; font-weight: bold;">AVAILABLE BALANCE</p>
+        <h3 id="userCoins" style="font-size: 35px; color: #667eea; margin: 5px 0;">0</h3>
+        <span style="background: #f1c40f; padding: 4px 10px; border-radius: 10px; font-size: 12px;">💰 Coins Earned</span>
     </div>
 
-    <div class="menu-grid">
-        <div class="menu-item" onclick="location.href='how-to.html'"><i class="fas fa-play-circle" style="color:#3498db; font-size:35px;"></i><p>How to Earn</p></div>
-        <div class="menu-item" onclick="location.href='leaderboard.html'"><i class="fas fa-trophy" style="color:#e74c3c; font-size:35px;"></i><p>Leaderboard</p></div>
-        <div class="menu-item" onclick="location.href='earn.html'"><i class="fas fa-bolt" style="color:#f1c40f; font-size:35px;"></i><p>Start Earning</p></div>
-        <div class="menu-item" onclick="location.href='withdraw.html'"><i class="fas fa-wallet" style="color:#2ecc71; font-size:35px;"></i><p>Withdraw</p></div>
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; padding: 0 20px;">
+        <div class="menu-item" onclick="location.href='earn.html'" style="background:white; padding:20px; border-radius:15px; text-align:center;"><i class="fas fa-play" style="color:#667eea; font-size:25px;"></i><p>Start Task</p></div>
+        <div class="menu-item" id="shareBtn" style="background:white; padding:20px; border-radius:15px; text-align:center; cursor:pointer;"><i class="fas fa-share-alt" style="color:#2ecc71; font-size:25px;"></i><p>Share App</p></div>
     </div>
 
-    <nav style="position: fixed; bottom: 0; width: 100%; background: white; display: flex; justify-content: space-around; padding: 15px 0; box-shadow: 0 -2px 15px rgba(0,0,0,0.1); z-index: 1000;">
+    <nav style="position: fixed; bottom: 0; width: 100%; background: white; display: flex; justify-content: space-around; padding: 15px 0; box-shadow: 0 -2px 10px rgba(0,0,0,0.1);">
         <a href="index.html" style="color:#667eea;"><i class="fa fa-home fa-lg"></i></a>
-        <a href="earn.html" style="color:#888;"><i class="fa fa-play-circle fa-lg"></i></a>
-        <a href="#" id="navShareBtn" style="color:#888;"><i class="fa fa-share-alt fa-lg"></i></a>
+        <a href="withdraw.html" style="color:#888;"><i class="fa fa-wallet fa-lg"></i></a>
         <a href="profile.html" style="color:#888;"><i class="fa fa-user fa-lg"></i></a>
     </nav>
 
     <script type="module">
-        import { auth, db } from './firebase.js';
+        import { db } from './firebase.js';
         import { doc, getDoc } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore.js";
-        import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-auth.js";
 
-        onAuthStateChanged(auth, async (user) => {
-            if (user) {
-                try {
-                    const userRef = doc(db, "users", user.uid);
-                    const snap = await getDoc(userRef);
-                    if (snap.exists()) {
-                        const data = snap.data();
-                        document.getElementById('userNameDisplay').innerText = "Hi, " + (data.name ? data.name.split(' ')[0] : "User");
-                        document.getElementById('userCoinsDisplay').innerText = data.coins || 0;
+        async function loadDashboard() {
+            const tgId = localStorage.getItem("tg_user_id");
+            if (!tgId) { window.location.replace("login.html"); return; }
+
+            try {
+                const snap = await getDoc(doc(db, "users", tgId));
+                if (snap.exists()) {
+                    const data = snap.data();
+                    document.getElementById('userName').innerText = "Hi, " + data.name;
+                    document.getElementById('userCoins').innerText = data.coins || 0;
+                    
+                    // শেয়ার বাটন ফিক্স (টেলিগ্রাম ডাইরেক্ট লিঙ্ক)
+                    document.getElementById('shareBtn').onclick = () => {
+                        const botUser = "earnpropfficial1_Bot";
+                        const refCode = data.referCode || "";
+                        const shareLink = `https://t.me/${botUser}?start=${refCode}`;
                         
-                        // শেয়ার বাটন টেলিগ্রাম রিডাইরেক্ট লজিক
-                        document.getElementById('navShareBtn').onclick = (e) => {
-                            e.preventDefault();
-                            const botUser = "earnpropfficial1_Bot";
-                            const refCode = data.referCode || "";
-                            window.location.href = `https://t.me/${botUser}?start=${refCode}`;
-                        };
-                    }
-                } catch (err) {
-                    console.error("Error loading user data:", err);
+                        // টেলিগ্রামে সরাসরি শেয়ার করা বা লিঙ্ক কপি করা
+                        if (window.Telegram?.WebApp) {
+                            window.Telegram.WebApp.openTelegramLink(`https://t.me/share/url?url=${encodeURIComponent(shareLink)}&text=Join%20EarnPro%20and%20Start%20Earning!`);
+                        } else {
+                            window.location.href = shareLink;
+                        }
+                    };
                 }
-                document.getElementById('loading-overlay').style.display = 'none';
-            } else {
-                window.location.href = "login.html";
-            }
-        });
+            } catch (e) { console.error(e); }
+            document.getElementById('loading-overlay').style.display = 'none';
+        }
+
+        loadDashboard();
     </script>
 </body>
 </html>
