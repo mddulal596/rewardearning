@@ -1,19 +1,15 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>EarnPro - Login</title>
+    <title>Logging in...</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    <style>
-        body { background: #f4f7f6; font-family: sans-serif; display: flex; align-items: center; justify-content: center; height: 100vh; margin: 0; }
-        .card { background: white; padding: 30px; border-radius: 20px; text-align: center; box-shadow: 0 10px 25px rgba(0,0,0,0.1); width: 80%; }
-    </style>
+    <style>body{background:#f4f7f6;display:flex;align-items:center;justify-content:center;height:100vh;font-family:sans-serif;}</style>
 </head>
 <body>
-    <div class="card">
-        <h2 style="color: #667eea;">Authenticating...</h2>
-        <p>Please wait while we connect your account.</p>
+    <div style="text-align:center;">
+        <h2 style="color:#667eea;">Connecting to EarnPro...</h2>
     </div>
 
     <script type="module">
@@ -23,10 +19,11 @@
         const tele = window.Telegram.WebApp;
         tele.ready();
 
-        async function initApp() {
+        async function login() {
             const user = tele.initDataUnsafe?.user;
             if (user) {
-                const userRef = doc(db, "users", user.id.toString());
+                const uid = user.id.toString();
+                const userRef = doc(db, "users", uid);
                 const snap = await getDoc(userRef);
 
                 if (!snap.exists()) {
@@ -38,13 +35,13 @@
                         createdAt: new Date()
                     });
                 }
-                localStorage.setItem("tg_user_id", user.id.toString());
+                localStorage.setItem("tg_user_id", uid);
                 window.location.replace("index.html");
             } else {
-                document.body.innerHTML = "<h1>Please open from Telegram Bot</h1>";
+                alert("Please open this from Telegram Bot!");
             }
         }
-        initApp();
+        login();
     </script>
 </body>
 </html>
