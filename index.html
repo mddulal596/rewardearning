@@ -11,115 +11,59 @@
         .header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 40px 20px; text-align: center; border-bottom-left-radius: 30px; border-bottom-right-radius: 30px; }
         .balance-card { background: white; margin: -25px 20px 20px; padding: 25px; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); text-align: center; position: relative; z-index: 10; }
         .balance-card h3 { margin: 5px 0; color: #667eea; font-size: 32px; font-weight: 800; }
-        
         .menu-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; padding: 0 20px; }
         .menu-item { background: white; padding: 25px 15px; border-radius: 20px; text-align: center; box-shadow: 0 5px 15px rgba(0,0,0,0.03); cursor: pointer; transition: 0.3s; border: 1px solid #f0f0f0; }
-        .menu-item:active { transform: scale(0.95); background: #f9f9f9; }
         .menu-item i { font-size: 35px; margin-bottom: 12px; display: block; }
         .menu-item p { margin: 0; font-weight: bold; color: #444; font-size: 15px; }
-
-        .icon-earn { color: #f1c40f; }
-        .icon-leader { color: #e74c3c; }
-        .icon-how { color: #3498db; }
-        .icon-withdraw { color: #2ecc71; }
-        .icon-history { color: #ff9f43; }
-        .icon-support { color: #ff4757; }
-
+        .icon-how { color: #3498db; } .icon-leader { color: #e74c3c; } .icon-earn { color: #f1c40f; } .icon-withdraw { color: #2ecc71; } .icon-history { color: #ff9f43; } .icon-support { color: #ff4757; }
         #loading-overlay { position: fixed; top:0; left:0; width:100%; height:100%; background:white; display:flex; flex-direction:column; align-items:center; justify-content:center; z-index:9999; }
     </style>
 </head>
 <body>
-
-    <div id="loading-overlay">
-        <i class="fas fa-circle-notch fa-spin" style="font-size: 50px; color: #667eea;"></i>
-        <p style="margin-top: 15px; font-weight: bold; color: #555;">Loading App...</p>
-    </div>
-
-    <div class="header">
-        <h2 id="userNameDisplay" style="margin: 0;">Welcome!</h2>
-        <p style="opacity: 0.8; font-size: 14px;">কাজ করুন এবং আনলিমিটেড ইনকাম করুন</p>
-    </div>
-
-    <div class="balance-card">
-        <p style="margin: 0; color: #888; font-size: 12px; text-transform: uppercase; font-weight: bold; letter-spacing: 1px;">Current Balance</p>
-        <h3 id="userCoinsDisplay">0</h3>
-        <div style="background: #f1c40f; color: #000; display: inline-block; padding: 3px 12px; border-radius: 10px; font-size: 11px; font-weight: bold;">💰 COINS</div>
-    </div>
-
+    <div id="loading-overlay"><i class="fas fa-circle-notch fa-spin" style="font-size: 50px; color: #667eea;"></i><p>Loading...</p></div>
+    <div class="header"><h2 id="userNameDisplay">Welcome!</h2><p>কাজ করুন এবং আনলিমিটেড ইনকাম করুন</p></div>
+    <div class="balance-card"><p>Current Balance</p><h3 id="userCoinsDisplay">0</h3><div style="background: #f1c40f; color: #000; padding: 3px 12px; border-radius: 10px; font-size: 11px; font-weight: bold;">💰 COINS</div></div>
+    
     <div class="menu-grid">
-        <div class="menu-item" onclick="location.href='how-to.html'">
-            <i class="fas fa-play-circle icon-how"></i>
-            <p>How to Earn</p>
-        </div>
-
-        <div class="menu-item" onclick="location.href='leaderboard.html'">
-            <i class="fas fa-trophy icon-leader"></i>
-            <p>Leaderboard</p>
-        </div>
-
-        <div class="menu-item" onclick="location.href='earn.html'">
-            <i class="fas fa-bolt icon-earn"></i>
-            <p>Start Earning</p>
-        </div>
-
-        <div class="menu-item" onclick="location.href='withdraw.html'">
-            <i class="fas fa-wallet icon-withdraw"></i>
-            <p>Withdraw</p>
-        </div>
-
-        <div class="menu-item" onclick="location.href='history.html'">
-            <i class="fas fa-history icon-history"></i>
-            <p>History</p>
-        </div>
-
-        <div class="menu-item" onclick="window.open('https://t.me/earnprosupport1', '_blank')">
-            <i class="fas fa-headset icon-support"></i>
-            <p>Support Team</p>
-        </div>
+        <div class="menu-item" onclick="location.href='how-to.html'"><i class="fas fa-play-circle icon-how"></i><p>How to Earn</p></div>
+        <div class="menu-item" onclick="location.href='leaderboard.html'"><i class="fas fa-trophy icon-leader"></i><p>Leaderboard</p></div>
+        <div class="menu-item" onclick="location.href='earn.html'"><i class="fas fa-bolt icon-earn"></i><p>Start Earning</p></div>
+        <div class="menu-item" onclick="location.href='withdraw.html'"><i class="fas fa-wallet icon-withdraw"></i><p>Withdraw</p></div>
+        <div class="menu-item" onclick="location.href='history.html'"><i class="fas fa-history icon-history"></i><p>History</p></div>
+        <div class="menu-item" onclick="window.open('https://t.me/earnprosupport1', '_blank')"><i class="fas fa-headset icon-support"></i><p>Support</p></div>
     </div>
 
     <nav style="position: fixed; bottom: 0; width: 100%; background: white; display: flex; justify-content: space-around; padding: 15px 0; box-shadow: 0 -2px 15px rgba(0,0,0,0.1); z-index: 1000;">
-        <a href="index.html" style="color:#667eea; text-decoration: none;"><i class="fa fa-home fa-lg"></i></a>
-        <a href="earn.html" style="color:#888; text-decoration: none;"><i class="fa fa-play-circle fa-lg"></i></a>
-        
-        <a href="refer.html" style="color:#888; text-decoration: none;"><i class="fa fa-share-alt fa-lg"></i></a>
-        
-        <a href="profile.html" style="color:#888; text-decoration: none;"><i class="fa fa-user fa-lg"></i></a>
+        <a href="index.html" style="color:#667eea;"><i class="fa fa-home fa-lg"></i></a>
+        <a href="earn.html" style="color:#888;"><i class="fa fa-play-circle fa-lg"></i></a>
+        <a href="#" id="navShareBtn" style="color:#888;"><i class="fa fa-share-alt fa-lg"></i></a>
+        <a href="profile.html" style="color:#888;"><i class="fa fa-user fa-lg"></i></a>
     </nav>
 
     <script type="module">
-        import { db } from './firebase.js';
+        import { auth, db } from './firebase.js';
         import { doc, getDoc } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore.js";
+        import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-auth.js";
 
-        const userId = localStorage.getItem("user_uid");
-
-        async function loadHomeData() {
-            if (!userId) {
-                window.location.href = "login.html";
-                return;
-            }
-
-            try {
-                const userRef = doc(db, "users", userId);
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                const userRef = doc(db, "users", user.uid);
                 const snap = await getDoc(userRef);
-                
                 if (snap.exists()) {
                     const data = snap.data();
-                    const firstName = data.name ? data.name.split(' ')[0] : "User";
-                    document.getElementById('userNameDisplay').innerText = "Hi, " + firstName;
+                    document.getElementById('userNameDisplay').innerText = "Hi, " + (data.name ? data.name.split(' ')[0] : "User");
                     document.getElementById('userCoinsDisplay').innerText = data.coins || 0;
                     document.getElementById('loading-overlay').style.display = 'none';
-                } else {
-                    localStorage.removeItem("user_uid");
-                    window.location.href = "login.html";
-                }
-            } catch (e) {
-                console.error("Error loading home data:", e);
-                document.getElementById('loading-overlay').style.display = 'none';
-            }
-        }
 
-        loadHomeData();
+                    // শেয়ার বাটন রিডাইরেক্ট লজিক
+                    document.getElementById('navShareBtn').onclick = (e) => {
+                        e.preventDefault();
+                        const botUser = "earnpropfficial1_Bot";
+                        window.location.href = `https://t.me/${botUser}?start=${data.referCode || ''}`;
+                    };
+                }
+            } else { window.location.href = "login.html"; }
+        });
     </script>
 </body>
 </html>
