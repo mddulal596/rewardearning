@@ -9,20 +9,18 @@
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
 </head>
 <body>
-    <div id="loading-overlay"><i class="fas fa-circle-notch fa-spin" style="font-size: 40px; color: #667eea;"></i></div>
-
-    <div class="header">
+    <div class="header" style="background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);color:white;padding:40px 20px;text-align:center;border-bottom-left-radius:30px;border-bottom-right-radius:30px;">
         <h2 id="userName">Loading...</h2>
-        <p style="font-size: 14px; opacity: 0.9;">Earn Unlimited Coins Daily!</p>
+        <p>Welcome to EarnPro!</p>
     </div>
 
-    <div class="balance-card">
-        <p style="margin: 0; color: #888; font-size: 12px; font-weight: bold;">YOUR BALANCE</p>
-        <h3 id="userCoins" style="font-size: 35px; color: #667eea; margin: 5px 0;">0</h3>
-        <div style="background: #f1c40f; display: inline-block; padding: 2px 12px; border-radius: 10px; font-size: 11px; font-weight: bold;">💰 COINS</div>
+    <div class="balance-card" style="background:white;margin:-25px 20px 20px;padding:25px;border-radius:20px;box-shadow:0 10px 25px rgba(0,0,0,0.05);text-align:center;">
+        <p style="margin:0;color:#888;font-size:12px;">AVAILABLE BALANCE</p>
+        <h3 id="userCoins" style="font-size:35px;color:#667eea;margin:5px 0;">0</h3>
+        <div style="background:#f1c40f;display:inline-block;padding:2px 12px;border-radius:10px;font-size:11px;font-weight:bold;">💰 COINS</div>
     </div>
 
-    <div class="menu-grid">
+    <div class="menu-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:15px;padding:0 20px;">
         <div class="menu-item" onclick="location.href='earn.html'"><i class="fas fa-play" style="color:#667eea;"></i><p>Start Task</p></div>
         <div class="menu-item" id="shareBtn"><i class="fas fa-share-alt" style="color:#2ecc71;"></i><p>Share App</p></div>
         <div class="menu-item" onclick="location.href='leaderboard.html'"><i class="fas fa-trophy" style="color:#f1c40f;"></i><p>Leaderboard</p></div>
@@ -40,24 +38,20 @@
         import { doc, onSnapshot } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore.js";
 
         const tgId = localStorage.getItem("tg_user_id");
-        if (!tgId) { window.location.replace("login.html"); }
+        if (!tgId) window.location.replace("login.html");
 
-        // রিয়েল-টাইম ব্যালেন্স আপডেট
         onSnapshot(doc(db, "users", tgId), (snap) => {
             if (snap.exists()) {
                 const data = snap.data();
                 document.getElementById('userName').innerText = "Hi, " + data.name;
                 document.getElementById('userCoins').innerText = data.coins || 0;
                 
-                // শেয়ার বাটন ফিক্স
                 document.getElementById('shareBtn').onclick = () => {
-                    const botUser = "earnpropfficial1_Bot";
-                    const shareLink = `https://t.me/${botUser}?start=${data.referCode || ''}`;
-                    const text = encodeURIComponent("Join EarnPro and Start Earning! 💰");
+                    const shareLink = `https://t.me/earnpropfficial1_Bot?start=${data.referCode}`;
+                    const text = encodeURIComponent("EarnPro-তে জয়েন করুন এবং প্রতিদিন ইনকাম করুন! 💰");
                     window.Telegram.WebApp.openTelegramLink(`https://t.me/share/url?url=${encodeURIComponent(shareLink)}&text=${text}`);
                 };
             }
-            document.getElementById('loading-overlay').style.display = 'none';
         });
     </script>
 </body>
