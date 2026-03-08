@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Withdraw History - EarnPro</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        body { background: #f4f7f6; font-family: 'Segoe UI', sans-serif; margin: 0; padding-bottom: 80px; }
+        .top-header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 30px 20px; text-align: center; border-bottom-left-radius: 25px; border-bottom-right-radius: 25px; }
+        
+        .history-container { padding: 15px; }
+        .history-card { background: white; border-radius: 15px; padding: 15px; margin-bottom: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.03); display: flex; justify-content: space-between; align-items: center; border-left: 5px solid #ccc; }
+        
+        .history-info h4 { margin: 0; color: #333; font-size: 16px; }
+        .history-info p { margin: 3px 0 0; color: #888; font-size: 12px; }
+        
+        .status { padding: 5px 12px; border-radius: 20px; font-size: 11px; font-weight: bold; text-transform: uppercase; }
+        
+        /* Status Colors */
+        .status-pending { background: #fffbe6; color: #faad14; }
+        .status-success { background: #f6ffed; color: #52c41a; }
+        .status-rejected { background: #fff1f0; color: #ff4d4f; }
+        
+        .border-pending { border-left-color: #faad14; }
+        .border-success { border-left-color: #52c41a; }
+        .border-rejected { border-left-color: #ff4d4f; }
+
+        #no-data { text-align: center; padding: 50px; color: #999; display: none; }
+        #loader { text-align: center; padding: 50px; color: #667eea; }
+    </style>
+</head>
+<body>
+
+    <div class="top-header">
+        <h2 style="margin: 0;">Payment History</h2>
+        <p style="opacity: 0.8; font-size: 13px;">আপনার আগের সকল পেমেন্ট রেকর্ড</p>
+    </div>
+
+    <div class="history-container" id="historyList">
+        <div id="loader">
+            <i class="fas fa-spinner fa-spin fa-2x"></i>
+            <p>Loading History...</p>
+        </div>
+        
+        <div id="no-data">
+            <i class="fas fa-folder-open fa-3x" style="opacity: 0.3;"></i>
+            <p style="margin-top: 10px;">এখনো কোনো উইথড্র করা হয়নি!</p>
+        </div>
+    </div>
+
+    <nav style="position: fixed; bottom: 0; width: 100%; background: white; display: flex; justify-content: space-around; padding: 15px 0; box-shadow: 0 -2px 15px rgba(0,0,0,0.1); z-index: 1000;">
+        <a href="index.html" style="color:#888; text-decoration: none;"><i class="fa fa-home fa-lg"></i></a>
+        <a href="earn.html" style="color:#888; text-decoration: none;"><i class="fa fa-bolt fa-lg"></i></a>
+        <a href="withdraw.html" style="color:#667eea; text-decoration: none;"><i class="fa fa-wallet fa-lg"></i></a>
+        <a href="profile.html" style="color:#888; text-decoration: none;"><i class="fa fa-user fa-lg"></i></a>
+    </nav>
+
+    <script type="module">
+        import { db } from './firebase.js';
+        import { collection, query, where, orderBy, getDocs } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore.js";
+
+        const userId = localStorage.getItem("user_uid");
+
+        async function loadHistory() {
+            const listDiv = document.getElementById('historyList');
+            const noDataDiv = document.getElementById('no-data');
+            const loader = document.getElementById('loader');
+            
+            if (!userId) {
+                window.location.href = "login.html";
+                return;
+            }
+
+            try {
+                // ১. Firestore থেকে ইউজারের উইথড্র রিকোয়েস্টগুলো নেওয়া
+                const q = query(
+                    collection(db, "withdrawals"), 
+                    where("uid", "==", userId),
+                    orderBy("timestamp", "desc")
+                );
+                
+                const querySnapshot = await getDocs(q);
+                loader.style.display = 'none';
+
+                if (querySnapshot.empty) {
+                    noDataDiv.style.display = 'block';
+                    return;
+                }
+
+                querySnapshot.forEach((doc) => {
+                    const data = doc.data();
+                    const status = data.status || "Pending";
+                    const statusClass = "status-" + status.toLowerCase();
+                    const borderClass = "border-" + status.toLowerCase();
+                    
+                    const card = document.createElement('div');
+                    card.className = `history-card ${borderClass}`;
+                    card.innerHTML = `
+                        <div class="history-info">
+                            <h4>${data.method} - ${data.amount} Coins</h4>
+                            <p><i class="fas fa-phone-alt"></i> ${data.number}</p>
+                            <p><i class="far fa-clock"></i> ${new Date(data.timestamp).toLocaleString()}</p>
+                        </div>
+                        <div class="status ${statusClass}">${status}</div>
+                    `;
+                    listDiv.appendChild(card);
+                });
+
+            } catch (error) {
+                console.error("History Error:", error);
+                loader.innerHTML = "<p style='color:red;'>Failed to load history.</p>";
+            }
+        }
+
+        loadHistory();
+    </script>
+</body>
+</html>
