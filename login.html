@@ -7,28 +7,36 @@
     <style>
         body { background: #f4f7f6; font-family: 'Segoe UI', sans-serif; display: flex; align-items: center; justify-content: center; height: 100vh; margin: 0; }
         .login-card { background: white; padding: 40px; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); text-align: center; width: 85%; max-width: 400px; }
+        .logo-box { margin-bottom: 20px; font-size: 50px; color: #667eea; }
     </style>
 </head>
 <body>
     <div class="login-card">
+        <div class="logo-box"><i class="fas fa-coins"></i></div>
         <h2 style="color: #667eea;">EarnPro Login</h2>
-        <p>টেলিগ্রাম দিয়ে লগইন করুন এবং ইনকাম শুরু করুন!</p>
+        <p>টেলিগ্রাম দিয়ে এক ক্লিকে লগইন করুন এবং ইনকাম শুরু করুন!</p>
         
         <div id="telegram-login-container">
-            </div>
+            <script async src="https://telegram.org/js/telegram-widget.js?22" data-telegram-login="earnpropfficial1_Bot" data-size="large" data-onauth="onTelegramAuth(user)" data-request-access="write"></script>
+        </div>
+        <p style="margin-top: 20px; font-size: 12px; color: #888;">Don't have an account? <a href="signup.html">Signup</a></p>
     </div>
 
     <script type="module">
         import { auth } from './firebase.js';
         import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-auth.js";
 
-        // ইউজার লগইন হওয়ার সাথে সাথে অটোমেটিক হোমপেজে পাঠিয়ে দেবে
         onAuthStateChanged(auth, (user) => {
             if (user) {
-                // replace ব্যবহার করা হয়েছে যাতে ব্যাক বাটন চাপলে আবার লগইন পেজ না আসে
                 window.location.replace("index.html"); 
             }
         });
+
+        // টেলিগ্রাম লগইন হওয়ার পর এই ফাংশনটি কল হবে
+        window.onTelegramAuth = function(user) {
+            console.log("Telegram User Data:", user);
+            // এখানে আপনার ফায়ারবেস লগইন লজিক যোগ করুন
+        };
     </script>
 </body>
 </html>
