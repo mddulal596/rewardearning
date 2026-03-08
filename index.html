@@ -38,4 +38,43 @@
     </div>
 
     <nav style="position: fixed; bottom: 0; width: 100%; background: white; display: flex; justify-content: space-around; padding: 15px 0; box-shadow: 0 -2px 15px rgba(0,0,0,0.1); z-index: 1000;">
-        <a href="index.html
+        <a href="index.html" style="color:#667eea;"><i class="fa fa-home fa-lg"></i></a>
+        <a href="earn.html" style="color:#888;"><i class="fa fa-play-circle fa-lg"></i></a>
+        <a href="#" id="navShareBtn" style="color:#888;"><i class="fa fa-share-alt fa-lg"></i></a>
+        <a href="profile.html" style="color:#888;"><i class="fa fa-user fa-lg"></i></a>
+    </nav>
+
+    <script type="module">
+        import { auth, db } from './firebase.js';
+        import { doc, getDoc } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore.js";
+        import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-auth.js";
+
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                try {
+                    const userRef = doc(db, "users", user.uid);
+                    const snap = await getDoc(userRef);
+                    if (snap.exists()) {
+                        const data = snap.data();
+                        document.getElementById('userNameDisplay').innerText = "Hi, " + (data.name ? data.name.split(' ')[0] : "User");
+                        document.getElementById('userCoinsDisplay').innerText = data.coins || 0;
+                        
+                        // শেয়ার বাটন টেলিগ্রাম রিডাইরেক্ট লজিক
+                        document.getElementById('navShareBtn').onclick = (e) => {
+                            e.preventDefault();
+                            const botUser = "earnpropfficial1_Bot";
+                            const refCode = data.referCode || "";
+                            window.location.href = `https://t.me/${botUser}?start=${refCode}`;
+                        };
+                    }
+                } catch (err) {
+                    console.error("Error loading user data:", err);
+                }
+                document.getElementById('loading-overlay').style.display = 'none';
+            } else {
+                window.location.href = "login.html";
+            }
+        });
+    </script>
+</body>
+</html>
