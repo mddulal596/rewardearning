@@ -11,9 +11,15 @@
         body { background: #f4f7f6; padding-bottom: 90px; font-family: 'Segoe UI', sans-serif; margin: 0; }
         .header-section { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 40px 20px; text-align: center; border-bottom-left-radius: 30px; border-bottom-right-radius: 30px; }
         .earn-card { background: white; padding: 20px; border-radius: 20px; margin: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); text-align: center; }
-        .btn-earn { width: 100%; padding: 15px; margin-bottom: 15px; border: none; border-radius: 12px; color: white; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+        .btn-earn { width: 100%; padding: 15px; margin-bottom: 15px; border: none; border-radius: 12px; color: white; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: 0.3s; }
+        .btn-earn:active { opacity: 0.8; transform: scale(0.98); }
         #wheel-container { font-size: 80px; margin: 20px 0; display: inline-block; transition: transform 4s cubic-bezier(0.1, 0, 0.1, 1); }
-        .bottom-nav { position: fixed; bottom: 0; width: 100%; background: white; display: flex; justify-content: space-around; padding: 10px 0; border-top: 1px solid #eee; }
+        
+        /* Bottom Nav Styling */
+        .bottom-nav { position: fixed; bottom: 0; width: 100%; background: white; display: flex; justify-content: space-around; padding: 10px 0; box-shadow: 0 -2px 15px rgba(0,0,0,0.1); border-top: 1px solid #eee; z-index: 1000; }
+        .nav-item { color: #888; text-decoration: none; text-align: center; flex: 1; font-size: 10px; }
+        .nav-item i { display: block; font-size: 18px; margin-bottom: 2px; }
+        .nav-item.active { color: #667eea; }
     </style>
 </head>
 <body>
@@ -25,7 +31,7 @@
 
     <div style="padding: 15px;">
         <button id="checkInBtn" class="btn-earn" style="background: #5c6bc0;"><i class="fa fa-calendar-check"></i> &nbsp; Daily Check-in (+10)</button>
-        <button id="watchAdBtn" class="btn-earn" style="background: #2e7d32;"><i class="fa fa-play-circle"></i> &nbsp; Watch Video (+5)</button>
+        <button id="watchAdBtn" class="btn-earn" style="background: #2e7d32;"><i class="fa fa-play-circle"></i> &nbsp; Watch Video & Earn (+5)</button>
 
         <div class="earn-card">
             <h4>Lucky Spin</h4>
@@ -35,35 +41,50 @@
     </div>
 
     <nav class="bottom-nav">
-        <a href="index.html" style="text-decoration:none; color:#888; text-align:center;"><i class="fa fa-home"></i><br>Home</a>
-        <a href="earn.html" style="text-decoration:none; color:#667eea; text-align:center;"><i class="fa fa-bolt"></i><br>Earn</a>
-        <a href="withdraw.html" style="text-decoration:none; color:#888; text-align:center;"><i class="fa fa-wallet"></i><br>Withdraw</a>
-        <a href="profile.html" style="text-decoration:none; color:#888; text-align:center;"><i class="fa fa-user"></i><br>Profile</a>
+        <a href="index.html" class="nav-item"><i class="fas fa-home"></i>Home</a>
+        <a href="earn.html" class="nav-item active"><i class="fas fa-bolt"></i>Earn</a>
+        <a href="withdraw.html" class="nav-item"><i class="fas fa-wallet"></i>Withdraw</a>
+        <a href="profile.html" class="nav-item"><i class="fas fa-user"></i>Profile</a>
     </nav>
 
     <script type="module">
         import { db } from './firebase.js';
-        import { doc, updateDoc, increment } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore.js";
+        import { doc, updateDoc, increment, getDoc } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore.js";
 
+        const tg = window.Telegram?.WebApp;
         const userId = localStorage.getItem("tg_user_id");
         const AD_LINK = "https://middayopened.com/uuh65fp1c?key=0d0044249c1cef410a86dcfa8f7e3460";
 
+        if (tg) {
+            tg.ready();
+            tg.BackButton.show();
+            tg.BackButton.onClick(() => window.location.href = "index.html");
+        }
+
+        // --- ১. লাকি স্পিন লজিক ---
         let spinning = false;
         document.getElementById('spinBtn').onclick = () => {
             if (spinning) return;
+            if (!userId) { alert("ইউজার আইডি পাওয়া যায়নি!"); return; }
+
             spinning = true;
             const wheel = document.getElementById('wheel-container');
-            const randomDeg = Math.floor(Math.random() * 360) + 1800;
+            const randomDeg = Math.floor(Math.random() * 360) + 1800; // ৫ বার ঘুরবে
             wheel.style.transform = `rotate(${randomDeg}deg)`;
 
             setTimeout(async () => {
                 const bonus = Math.floor(Math.random() * 10) + 1;
                 
-                // ব্রাউজারের কনফার্মেশন বক্স ব্যবহার করে সমাধান
-                if (confirm(`অভিনন্দন! আপনি ${bonus} কয়েন পেয়েছেন। কয়েনটি কালেক্ট করতে বিজ্ঞাপনটি দেখুন।`)) {
+                // কনফার্মেশন বক্স: OK চাপলে বিজ্ঞাপন খুলবে
+                if (confirm(`অভিনন্দন! আপনি ${bonus} কয়েন পেয়েছেন। বিজ্ঞাপনটি দেখে কয়েন কালেক্ট করুন।`)) {
                     window.open(AD_LINK, '_blank');
-                    const userRef = doc(db, "users", userId);
-                    await updateDoc(userRef, { coins: increment(bonus) });
+                    try {
+                        const userRef = doc(db, "users", userId);
+                        await updateDoc(userRef, { coins: increment(bonus) });
+                        alert("সফলভাবে কয়েন যোগ হয়েছে!");
+                    } catch (e) {
+                        console.error("Update Error:", e);
+                    }
                 }
                 
                 spinning = false;
@@ -71,11 +92,25 @@
             }, 4000);
         };
 
-        // Watch Video Logic
+        // --- ২. ভিডিও অ্যাড লজিক ---
         document.getElementById('watchAdBtn').onclick = async () => {
+            if (!userId) return;
             window.open(AD_LINK, '_blank');
-            await updateDoc(doc(db, "users", userId), { coins: increment(5) });
-            alert("৫ কয়েন যোগ হয়েছে!");
+            try {
+                await updateDoc(doc(db, "users", userId), { coins: increment(5) });
+                alert("৫ কয়েন যোগ হয়েছে!");
+            } catch (e) {
+                console.error(e);
+            }
+        };
+
+        // --- ৩. ডেইলি চেক-ইন লজিক ---
+        document.getElementById('checkInBtn').onclick = async () => {
+            alert("ডেইলি চেক-ইন এর জন্য বিজ্ঞাপনটি দেখুন।");
+            window.open(AD_LINK, '_blank');
+            // এখানে আপনি চাইলে দিনে একবার চেক-ইন করার লজিক যোগ করতে পারেন
+            await updateDoc(doc(db, "users", userId), { coins: increment(10) });
+            alert("১০ কয়েন বোনাস পেয়েছেন!");
         };
     </script>
 </body>
