@@ -8,6 +8,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
         body { background: #f4f7f6; padding-bottom: 90px; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; }
+        .header-section { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 40px 20px; text-align: center; border-bottom-left-radius: 30px; border-bottom-right-radius: 30px; }
         .earn-card { background: white; padding: 20px; border-radius: 20px; margin: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); text-align: center; }
         .btn-earn { width: 100%; padding: 15px; margin-bottom: 15px; border: none; border-radius: 12px; color: white; font-weight: bold; font-size: 16px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: 0.3s; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
         .btn-earn:active { transform: scale(0.98); }
@@ -17,7 +18,7 @@
 </head>
 <body>
 
-    <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 40px 20px; text-align: center; border-bottom-left-radius: 30px; border-bottom-right-radius: 30px;">
+    <div class="header-section">
         <h2 style="margin: 0;">Earn Coins</h2>
         <p style="opacity: 0.8;">টাস্ক পূরণ করুন এবং কয়েন ইনকাম করুন</p>
     </div>
@@ -33,7 +34,7 @@
         </button>
 
         <div class="earn-card">
-            <h4 style="color: #333;">Lucky Spin</h4>
+            <h4 style="color: #333; margin-bottom: 5px;">Lucky Spin</h4>
             <div id="wheel-container">🎡</div>
             <button id="spinBtn" class="btn-earn" style="background: #f39c12; width: 100%; margin-top: 10px;">
                 <i class="fa fa-sync-alt" style="margin-right: 10px;"></i> Spin Now
@@ -52,51 +53,56 @@
         import { db } from './firebase.js';
         import { doc, getDoc, updateDoc, increment } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore.js";
 
-        // Adsterra Links
+        // Adsterra Direct Links
         const LINK_DAILY_CHECK = "https://middayopened.com/rmm8pbwe?key=a42d11bce0966c10bc9b3f909ae44009";
         const LINK_WATCH_VIDEO = "https://middayopened.com/c95t5ad9nb?key=9e9e3820d54db2d2cbe11cbfc394a5e9";
         const LINK_LUCKY_SPIN  = "https://middayopened.com/uuh65fp1c?key=0d0044249c1cef410a86dcfa8f7e3460";
 
         const userId = localStorage.getItem("user_uid");
 
-        // ১. পেজ লোড হলে চেক-ইন স্ট্যাটাস চেক করা
         async function checkStatus() {
             if (!userId) {
                 window.location.href = "login.html";
                 return;
             }
-            const snap = await getDoc(doc(db, "users", userId));
-            if (snap.exists()) {
-                const lastCheck = snap.data().lastCheckIn;
-                const today = new Date().toDateString();
-                if (lastCheck === today) {
-                    document.getElementById('checkInBtn').disabled = true;
-                    document.getElementById('checkInText').innerText = "Already Checked-in";
+            try {
+                const snap = await getDoc(doc(db, "users", userId));
+                if (snap.exists()) {
+                    const lastCheck = snap.data().lastCheckIn;
+                    const today = new Date().toDateString();
+                    if (lastCheck === today) {
+                        document.getElementById('checkInBtn').disabled = true;
+                        document.getElementById('checkInText').innerText = "Already Checked-in";
+                    }
                 }
-            }
+            } catch (e) { console.error(e); }
         }
 
-        // ২. Daily Check-in Function
+        // ১. Daily Check-in
         document.getElementById('checkInBtn').onclick = async () => {
             window.open(LINK_DAILY_CHECK, '_blank');
             const userRef = doc(db, "users", userId);
             await updateDoc(userRef, { 
                 coins: increment(10), 
+                taskCount: increment(1),
                 lastCheckIn: new Date().toDateString() 
             });
             alert("১০ কয়েন যোগ হয়েছে!");
             location.reload();
         };
 
-        // ৩. Watch Video Function
+        // ২. Watch Video
         document.getElementById('watchAdBtn').onclick = async () => {
             window.open(LINK_WATCH_VIDEO, '_blank');
             const userRef = doc(db, "users", userId);
-            await updateDoc(userRef, { coins: increment(5) });
+            await updateDoc(userRef, { 
+                coins: increment(5),
+                taskCount: increment(1)
+            });
             alert("৫ কয়েন যোগ হয়েছে!");
         };
 
-        // ৪. Lucky Spin Function
+        // ৩. Lucky Spin
         let spinning = false;
         document.getElementById('spinBtn').onclick = async () => {
             if (spinning) return;
@@ -107,12 +113,15 @@
 
             setTimeout(async () => {
                 const bonus = Math.floor(Math.random() * 10) + 1;
-                alert(`অভিনন্দন! আপনি ${bonus} কয়েন পেয়েছেন। বিজ্ঞাপনটি দেখে কয়েন কালেক্ট করুন।`);
+                alert(`অভিনন্দন! আপনি ${bonus} কয়েন পেয়েছেন। কয়েনটি কালেক্ট করতে বিজ্ঞাপনটি দেখুন।`);
                 
                 window.open(LINK_LUCKY_SPIN, '_blank');
 
                 const userRef = doc(db, "users", userId);
-                await updateDoc(userRef, { coins: increment(bonus) });
+                await updateDoc(userRef, { 
+                    coins: increment(bonus),
+                    taskCount: increment(1)
+                });
                 
                 spinning = false;
                 wheel.style.transform = `rotate(0deg)`;
