@@ -15,8 +15,9 @@
         .card { background: white; margin: -30px 20px 20px; padding: 25px; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); }
         .info-row { display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid #f0f0f0; }
         .info-row:last-child { border-bottom: none; }
-        .logout-btn { width: 100%; padding: 12px; background: #fff; border: 1px solid #ff4757; color: #ff4757; border-radius: 12px; font-weight: bold; cursor: pointer; margin-top: 10px; }
-        .bottom-nav { position: fixed; bottom: 0; width: 100%; background: white; display: flex; justify-content: space-around; padding: 10px 0; box-shadow: 0 -2px 15px rgba(0,0,0,0.1); border-top: 1px solid #eee; }
+        .logout-btn { width: 100%; padding: 12px; background: #fff; border: 1px solid #ff4757; color: #ff4757; border-radius: 12px; font-weight: bold; cursor: pointer; margin-top: 10px; transition: 0.3s; }
+        .logout-btn:active { background: #ff4757; color: white; }
+        .bottom-nav { position: fixed; bottom: 0; width: 100%; background: white; display: flex; justify-content: space-around; padding: 10px 0; box-shadow: 0 -2px 15px rgba(0,0,0,0.1); border-top: 1px solid #eee; z-index: 1000; }
         .nav-item { color: #888; text-decoration: none; text-align: center; flex: 1; font-size: 10px; }
         .nav-item i { display: block; font-size: 18px; margin-bottom: 2px; }
         .nav-item.active { color: #667eea; }
@@ -54,35 +55,66 @@
 
     <script type="module">
         import { db } from './firebase.js';
-        import { doc, onSnapshot } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore.js";
+        import { doc, onSnapshot, updateDoc } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore.js";
 
-        const tgId = localStorage.getItem("tg_user_id");
+        const tg = window.Telegram?.WebApp;
+        const tgUser = tg?.initDataUnsafe?.user;
+        const tgId = localStorage.getItem("tg_user_id") || tgUser?.id?.toString();
 
-        if (window.Telegram?.WebApp) {
-            window.Telegram.WebApp.ready();
-            window.Telegram.WebApp.BackButton.show();
-            window.Telegram.WebApp.BackButton.onClick(() => window.location.href = "index.html");
+        // ১. টেলিগ্রাম ব্যাক বাটন এবং UI সেটআপ
+        if (tg) {
+            tg.ready();
+            tg.expand();
+            tg.BackButton.show();
+            tg.BackButton.onClick(() => window.location.href = "index.html");
         }
 
         if (tgId) {
+            // ২. রিয়েল-টাইম ডাটা লিসেনার
             onSnapshot(doc(db, "users", tgId), (snap) => {
                 if (snap.exists()) {
                     const data = snap.data();
-                    document.getElementById('profileName').innerText = data.name || "User";
+                    
+                    // UI আপডেট
+                    document.getElementById('profileName').innerText = data.name || (tgUser ? tgUser.first_name : "User");
                     document.getElementById('profileBalance').innerText = data.coins || 0;
-                    document.getElementById('profileEmail').innerText = "@" + (data.username || "user");
+                    document.getElementById('profileEmail').innerText = "@" + (data.username || tgUser?.username || "user");
                     document.getElementById('profileRefer').innerText = data.referCode || "N/A";
                     
                     const avatarDiv = document.getElementById('userAvatar');
-                    // টেলিগ্রাম প্রোফাইল ছবি দেখানোর লজিক
-                    if (data.photo) {
-                        avatarDiv.innerHTML = `<img src="${data.photo}" alt="Profile">`;
+                    
+                    // ৩. প্রোফাইল ছবি লজিক (টেলিগ্রাম থেকে নতুন ছবি থাকলে আপডেট করা)
+                    const currentPhoto = data.photo || tgUser?.photo_url;
+                    
+                    if (currentPhoto) {
+                        avatarDiv.innerHTML = `<img src="${currentPhoto}" alt="Profile">`;
+                        
+                        // যদি ডাটাবেসে ছবি না থাকে কিন্তু টেলিগ্রামে থাকে, তবে আপডেট করে দেওয়া
+                        if (!data.photo && tgUser?.photo_url) {
+                            updateDoc(doc(db, "users", tgId), { photo: tgUser.photo_url });
+                        }
                     } else {
                         avatarDiv.innerText = data.name ? data.name.charAt(0).toUpperCase() : "U";
                     }
+                } else {
+                    window.location.replace("login.html");
                 }
             });
+        } else {
+            window.location.replace("login.html");
         }
+
+        // ৪. এক্সিট বাটন
+        document.getElementById('btnLogOut').onclick = () => {
+            if(confirm("আপনি কি অ্যাপ থেকে বের হতে চান?")) {
+                if (tg) {
+                    tg.close(); 
+                } else {
+                    localStorage.clear();
+                    window.location.replace("login.html");
+                }
+            }
+        };
     </script>
 </body>
 </html>
