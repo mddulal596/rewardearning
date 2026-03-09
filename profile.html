@@ -10,24 +10,28 @@
     <style>
         body { background: #f4f7f6; font-family: 'Segoe UI', sans-serif; margin: 0; padding-bottom: 90px; }
         .profile-header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 50px 20px; text-align: center; border-bottom-left-radius: 30px; border-bottom-right-radius: 30px; position: relative; }
-        .profile-img { width: 100px; height: 100px; border-radius: 50%; border: 4px solid rgba(255,255,255,0.3); margin-bottom: 15px; background: #eee; display: flex; align-items: center; justify-content: center; font-size: 40px; color: #667eea; margin-left: auto; margin-right: auto; overflow: hidden; }
+        .profile-img { width: 100px; height: 100px; border-radius: 50%; border: 4px solid rgba(255,255,255,0.3); margin-bottom: 15px; background: #eee; display: flex; align-items: center; justify-content: center; font-size: 40px; color: #667eea; margin: 0 auto 15px; overflow: hidden; }
         .profile-img img { width: 100%; height: 100%; object-fit: cover; }
         
-        .info-card { background: white; margin: -30px 20px 20px; padding: 25px; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); }
+        .info-card { background: white; margin: -30px 20px 15px; padding: 20px; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); }
         .info-row { display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid #f0f0f0; font-size: 14px; }
         .info-row:last-child { border-bottom: none; }
         .label { color: #888; font-weight: 500; }
-        .value { color: #333; font-weight: bold; }
+        .value { color: #333; font-weight: bold; cursor: pointer; }
 
-        /* New Stats Grid */
+        .promo-section { margin: 0 20px 20px; background: white; padding: 10px; border-radius: 15px; display: flex; gap: 8px; box-shadow: 0 5px 15px rgba(0,0,0,0.02); }
+        .promo-section input { flex: 1; padding: 12px; border: 1px solid #eee; border-radius: 10px; outline: none; font-size: 14px; background: #fafafa; }
+        .promo-btn { padding: 0 20px; background: #667eea; color: white; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; transition: 0.3s; }
+
         .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 0 20px 20px; }
         .stat-box { background: white; padding: 15px; border-radius: 15px; text-align: center; box-shadow: 0 5px 15px rgba(0,0,0,0.02); }
         .stat-box i { font-size: 20px; margin-bottom: 5px; display: block; }
-        .stat-title { font-size: 11px; color: #888; text-transform: uppercase; letter-spacing: 0.5px; }
+        .stat-title { font-size: 11px; color: #888; text-transform: uppercase; }
         .stat-value { font-size: 16px; font-weight: bold; color: #333; margin-top: 3px; display: block; }
 
-        .logout-btn { width: calc(100% - 40px); margin: 0 20px; padding: 15px; background: white; border: 1.5px solid #ff4d4d; color: #ff4d4d; border-radius: 15px; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; transition: 0.3s; }
-        .logout-btn:active { background: #fff5f5; transform: scale(0.98); }
+        .logout-btn { width: calc(100% - 40px); margin: 0 20px; padding: 15px; background: white; border: 1.5px solid #ff4d4d; color: #ff4d4d; border-radius: 15px; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; }
+        
+        .vip-active { color: #f1c40f !important; }
 
         .bottom-nav { position: fixed; bottom: 0; width: 100%; background: white; display: flex; justify-content: space-around; padding: 10px 0; border-top: 1px solid #eee; z-index: 1000; }
         .nav-item { color: #888; text-decoration: none; text-align: center; flex: 1; font-size: 10px; }
@@ -50,10 +54,15 @@
             <span class="label">Current Balance</span>
             <span class="value" style="color: #667eea;"><span id="profileBalance">0</span> 💰</span>
         </div>
-        <div class="info-row">
-            <span class="label">Refer Code</span>
+        <div class="info-row" id="copyRefer">
+            <span class="label">Refer Code (Click to Copy)</span>
             <span class="value" id="profileRefer" style="color: #2ecc71;">PRO0000</span>
         </div>
+    </div>
+
+    <div class="promo-section">
+        <input type="text" id="promoInput" placeholder="Enter Promo Code">
+        <button class="promo-btn" id="btnRedeem">Apply</button>
     </div>
 
     <div class="stats-grid">
@@ -68,19 +77,19 @@
             <span class="stat-value" id="totalTask">0</span>
         </div>
         <div class="stat-box">
-            <i class="fas fa-crown" style="color: #f1c40f;"></i>
-            <span class="stat-title">VIP</span>
+            <i class="fas fa-crown" id="vipIcon"></i>
+            <span class="stat-title">VIP Status</span>
             <span class="stat-value" id="vipLevel">No</span>
         </div>
         <div class="stat-box">
             <i class="fas fa-shield-alt" style="color: #2ecc71;"></i>
-            <span class="stat-title">Status</span>
-            <span class="stat-value" id="accStatus" style="color: #2ecc71;">Active</span>
+            <span class="stat-title">Account</span>
+            <span class="stat-value" id="accStatus">Active</span>
         </div>
     </div>
 
     <button id="btnLogOut" class="logout-btn">
-        <i class="fas fa-sign-out-alt"></i> Exit App
+        <i class="fas fa-sign-out-alt"></i> Exit Application
     </button>
 
     <nav class="bottom-nav">
@@ -92,7 +101,7 @@
 
     <script type="module">
         import { db } from './firebase.js';
-        import { doc, onSnapshot, updateDoc } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore.js";
+        import { doc, onSnapshot, updateDoc, increment } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore.js";
 
         const tg = window.Telegram?.WebApp;
         const tgId = localStorage.getItem("tg_user_id");
@@ -100,31 +109,26 @@
         if (!tgId) {
             window.location.replace("login.html");
         } else {
-            // ফায়ারবেস থেকে ডাটা লোড করা
             onSnapshot(doc(db, "users", tgId), (snap) => {
                 if (snap.exists()) {
                     const data = snap.data();
-                    
-                    // নাম এবং হ্যান্ডেল আপডেট
-                    document.getElementById('userName').innerText = data.name || "User Name";
+                    document.getElementById('userName').innerText = data.name || "User";
                     document.getElementById('userHandle').innerText = "@" + (data.username || "user");
-                    
-                    // মূল তথ্য আপডেট
                     document.getElementById('profileBalance').innerText = data.coins || 0;
                     document.getElementById('profileRefer').innerText = data.referCode || "N/A";
-
-                    // নতুন স্ট্যাটাস আপডেট
                     document.getElementById('totalRefer').innerText = data.totalRefer || 0;
                     document.getElementById('totalTask').innerText = data.totalTask || 0;
-                    document.getElementById('vipLevel').innerText = data.vip || "No";
-                    document.getElementById('accStatus').innerText = data.status || "Active";
                     
-                    // স্ট্যাটাস কালার পরিবর্তন
-                    if(data.status === "Banned") {
-                        document.getElementById('accStatus').style.color = "#ff4d4d";
+                    const vipStat = data.vip || "No";
+                    document.getElementById('vipLevel').innerText = vipStat;
+                    if(vipStat === "Yes") {
+                        document.getElementById('vipLevel').classList.add('vip-active');
+                        document.getElementById('vipIcon').style.color = "#f1c40f";
+                    } else {
+                        document.getElementById('vipIcon').style.color = "#ccc";
                     }
 
-                    // প্রোফাইল ছবি সেট করা
+                    document.getElementById('accStatus').innerText = data.status || "Active";
                     if (data.photo) {
                         document.getElementById('userAvatar').innerHTML = `<img src="${data.photo}" alt="Profile">`;
                     }
@@ -132,17 +136,42 @@
             });
         }
 
-        // এক্সিট বাটন লজিক
-        document.getElementById('btnLogOut').onclick = () => {
-            if (confirm("আপনি কি অ্যাপ থেকে বের হয়ে যেতে চান?")) {
-                if (tg) {
-                    tg.close();
-                } else {
-                    localStorage.clear();
-                    window.location.replace("login.html");
-                }
+        // রেফার কোড কপি লজিক
+        document.getElementById('copyRefer').onclick = () => {
+            const code = document.getElementById('profileRefer').innerText;
+            if (code === "N/A") return;
+            navigator.clipboard.writeText(code);
+            if (tg?.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
+            alert("Refer code copied!");
+        };
+
+        // প্রমো কোড রিডিম লজিক
+        document.getElementById('btnRedeem').onclick = async () => {
+            const code = document.getElementById('promoInput').value.trim();
+            if(!code) return alert("Please enter a code!");
+
+            // উদাহরণ প্রমো কোড (আপনি চাইলে ফায়ারবেস থেকে ডাইনামিক করতে পারেন)
+            if(code === "WELCOME50") {
+                await updateDoc(doc(db, "users", tgId), { coins: increment(50) });
+                alert("50 Coins added!");
+                document.getElementById('promoInput').value = "";
+            } else {
+                alert("Invalid or Expired Code!");
             }
         };
+
+        document.getElementById('btnLogOut').onclick = () => {
+            if (confirm("Do you want to exit?")) {
+                if (tg) tg.close();
+                else window.location.replace("login.html");
+            }
+        };
+
+        if (tg) {
+            tg.ready();
+            tg.BackButton.show();
+            tg.BackButton.onClick(() => window.location.href = "index.html");
+        }
     </script>
 </body>
 </html>
