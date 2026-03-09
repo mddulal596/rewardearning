@@ -3,9 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Profile - EarnPro</title>
+    <title>Profile - Earn Pro Official</title>
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         body { background: #f4f7f6; font-family: 'Segoe UI', sans-serif; margin: 0; padding-bottom: 90px; }
@@ -42,9 +43,7 @@
 <body>
 
     <div class="profile-header">
-        <div class="profile-img" id="userAvatar">
-            <i class="fas fa-user"></i>
-        </div>
+        <div class="profile-img" id="userAvatar"><i class="fas fa-user"></i></div>
         <h3 id="userName" style="margin: 0;">Loading...</h3>
         <p id="userHandle" style="margin: 5px 0 0; opacity: 0.8; font-size: 13px;">@username</p>
     </div>
@@ -88,9 +87,7 @@
         </div>
     </div>
 
-    <button id="btnLogOut" class="logout-btn">
-        <i class="fas fa-sign-out-alt"></i> Exit Application
-    </button>
+    <button id="btnLogOut" class="logout-btn"><i class="fas fa-sign-out-alt"></i> Exit Application</button>
 
     <nav class="bottom-nav">
         <a href="index.html" class="nav-item"><i class="fas fa-home"></i>Home</a>
@@ -136,35 +133,68 @@
             });
         }
 
-        // রেফার কোড কপি লজিক
+        // রেফার কোড কপি লজিক (SweetAlert2)
         document.getElementById('copyRefer').onclick = () => {
             const code = document.getElementById('profileRefer').innerText;
-            if (code === "N/A") return;
+            if (code === "N/A" || code === "PRO0000") return;
             navigator.clipboard.writeText(code);
             if (tg?.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
-            alert("Refer code copied!");
+            
+            Swal.fire({
+                title: 'Earn Pro Official',
+                text: 'Refer code copied: ' + code,
+                icon: 'success',
+                timer: 1500,
+                showConfirmButton: false
+            });
         };
 
-        // প্রমো কোড রিডিম লজিক
+        // প্রমো কোড রিডিম লজিক (SweetAlert2 সমাধান)
         document.getElementById('btnRedeem').onclick = async () => {
             const code = document.getElementById('promoInput').value.trim();
-            if(!code) return alert("Please enter a code!");
+            if(!code) {
+                return Swal.fire({
+                    title: 'Earn Pro Official',
+                    text: 'Please enter a code!',
+                    icon: 'warning'
+                });
+            }
 
-            // উদাহরণ প্রমো কোড (আপনি চাইলে ফায়ারবেস থেকে ডাইনামিক করতে পারেন)
-            if(code === "WELCOME50") {
+            // ভ্যালিড কোড চেক
+            if(code === "WELCOME50" || code === "PRO8722") {
                 await updateDoc(doc(db, "users", tgId), { coins: increment(50) });
-                alert("50 Coins added!");
+                Swal.fire({
+                    title: 'Earn Pro Official',
+                    text: '50 Coins added successfully!',
+                    icon: 'success'
+                });
                 document.getElementById('promoInput').value = "";
             } else {
-                alert("Invalid or Expired Code!");
+                // Invalid Code সমাধান
+                Swal.fire({
+                    title: 'Earn Pro Official',
+                    text: 'Invalid or Expired Code!',
+                    icon: 'error'
+                });
             }
         };
 
+        // এক্সিট লজিক
         document.getElementById('btnLogOut').onclick = () => {
-            if (confirm("Do you want to exit?")) {
-                if (tg) tg.close();
-                else window.location.replace("login.html");
-            }
+            Swal.fire({
+                title: 'Earn Pro Official',
+                text: "Do you want to exit the application?",
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonColor: '#ff4d4d',
+                cancelButtonColor: '#667eea',
+                confirmButtonText: 'Yes, Exit!'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    if (tg) tg.close();
+                    else window.location.replace("login.html");
+                }
+            });
         };
 
         if (tg) {
