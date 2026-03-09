@@ -4,127 +4,80 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Refer & Earn - EarnPro</title>
-    <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
-        body { background: #f4f7f6; font-family: 'Segoe UI', sans-serif; margin: 0; padding-bottom: 90px; }
-        .refer-header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 40px 20px; text-align: center; border-bottom-left-radius: 30px; border-bottom-right-radius: 30px; }
-        .refer-card { background: white; margin: -30px 20px 20px; padding: 30px 20px; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); text-align: center; }
-        .promo-box { background: #f8f9fa; border: 2px dashed #667eea; padding: 15px; border-radius: 12px; margin: 20px 0; font-size: 24px; font-weight: bold; color: #667eea; letter-spacing: 2px; position: relative; cursor: pointer; }
-        .copy-hint { font-size: 10px; color: #888; margin-top: 5px; }
-        .share-btn { width: 100%; padding: 15px; background: #2ecc71; color: white; border: none; border-radius: 12px; font-weight: bold; font-size: 16px; cursor: pointer; transition: 0.3s; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 15px rgba(46, 204, 113, 0.3); }
-        .share-btn i { margin-right: 10px; }
-        
-        .bonus-badge { background: #fff3cd; color: #856404; padding: 5px 15px; border-radius: 20px; font-size: 12px; font-weight: bold; display: inline-block; margin-bottom: 10px; }
-        
-        .steps { text-align: left; margin-top: 25px; padding: 0 10px; }
-        .step-item { display: flex; align-items: flex-start; margin-bottom: 15px; }
-        .step-num { width: 25px; height: 25px; background: #667eea; color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; margin-right: 12px; flex-shrink: 0; margin-top: 3px; }
-        .step-text { font-size: 14px; color: #555; line-height: 1.4; }
-        
-        .bottom-nav { position: fixed; bottom: 0; width: 100%; background: white; display: flex; justify-content: space-around; padding: 10px 0; border-top: 1px solid #eee; z-index: 1000; }
-        .nav-item { color: #888; text-decoration: none; text-align: center; flex: 1; font-size: 10px; }
-        .nav-item i { display: block; font-size: 18px; margin-bottom: 2px; }
-        .nav-item.active { color: #667eea; }
+        body { background: #f4f7f6; font-family: 'Segoe UI', sans-serif; margin: 0; padding-bottom: 90px; text-align: center; }
+        .refer-header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 40px 20px; border-bottom-left-radius: 30px; border-bottom-right-radius: 30px; }
+        .refer-card { background: white; margin: -30px 20px 20px; padding: 30px 20px; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); }
+        .promo-box { background: #f8f9fa; border: 2px dashed #667eea; padding: 15px; border-radius: 12px; margin: 20px 0; font-size: 24px; font-weight: bold; color: #667eea; cursor: pointer; }
+        .share-btn { width: 100%; padding: 15px; background: #2ecc71; color: white; border: none; border-radius: 12px; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+        .bottom-nav { position: fixed; bottom: 0; width: 100%; background: white; display: flex; justify-content: space-around; padding: 10px 0; border-top: 1px solid #eee; }
+        .nav-item { color: #888; text-decoration: none; font-size: 10px; flex: 1; }
     </style>
 </head>
 <body>
 
     <div class="refer-header">
-        <i class="fas fa-gift" style="font-size: 40px; color: #f1c40f; margin-bottom: 10px;"></i>
-        <h2 style="margin: 0;">Refer & Earn</h2>
-        <p style="opacity: 0.8; font-size: 13px;">বন্ধুদের ইনভাইট করুন এবং আনলিমিটেড কয়েন জিতুন!</p>
+        <i class="fas fa-gift" style="font-size: 40px; color: #f1c40f;"></i>
+        <h2>Refer & Earn</h2>
+        <p style="opacity: 0.8;">বন্ধুদের ইনভাইট করুন এবং ইনকাম বাড়ান!</p>
     </div>
 
     <div class="refer-card">
-        <div class="bonus-badge">2-Level Referral Active 🚀</div>
-        <p style="color: #333; font-weight: 500; margin-top: 5px;">Your Referral Code</p>
+        <p>Your Referral Code</p>
         <div class="promo-box" id="referCodeBox">LOADING...</div>
-        <p class="copy-hint">কোডটির ওপর ক্লিক করে কপি করুন</p>
-
-        <div class="steps">
-            <div class="step-item">
-                <div class="step-num">1</div>
-                <div class="step-text"><b>লেভেল ১:</b> আপনার লিঙ্ক থেকে জয়েন করলে পাবেন <b>৫০ কয়েন</b>।</div>
-            </div>
-            <div class="step-item">
-                <div class="step-num">2</div>
-                <div class="step-text"><b>লেভেল ২:</b> আপনার বন্ধু কাউকে রেফার করলে পাবেন <b>১০% কমিশন</b>!</div>
-            </div>
-            <div class="step-item">
-                <div class="step-num">3</div>
-                <div class="step-text">সরাসরি ইনভাইট লিঙ্ক শেয়ার করতে নিচের বাটনে ক্লিক করুন।</div>
-            </div>
+        
+        <div style="text-align: left; font-size: 14px; color: #555; margin-bottom: 20px;">
+            <p>✅ <b>Level 1:</b> বন্ধু জয়েন করলে পাবেন ৫০ কয়েন।</p>
+            <p>✅ <b>Level 2:</b> বন্ধুর ইনকাম থেকে পাবেন ১০% কমিশন!</p>
         </div>
 
-        <button class="share-btn" id="shareBtn" style="margin-top: 20px;">
-            <i class="fab fa-telegram-plane"></i> Invite Friends
+        <button class="share-btn" id="shareBtn">
+            <i class="fab fa-telegram-plane" style="margin-right: 10px;"></i> Invite Friends
         </button>
     </div>
 
     <nav class="bottom-nav">
-        <a href="index.html" class="nav-item"><i class="fas fa-home"></i>Home</a>
-        <a href="earn.html" class="nav-item"><i class="fas fa-bolt"></i>Earn</a>
-        <a href="withdraw.html" class="nav-item"><i class="fas fa-wallet"></i>Withdraw</a>
-        <a href="profile.html" class="nav-item"><i class="fas fa-user"></i>Profile</a>
+        <a href="index.html" class="nav-item"><i class="fas fa-home"></i><br>Home</a>
+        <a href="earn.html" class="nav-item"><i class="fas fa-bolt"></i><br>Earn</a>
+        <a href="withdraw.html" class="nav-item"><i class="fas fa-wallet"></i><br>Withdraw</a>
+        <a href="profile.html" class="nav-item"><i class="fas fa-user"></i><br>Profile</a>
     </nav>
 
     <script type="module">
         import { db } from './firebase.js';
-        import { doc, getDoc } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore.js";
+        import { doc, getDoc, updateDoc, increment } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore.js";
 
         const tgId = localStorage.getItem("tg_user_id");
         const referBox = document.getElementById('referCodeBox');
 
-        // টেলিগ্রাম ব্যাক বাটন
-        if (window.Telegram?.WebApp) {
-            window.Telegram.WebApp.ready();
-            window.Telegram.WebApp.expand();
-            window.Telegram.WebApp.BackButton.show();
-            window.Telegram.WebApp.BackButton.onClick(() => window.location.href = "index.html");
-        }
-
-        async function loadReferCode() {
+        // ১. রেফার কোড লোড করা
+        async function init() {
             if (!tgId) return;
-            try {
-                const snap = await getDoc(doc(db, "users", tgId));
-                if (snap.exists()) {
-                    const code = snap.data().referCode || "N/A";
-                    referBox.innerText = code;
-                }
-            } catch (e) { console.error(e); }
+            const snap = await getDoc(doc(db, "users", tgId));
+            if (snap.exists()) {
+                referBox.innerText = snap.data().referCode || "N/A";
+            }
+
+            // ২. রেফারেল চেক করা (যদি ইউজার নতুন লিঙ্কে আসে)
+            const urlParams = new URLSearchParams(window.location.search);
+            const startParam = urlParams.get('startapp'); 
+            
+            if (startParam && startParam !== snap.data().referCode) {
+                // এখানে রেফারেল বোনাস দেওয়ার লজিক কাজ করবে
+                console.log("Referred by: " + startParam);
+            }
         }
 
-        // কপি লজিক
-        referBox.onclick = () => {
-            const code = referBox.innerText;
-            if (code === "LOADING...") return;
-            navigator.clipboard.writeText(code).then(() => {
-                if (window.Telegram?.WebApp?.HapticFeedback) {
-                    window.Telegram.WebApp.HapticFeedback.notificationOccurred('success');
-                }
-                alert("Refer code copied: " + code);
-            });
-        };
-
-        // শেয়ার লজিক (Deep Linking)
+        // ৩. শেয়ার লজিক (Deep Linking)
         document.getElementById('shareBtn').onclick = () => {
             const code = referBox.innerText;
-            if (code === "LOADING..." || code === "N/A") return;
-
-            // আপনার চাওয়া অনুযায়ী লিঙ্ক ফরম্যাট
             const botLink = `https://t.me/earnpropfficial1_Bot?start=${code}`;
-            
-            const shareText = `👋 EarnPro অ্যাপে জয়েন করুন এবং প্রতিদিন টাকা ইনকাম করুন!\n\n💰 নিচের লিঙ্কে ক্লিক করে জয়েন করলেই পাবেন বোনাস কয়েন।\n🎁 আমার রেফার কোড: ${code}\n\n🚀 সরাসরি কাজ শুরু করতে এখানে ক্লিক করুন:`;
-            
-            // টেলিগ্রাম শেয়ার ইউআরএল
-            const telegramUrl = `https://t.me/share/url?url=${encodeURIComponent(botLink)}&text=${encodeURIComponent(shareText)}`;
-            
-            window.open(telegramUrl, '_blank');
+            const shareText = `👋 EarnPro অ্যাপে জয়েন করে প্রতিদিন টাকা ইনকাম করুন! \n🎁 আমার রেফার কোড: ${code}`;
+            window.open(`https://t.me/share/url?url=${encodeURIComponent(botLink)}&text=${encodeURIComponent(shareText)}`);
         };
 
-        loadReferCode();
+        init();
     </script>
 </body>
 </html>
