@@ -46,15 +46,15 @@
         <div class="steps">
             <div class="step-item">
                 <div class="step-num">1</div>
-                <div class="step-text"><b>লেভেল ১:</b> আপনার বন্ধু জয়েন করলে পাবেন <b>৫০ কয়েন</b> বোনাস।</div>
+                <div class="step-text"><b>লেভেল ১:</b> আপনার লিঙ্ক থেকে জয়েন করলে পাবেন <b>৫০ কয়েন</b>।</div>
             </div>
             <div class="step-item">
                 <div class="step-num">2</div>
-                <div class="step-text"><b>লেভেল ২:</b> আপনার বন্ধু কাউকে রেফার করলে সেখান থেকেও পাবেন <b>১০% কমিশন</b>!</div>
+                <div class="step-text"><b>লেভেল ২:</b> আপনার বন্ধু কাউকে রেফার করলে পাবেন <b>১০% কমিশন</b>!</div>
             </div>
             <div class="step-item">
                 <div class="step-num">3</div>
-                <div class="step-text">আনলিমিটেড রেফার করুন এবং আনলিমিটেড ইনকাম করুন।</div>
+                <div class="step-text">সরাসরি ইনভাইট লিঙ্ক শেয়ার করতে নিচের বাটনে ক্লিক করুন।</div>
             </div>
         </div>
 
@@ -77,7 +77,7 @@
         const tgId = localStorage.getItem("tg_user_id");
         const referBox = document.getElementById('referCodeBox');
 
-        // টেলিগ্রাম ব্যাক বাটন সেটআপ
+        // টেলিগ্রাম ব্যাক বাটন
         if (window.Telegram?.WebApp) {
             window.Telegram.WebApp.ready();
             window.Telegram.WebApp.expand();
@@ -101,7 +101,6 @@
             const code = referBox.innerText;
             if (code === "LOADING...") return;
             navigator.clipboard.writeText(code).then(() => {
-                // টেলিগ্রাম ভাইব্রেশন ফিডব্যাক (অপশনাল)
                 if (window.Telegram?.WebApp?.HapticFeedback) {
                     window.Telegram.WebApp.HapticFeedback.notificationOccurred('success');
                 }
@@ -109,14 +108,18 @@
             });
         };
 
-        // শেয়ার লজিক (প্রফেশনাল টু-লেভেল রেফারেল টেক্সট)
+        // শেয়ার লজিক (Deep Linking)
         document.getElementById('shareBtn').onclick = () => {
-            const code = referCodeBox.innerText;
-            if (code === "LOADING...") return;
+            const code = referBox.innerText;
+            if (code === "LOADING..." || code === "N/A") return;
 
-            const shareText = `👋 EarnPro অ্যাপে জয়েন করুন এবং প্রতিদিন টাকা ইনকাম করুন!\n\n💰 আমার রেফার কোড ব্যবহার করলে পাবেন বোনাস কয়েন।\n🎁 আমার রেফার কোড: ${code}\n\n🚀 কাজ শুরু করতে লিঙ্কে ক্লিক করুন:\nhttps://t.me/earnpropfficial1_Bot`;
+            // আপনার চাওয়া অনুযায়ী লিঙ্ক ফরম্যাট
+            const botLink = `https://t.me/earnpropfficial1_Bot?start=${code}`;
             
-            const telegramUrl = `https://t.me/share/url?url=https://t.me/earnpropfficial1_Bot&text=${encodeURIComponent(shareText)}`;
+            const shareText = `👋 EarnPro অ্যাপে জয়েন করুন এবং প্রতিদিন টাকা ইনকাম করুন!\n\n💰 নিচের লিঙ্কে ক্লিক করে জয়েন করলেই পাবেন বোনাস কয়েন।\n🎁 আমার রেফার কোড: ${code}\n\n🚀 সরাসরি কাজ শুরু করতে এখানে ক্লিক করুন:`;
+            
+            // টেলিগ্রাম শেয়ার ইউআরএল
+            const telegramUrl = `https://t.me/share/url?url=${encodeURIComponent(botLink)}&text=${encodeURIComponent(shareText)}`;
             
             window.open(telegramUrl, '_blank');
         };
