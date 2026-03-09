@@ -14,7 +14,6 @@
         .promo-box:active { transform: scale(0.95); background: #eee; }
         .share-btn { width: 100%; padding: 15px; background: #2ecc71; color: white; border: none; border-radius: 12px; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; font-size: 16px; }
         
-        /* Promo Input Section */
         .promo-input-card { background: white; margin: 0 20px 20px; padding: 20px; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); }
         .p-input { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 10px; margin-bottom: 10px; outline: none; text-align: center; font-size: 16px; box-sizing: border-box; }
         .apply-btn { width: 100%; padding: 12px; background: #667eea; color: white; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; }
@@ -62,12 +61,12 @@
 
     <script type="module">
         import { db } from './firebase.js';
-        import { doc, getDoc, updateDoc, increment, onSnapshot } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore.js";
+        import { doc, updateDoc, increment, onSnapshot, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore.js";
 
         const tgId = localStorage.getItem("tg_user_id");
         const referBox = document.getElementById('referCodeBox');
 
-        // ১. ডাটা লোড করা
+        // ১. নিজের রেফার কোড লোড করা
         if (tgId) {
             onSnapshot(doc(db, "users", tgId), (snap) => {
                 if (snap.exists()) {
@@ -76,69 +75,70 @@
             });
         }
 
-        // ২. প্রোমো কোড লজিক এবং পপ-আপ সমাধান
+        // ২. রেফার এবং প্রোমো কোড লজিক
         document.getElementById('btnRedeem').onclick = async () => {
             const code = document.getElementById('promoInput').value.trim();
             
             if(!code) {
-                Swal.fire({
-                    title: 'Earn Pro Official',
-                    text: 'অনুগ্রহ করে একটি কোড লিখুন!',
-                    icon: 'warning',
-                    confirmButtonColor: '#667eea'
-                });
+                Swal.fire({ title: 'Earn Pro Official', text: 'কোড লিখুন!', icon: 'warning' });
                 return;
             }
 
-            // এখানে আপনার ভ্যালিড কোডগুলো দিন
-            const validCodes = ["PRO8722", "WELCOME50", "GIFT100"];
+            try {
+                // ডাটাবেসে চেক করা কোডটি কারোর রেফার কোড কি না
+                const q = query(collection(db, "users"), where("referCode", "==", code));
+                const querySnapshot = await getDocs(q);
 
-            if(validCodes.includes(code)) {
-                try {
-                    await updateDoc(doc(db, "users", tgId), {
-                        coins: increment(50)
+                if (!querySnapshot.empty) {
+                    const referrerDoc = querySnapshot.docs[0];
+                    const referrerId = referrerDoc.id;
+
+                    if(referrerId === tgId) {
+                        Swal.fire({ title: 'Earn Pro Official', text: 'নিজের কোড ব্যবহার করা যাবে না!', icon: 'error' });
+                        return;
+                    }
+
+                    // রেফারারকে বোনাস এবং রেফার সংখ্যা বাড়ানো
+                    await updateDoc(doc(db, "users", referrerId), {
+                        coins: increment(50),
+                        totalRefer: increment(1)
                     });
-                    Swal.fire({
-                        title: 'Earn Pro Official',
-                        text: 'সফলভাবে কোডটি ব্যবহার করা হয়েছে! ৫০ কয়েন বোনাস পেয়েছেন।',
-                        icon: 'success',
-                        confirmButtonColor: '#2ecc71'
-                    });
+
+                    // নতুন ইউজারকে বোনাস
+                    await updateDoc(doc(db, "users", tgId), { coins: increment(20) });
+
+                    Swal.fire({ title: 'Earn Pro Official', text: 'রেফার সফল! বোনাস যোগ হয়েছে।', icon: 'success' });
                     document.getElementById('promoInput').value = "";
-                } catch (e) { console.error(e); }
-            } else {
-                // এটি আপনার মূল এরর সমস্যার সমাধান (ডোমেইন নাম আসবে না)
-                Swal.fire({
-                    title: 'Earn Pro Official',
-                    text: 'Invalid or Expired Code!',
-                    icon: 'error',
-                    confirmButtonColor: '#ff4d4d'
-                });
-            }
+
+                } else {
+                    // সাধারণ প্রোমো কোড চেক
+                    const validPromoCodes = ["PRO8722", "WELCOME50", "BONUS100"];
+                    if(validPromoCodes.includes(code)) {
+                        await updateDoc(doc(db, "users", tgId), { coins: increment(50) });
+                        Swal.fire({ title: 'Earn Pro Official', text: 'প্রোমো বোনাস যোগ হয়েছে!', icon: 'success' });
+                        document.getElementById('promoInput').value = "";
+                    } else {
+                        // ভুল কোড পপ-আপ
+                        Swal.fire({ title: 'Earn Pro Official', text: 'Invalid or Expired Code!', icon: 'error' });
+                    }
+                }
+            } catch (e) { console.error(e); }
         };
 
-        // ৩. কোড কপি ফাংশন
+        // ৩. কপি এবং শেয়ার ফাংশন
         window.copyCode = () => {
             const code = referBox.innerText;
             if(code === "LOADING..." || code === "N/A") return;
             navigator.clipboard.writeText(code);
-            Swal.fire({
-                title: 'Earn Pro Official',
-                text: 'Code Copied: ' + code,
-                icon: 'success',
-                timer: 1500,
-                showConfirmButton: false
-            });
+            Swal.fire({ title: 'Earn Pro Official', text: 'Copied: ' + code, icon: 'success', timer: 1000, showConfirmButton: false });
         };
 
-        // ৪. শেয়ার লজিক
         document.getElementById('shareBtn').onclick = () => {
             const code = referBox.innerText;
             const botLink = `https://t.me/earnpropfficial1_Bot?start=${code}`;
-            const shareText = `👋 Earn Pro Official অ্যাপে জয়েন করে প্রতিদিন টাকা ইনকাম করুন! \n🎁 আমার রেফার কোড: ${code}`;
+            const shareText = `👋 Earn Pro Official অ্যাপে জয়েন করে টাকা ইনকাম করুন! \n🎁 রেফার কোড: ${code}`;
             window.open(`https://t.me/share/url?url=${encodeURIComponent(botLink)}&text=${encodeURIComponent(shareText)}`);
         };
-
     </script>
 </body>
 </html>
