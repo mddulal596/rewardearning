@@ -13,15 +13,20 @@
         .refer-card { background: white; margin: -30px 20px 20px; padding: 30px 20px; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); text-align: center; }
         .promo-box { background: #f8f9fa; border: 2px dashed #667eea; padding: 15px; border-radius: 12px; margin: 20px 0; font-size: 24px; font-weight: bold; color: #667eea; letter-spacing: 2px; position: relative; cursor: pointer; }
         .copy-hint { font-size: 10px; color: #888; margin-top: 5px; }
-        .share-btn { width: 100%; padding: 15px; background: #2ecc71; color: white; border: none; border-radius: 12px; font-weight: bold; font-size: 16px; cursor: pointer; transition: 0.3s; display: flex; align-items: center; justify-content: center; }
+        .share-btn { width: 100%; padding: 15px; background: #2ecc71; color: white; border: none; border-radius: 12px; font-weight: bold; font-size: 16px; cursor: pointer; transition: 0.3s; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 15px rgba(46, 204, 113, 0.3); }
         .share-btn i { margin-right: 10px; }
+        
+        .bonus-badge { background: #fff3cd; color: #856404; padding: 5px 15px; border-radius: 20px; font-size: 12px; font-weight: bold; display: inline-block; margin-bottom: 10px; }
+        
         .steps { text-align: left; margin-top: 25px; padding: 0 10px; }
-        .step-item { display: flex; align-items: center; margin-bottom: 15px; }
-        .step-num { width: 25px; height: 25px; background: #667eea; color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; margin-right: 12px; flex-shrink: 0; }
-        .step-text { font-size: 14px; color: #555; }
+        .step-item { display: flex; align-items: flex-start; margin-bottom: 15px; }
+        .step-num { width: 25px; height: 25px; background: #667eea; color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; margin-right: 12px; flex-shrink: 0; margin-top: 3px; }
+        .step-text { font-size: 14px; color: #555; line-height: 1.4; }
+        
         .bottom-nav { position: fixed; bottom: 0; width: 100%; background: white; display: flex; justify-content: space-around; padding: 10px 0; border-top: 1px solid #eee; z-index: 1000; }
         .nav-item { color: #888; text-decoration: none; text-align: center; flex: 1; font-size: 10px; }
         .nav-item i { display: block; font-size: 18px; margin-bottom: 2px; }
+        .nav-item.active { color: #667eea; }
     </style>
 </head>
 <body>
@@ -33,27 +38,28 @@
     </div>
 
     <div class="refer-card">
-        <p style="color: #333; font-weight: 500;">Your Referral Code</p>
+        <div class="bonus-badge">2-Level Referral Active 🚀</div>
+        <p style="color: #333; font-weight: 500; margin-top: 5px;">Your Referral Code</p>
         <div class="promo-box" id="referCodeBox">LOADING...</div>
         <p class="copy-hint">কোডটির ওপর ক্লিক করে কপি করুন</p>
 
         <div class="steps">
             <div class="step-item">
                 <div class="step-num">1</div>
-                <div class="step-text">আপনার রেফার কোডটি বন্ধুদের সাথে শেয়ার করুন।</div>
+                <div class="step-text"><b>লেভেল ১:</b> আপনার বন্ধু জয়েন করলে পাবেন <b>৫০ কয়েন</b> বোনাস।</div>
             </div>
             <div class="step-item">
                 <div class="step-num">2</div>
-                <div class="step-text">তারা যখন আপনার কোড ব্যবহার করে একাউন্ট খুলবে।</div>
+                <div class="step-text"><b>লেভেল ২:</b> আপনার বন্ধু কাউকে রেফার করলে সেখান থেকেও পাবেন <b>১০% কমিশন</b>!</div>
             </div>
             <div class="step-item">
                 <div class="step-num">3</div>
-                <div class="step-text">প্রতিটি সফল রেফারে আপনি পাবেন <b>৫০ কয়েন</b> বোনাস!</div>
+                <div class="step-text">আনলিমিটেড রেফার করুন এবং আনলিমিটেড ইনকাম করুন।</div>
             </div>
         </div>
 
-        <button class="share-btn" id="shareBtn">
-            <i class="fas fa-share-alt"></i> Share With Friends
+        <button class="share-btn" id="shareBtn" style="margin-top: 20px;">
+            <i class="fab fa-telegram-plane"></i> Invite Friends
         </button>
     </div>
 
@@ -71,9 +77,10 @@
         const tgId = localStorage.getItem("tg_user_id");
         const referBox = document.getElementById('referCodeBox');
 
-        // ১. টেলিগ্রাম ব্যাক বাটন
+        // টেলিগ্রাম ব্যাক বাটন সেটআপ
         if (window.Telegram?.WebApp) {
             window.Telegram.WebApp.ready();
+            window.Telegram.WebApp.expand();
             window.Telegram.WebApp.BackButton.show();
             window.Telegram.WebApp.BackButton.onClick(() => window.location.href = "index.html");
         }
@@ -89,25 +96,29 @@
             } catch (e) { console.error(e); }
         }
 
-        // ২. কপি লজিক
+        // কপি লজিক
         referBox.onclick = () => {
             const code = referBox.innerText;
             if (code === "LOADING...") return;
-            navigator.clipboard.writeText(code);
-            alert("Refer code copied: " + code);
+            navigator.clipboard.writeText(code).then(() => {
+                // টেলিগ্রাম ভাইব্রেশন ফিডব্যাক (অপশনাল)
+                if (window.Telegram?.WebApp?.HapticFeedback) {
+                    window.Telegram.WebApp.HapticFeedback.notificationOccurred('success');
+                }
+                alert("Refer code copied: " + code);
+            });
         };
 
-        // ৩. শেয়ার লজিক (টেলিগ্রাম শেয়ারিং)
+        // শেয়ার লজিক (প্রফেশনাল টু-লেভেল রেফারেল টেক্সট)
         document.getElementById('shareBtn').onclick = () => {
-            const code = referBox.innerText;
-            const shareText = `EarnPro অ্যাপে জয়েন করুন এবং কয়েন ইনকাম করুন! আমার রেফার কোড: ${code}\nলিঙ্ক: https://t.me/YourBotUserName`;
+            const code = referCodeBox.innerText;
+            if (code === "LOADING...") return;
+
+            const shareText = `👋 EarnPro অ্যাপে জয়েন করুন এবং প্রতিদিন টাকা ইনকাম করুন!\n\n💰 আমার রেফার কোড ব্যবহার করলে পাবেন বোনাস কয়েন।\n🎁 আমার রেফার কোড: ${code}\n\n🚀 কাজ শুরু করতে লিঙ্কে ক্লিক করুন:\nhttps://t.me/earnpropfficial1_Bot`;
             
-            if (window.Telegram?.WebApp) {
-                // সরাসরি টেলিগ্রামে শেয়ার করার লিঙ্ক
-                window.open(`https://t.me/share/url?url=https://t.me/YourBotUserName&text=${encodeURIComponent(shareText)}`);
-            } else {
-                alert("Sharing logic for browsers: \n" + shareText);
-            }
+            const telegramUrl = `https://t.me/share/url?url=https://t.me/earnpropfficial1_Bot&text=${encodeURIComponent(shareText)}`;
+            
+            window.open(telegramUrl, '_blank');
         };
 
         loadReferCode();
