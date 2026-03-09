@@ -62,7 +62,7 @@
         const AD_WATCH = "https://middayopened.com/c95t5ad9nb?key=9e9e3820d54db2d2cbe11cbfc394a5e9";
         const AD_SPIN = "https://middayopened.com/rmm8pbwe?key=a42d11bce0966c10bc9b3f909ae44009";
 
-        // ১. ডেইলি চেক-ইন স্ট্যাটাস চেক (২৪ ঘণ্টা লক)
+        // ১. ডেইলি চেক-ইন লক স্ট্যাটাস চেক (২৪ ঘণ্টা)
         async function checkDailyStatus() {
             if (!userId) return;
             const snap = await getDoc(doc(db, "users", userId));
@@ -80,6 +80,7 @@
         }
 
         document.getElementById('checkInBtn').onclick = async () => {
+            if (!userId) return;
             window.open(AD_DAILY, '_blank');
             await updateDoc(doc(db, "users", userId), { 
                 coins: increment(10),
@@ -91,12 +92,13 @@
 
         // ২. ভিডিও অ্যাড লজিক
         document.getElementById('watchAdBtn').onclick = async () => {
+            if (!userId) return;
             window.open(AD_WATCH, '_blank');
             await updateDoc(doc(db, "users", userId), { coins: increment(5) });
             alert("৫ কয়েন যোগ হয়েছে!");
         };
 
-        // ৩. স্পিন লজিক (১-২০ কয়েন + অ্যাড লিঙ্ক)
+        // ৩. স্পিন লজিক (১-২০ কয়েন + অ্যাড ফিক্স)
         let spinning = false;
         document.getElementById('spinBtn').onclick = () => {
             if (spinning || !userId) return;
@@ -107,11 +109,27 @@
 
             setTimeout(async () => {
                 const bonus = Math.floor(Math.random() * 20) + 1;
-                if (confirm(`অভিনন্দন! আপনি ${bonus} কয়েন পেয়েছেন। বিজ্ঞাপনটি দেখে কয়েন কালেক্ট করুন।`)) {
-                    window.open(AD_SPIN, '_blank');
-                    await updateDoc(doc(db, "users", userId), { coins: increment(bonus) });
-                    alert(`${bonus} কয়েন যোগ করা হয়েছে!`);
+                
+                // ইউজার OK ক্লিক করলে অ্যাড নিশ্চিতভাবে ওপেন করার জন্য Fallback লজিক
+                const userConfirmed = confirm(`অভিনন্দন! আপনি ${bonus} কয়েন পেয়েছেন। বিজ্ঞাপনটি দেখে কয়েন কালেক্ট করতে 'OK' ক্লিক করুন।`);
+                
+                if (userConfirmed) {
+                    try {
+                        // ব্যালেন্স আপডেট
+                        await updateDoc(doc(db, "users", userId), { coins: increment(bonus) });
+                        
+                        // পপ-আপ ব্লক এড়িয়ে অ্যাড ওপেন করা
+                        const adWindow = window.open(AD_SPIN, '_blank');
+                        
+                        // যদি পপ-আপ ব্লক হয়, সরাসরি লিঙ্কে রিডাইরেক্ট করা
+                        if (!adWindow || adWindow.closed || typeof adWindow.closed == 'undefined') {
+                            window.location.href = AD_SPIN;
+                        } else {
+                            alert(`${bonus} কয়েন যোগ করা হয়েছে!`);
+                        }
+                    } catch (e) { console.error(e); }
                 }
+                
                 spinning = false;
                 wheel.style.transform = `rotate(0deg)`;
             }, 4000);
