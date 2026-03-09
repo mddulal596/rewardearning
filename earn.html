@@ -11,9 +11,10 @@
         body { background: #f4f7f6; font-family: 'Segoe UI', sans-serif; margin: 0; padding-bottom: 90px; }
         .header-section { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 40px 20px; text-align: center; border-bottom-left-radius: 30px; border-bottom-right-radius: 30px; }
         .earn-card { background: white; padding: 25px; border-radius: 20px; margin: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); text-align: center; }
-        .btn-earn { width: 100%; padding: 15px; margin-bottom: 15px; border: none; border-radius: 12px; color: white; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+        .btn-earn { width: 100%; padding: 15px; margin-bottom: 15px; border: none; border-radius: 12px; color: white; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: 0.3s; }
+        .btn-earn:disabled { background: #ccc !important; cursor: not-allowed; opacity: 0.8; }
         #wheel-container { font-size: 80px; margin: 20px 0; display: inline-block; transition: transform 4s cubic-bezier(0.1, 0, 0.1, 1); }
-        .bottom-nav { position: fixed; bottom: 0; width: 100%; background: white; display: flex; justify-content: space-around; padding: 10px 0; border-top: 1px solid #eee; }
+        .bottom-nav { position: fixed; bottom: 0; width: 100%; background: white; display: flex; justify-content: space-around; padding: 10px 0; border-top: 1px solid #eee; z-index: 1000; }
         .nav-item { color: #888; text-decoration: none; text-align: center; flex: 1; font-size: 10px; }
         .nav-item i { display: block; font-size: 18px; margin-bottom: 2px; }
         .nav-item.active { color: #667eea; }
@@ -26,12 +27,20 @@
     </div>
 
     <div style="padding: 15px;">
-        <button id="watchAdBtn" class="btn-earn" style="background: #2e7d32;"><i class="fa fa-play-circle"></i> &nbsp; Watch Video & Earn (+5)</button>
+        <button id="checkInBtn" class="btn-earn" style="background: #5c6bc0;">
+            <i class="fa fa-calendar-check"></i> &nbsp; Daily Check-in (+10)
+        </button>
+
+        <button id="watchAdBtn" class="btn-earn" style="background: #2e7d32;">
+            <i class="fa fa-play-circle"></i> &nbsp; Watch Video & Earn (+5)
+        </button>
 
         <div class="earn-card">
             <h4>Lucky Spin</h4>
             <div id="wheel-container">🎡</div>
-            <button id="spinBtn" class="btn-earn" style="background: #f39c12; margin-top: 10px;"><i class="fa fa-sync-alt"></i> &nbsp; Spin Now</button>
+            <button id="spinBtn" class="btn-earn" style="background: #f39c12; margin-top: 10px;">
+                <i class="fa fa-sync-alt"></i> &nbsp; Spin Now
+            </button>
         </div>
     </div>
 
@@ -44,11 +53,46 @@
 
     <script type="module">
         import { db } from './firebase.js';
-        import { doc, updateDoc, increment } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore.js";
+        import { doc, getDoc, updateDoc, increment } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore.js";
 
         const userId = localStorage.getItem("tg_user_id");
         const AD_LINK = "https://middayopened.com/uuh65fp1c?key=0d0044249c1cef410a86dcfa8f7e3460";
 
+        // --- ১. ডেইলি চেক-ইন চেক (২৪ ঘণ্টা লজিক) ---
+        async function checkDailyStatus() {
+            if (!userId) return;
+            const userSnap = await getDoc(doc(db, "users", userId));
+            if (userSnap.exists()) {
+                const lastCheck = userSnap.data().lastCheckIn || 0;
+                const currentTime = Date.now();
+                const twentyFourHours = 24 * 60 * 60 * 1000;
+
+                if (currentTime - lastCheck < twentyFourHours) {
+                    const btn = document.getElementById('checkInBtn');
+                    btn.disabled = true;
+                    btn.innerHTML = '<i class="fa fa-check-circle"></i> &nbsp; Already Checked-in';
+                }
+            }
+        }
+
+        document.getElementById('checkInBtn').onclick = async () => {
+            if (!userId) return;
+            
+            window.open(AD_LINK, '_blank');
+            
+            try {
+                await updateDoc(doc(db, "users", userId), { 
+                    coins: increment(10),
+                    lastCheckIn: Date.now()
+                });
+                alert("১০ কয়েন বোনাস পেয়েছেন!");
+                location.reload(); // বাটন আপডেট করার জন্য রিলোড
+            } catch (e) {
+                console.error(e);
+            }
+        };
+
+        // --- ২. লাকি স্পিন লজিক ---
         let spinning = false;
         document.getElementById('spinBtn').onclick = () => {
             if (spinning) return;
@@ -68,11 +112,15 @@
             }, 4000);
         };
 
+        // --- ৩. ভিডিও অ্যাড লজিক ---
         document.getElementById('watchAdBtn').onclick = async () => {
             window.open(AD_LINK, '_blank');
             await updateDoc(doc(db, "users", userId), { coins: increment(5) });
             alert("৫ কয়েন যোগ হয়েছে!");
         };
+
+        // পেজ লোড হওয়ার সময় স্ট্যাটাস চেক
+        checkDailyStatus();
 
         if (window.Telegram?.WebApp) {
             window.Telegram.WebApp.ready();
