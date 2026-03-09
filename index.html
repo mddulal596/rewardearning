@@ -3,17 +3,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>EarnPro - Home</title>
+    <title>Earn Pro Official - Home</title>
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         body { background: #f4f7f6; font-family: 'Segoe UI', sans-serif; margin: 0; padding-bottom: 90px; }
         .home-header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 40px 20px; text-align: center; border-bottom-left-radius: 30px; border-bottom-right-radius: 30px; }
         .balance-card { background: white; margin: -30px 20px 20px; padding: 20px; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); text-align: center; }
         .grid-container { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; padding: 0 20px; }
-        .grid-item { background: white; padding: 20px 10px; border-radius: 15px; text-align: center; box-shadow: 0 5px 15px rgba(0,0,0,0.03); text-decoration: none; color: #333; transition: 0.3s; display: flex; flex-direction: column; align-items: center; justify-content: center; }
-        .grid-item:active { transform: scale(0.95); }
+        .grid-item { background: white; padding: 20px 10px; border-radius: 15px; text-align: center; box-shadow: 0 5px 15px rgba(0,0,0,0.03); text-decoration: none; color: #333; transition: 0.3s; display: flex; flex-direction: column; align-items: center; justify-content: center; border: 1px solid transparent; }
+        .grid-item:active { transform: scale(0.95); border-color: #667eea; }
         .grid-item i { font-size: 28px; margin-bottom: 8px; }
         .bottom-nav { position: fixed; bottom: 0; width: 100%; background: white; display: flex; justify-content: space-around; padding: 10px 0; border-top: 1px solid #eee; z-index: 1000; }
         .nav-item { color: #888; text-decoration: none; text-align: center; flex: 1; font-size: 10px; }
@@ -24,13 +25,13 @@
 <body>
     <div class="home-header">
         <h2 id="welcomeName">Hi, User</h2>
-        <p style="opacity: 0.8; font-size: 14px;">Welcome to EarnPro!</p>
+        <p style="opacity: 0.8; font-size: 14px;">Welcome to Earn Pro Official!</p>
     </div>
 
     <div class="balance-card">
         <p style="color: #888; font-size: 12px; margin-bottom: 5px; text-transform: uppercase;">Available Balance</p>
         <h1 id="homeBalance" style="margin: 0; color: #667eea;">0</h1>
-        <div style="background:#f1c40f; display:inline-block; padding:2px 12px; border-radius:10px; font-size:11px; font-weight:bold; margin-top:5px;">💰 COINS</div>
+        <div style="background:#f1c40f; display:inline-block; padding:2px 12px; border-radius:10px; font-size:11px; font-weight:bold; margin-top:5px; color: #000;">💰 COINS</div>
     </div>
 
     <div class="grid-container">
@@ -58,16 +59,26 @@
         import { db } from './firebase.js';
         import { doc, onSnapshot } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore.js";
 
+        const tg = window.Telegram?.WebApp;
         const tgId = localStorage.getItem("tg_user_id");
-        if (!tgId) window.location.replace("login.html");
+        
+        if (!tgId) {
+            window.location.replace("login.html");
+        } else {
+            onSnapshot(doc(db, "users", tgId), (snap) => {
+                if (snap.exists()) {
+                    const data = snap.data();
+                    document.getElementById('welcomeName').innerText = "Hi, " + (data.name || "User");
+                    document.getElementById('homeBalance').innerText = data.coins || 0;
+                }
+            });
+        }
 
-        onSnapshot(doc(db, "users", tgId), (snap) => {
-            if (snap.exists()) {
-                const data = snap.data();
-                document.getElementById('welcomeName').innerText = "Hi, " + (data.name || "User");
-                document.getElementById('homeBalance').innerText = data.coins || 0;
-            }
-        });
+        // টেলিগ্রাম ওয়েব অ্যাপ সেটআপ
+        if (tg) {
+            tg.ready();
+            tg.expand(); // অ্যাপটিকে পূর্ণ স্ক্রিনে দেখানোর জন্য
+        }
     </script>
 </body>
 </html>
