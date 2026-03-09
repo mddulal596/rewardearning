@@ -3,36 +3,85 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>EarnPro - Profile</title>
+    <title>Profile - EarnPro</title>
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         body { background: #f4f7f6; font-family: 'Segoe UI', sans-serif; margin: 0; padding-bottom: 90px; }
-        .profile-header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 50px 20px; text-align: center; border-bottom-left-radius: 30px; border-bottom-right-radius: 30px; }
-        .profile-img { width: 80px; height: 80px; border-radius: 50%; border: 4px solid rgba(255,255,255,0.3); margin: 0 auto 10px; display: flex; align-items: center; justify-content: center; background: rgba(255,255,255,0.2); font-size: 30px; font-weight: bold; overflow: hidden; }
-        .card { background: white; margin: -30px 20px 20px; padding: 25px; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); }
-        .info-row { display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid #f0f0f0; }
-        .logout-btn { width: 100%; padding: 12px; background: #fff; border: 1px solid #ff4757; color: #ff4757; border-radius: 12px; font-weight: bold; cursor: pointer; margin-top: 10px; }
-        .bottom-nav { position: fixed; bottom: 0; width: 100%; background: white; display: flex; justify-content: space-around; padding: 10px 0; border-top: 1px solid #eee; }
+        .profile-header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 50px 20px; text-align: center; border-bottom-left-radius: 30px; border-bottom-right-radius: 30px; position: relative; }
+        .profile-img { width: 100px; height: 100px; border-radius: 50%; border: 4px solid rgba(255,255,255,0.3); margin-bottom: 15px; background: #eee; display: flex; align-items: center; justify-content: center; font-size: 40px; color: #667eea; margin-left: auto; margin-right: auto; overflow: hidden; }
+        .profile-img img { width: 100%; height: 100%; object-fit: cover; }
+        
+        .info-card { background: white; margin: -30px 20px 20px; padding: 25px; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); }
+        .info-row { display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid #f0f0f0; font-size: 14px; }
+        .info-row:last-child { border-bottom: none; }
+        .label { color: #888; font-weight: 500; }
+        .value { color: #333; font-weight: bold; }
+
+        /* New Stats Grid */
+        .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 0 20px 20px; }
+        .stat-box { background: white; padding: 15px; border-radius: 15px; text-align: center; box-shadow: 0 5px 15px rgba(0,0,0,0.02); }
+        .stat-box i { font-size: 20px; margin-bottom: 5px; display: block; }
+        .stat-title { font-size: 11px; color: #888; text-transform: uppercase; letter-spacing: 0.5px; }
+        .stat-value { font-size: 16px; font-weight: bold; color: #333; margin-top: 3px; display: block; }
+
+        .logout-btn { width: calc(100% - 40px); margin: 0 20px; padding: 15px; background: white; border: 1.5px solid #ff4d4d; color: #ff4d4d; border-radius: 15px; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; transition: 0.3s; }
+        .logout-btn:active { background: #fff5f5; transform: scale(0.98); }
+
+        .bottom-nav { position: fixed; bottom: 0; width: 100%; background: white; display: flex; justify-content: space-around; padding: 10px 0; border-top: 1px solid #eee; z-index: 1000; }
         .nav-item { color: #888; text-decoration: none; text-align: center; flex: 1; font-size: 10px; }
         .nav-item i { display: block; font-size: 18px; margin-bottom: 2px; }
         .nav-item.active { color: #667eea; }
     </style>
 </head>
 <body>
+
     <div class="profile-header">
-        <div id="userAvatar" class="profile-img">U</div>
-        <h2 id="profileName">Loading...</h2>
-        <p id="profileEmail">@username</p>
+        <div class="profile-img" id="userAvatar">
+            <i class="fas fa-user"></i>
+        </div>
+        <h3 id="userName" style="margin: 0;">Loading...</h3>
+        <p id="userHandle" style="margin: 5px 0 0; opacity: 0.8; font-size: 13px;">@username</p>
     </div>
 
-    <div class="card">
-        <div class="info-row"><span>Current Balance</span><span style="font-weight: bold; color: #667eea;"><span id="profileBalance">0</span> 💰</span></div>
-        <div class="info-row"><span>Refer Code</span><span id="profileRefer" style="font-weight: bold; color: #2ecc71;">---</span></div>
-        <div class="info-row"><span>Account Status</span><span style="color: #2ecc71; font-weight: bold;">Active</span></div>
-        <button id="btnExit" class="logout-btn"><i class="fas fa-sign-out-alt"></i> Exit App</button>
+    <div class="info-card">
+        <div class="info-row">
+            <span class="label">Current Balance</span>
+            <span class="value" style="color: #667eea;"><span id="profileBalance">0</span> 💰</span>
+        </div>
+        <div class="info-row">
+            <span class="label">Refer Code</span>
+            <span class="value" id="profileRefer" style="color: #2ecc71;">PRO0000</span>
+        </div>
     </div>
+
+    <div class="stats-grid">
+        <div class="stat-box">
+            <i class="fas fa-users" style="color: #3498db;"></i>
+            <span class="stat-title">Refers</span>
+            <span class="stat-value" id="totalRefer">0</span>
+        </div>
+        <div class="stat-box">
+            <i class="fas fa-tasks" style="color: #9b59b6;"></i>
+            <span class="stat-title">Tasks</span>
+            <span class="stat-value" id="totalTask">0</span>
+        </div>
+        <div class="stat-box">
+            <i class="fas fa-crown" style="color: #f1c40f;"></i>
+            <span class="stat-title">VIP</span>
+            <span class="stat-value" id="vipLevel">No</span>
+        </div>
+        <div class="stat-box">
+            <i class="fas fa-shield-alt" style="color: #2ecc71;"></i>
+            <span class="stat-title">Status</span>
+            <span class="stat-value" id="accStatus" style="color: #2ecc71;">Active</span>
+        </div>
+    </div>
+
+    <button id="btnLogOut" class="logout-btn">
+        <i class="fas fa-sign-out-alt"></i> Exit App
+    </button>
 
     <nav class="bottom-nav">
         <a href="index.html" class="nav-item"><i class="fas fa-home"></i>Home</a>
@@ -43,29 +92,57 @@
 
     <script type="module">
         import { db } from './firebase.js';
-        import { doc, onSnapshot } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore.js";
+        import { doc, onSnapshot, updateDoc } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore.js";
 
+        const tg = window.Telegram?.WebApp;
         const tgId = localStorage.getItem("tg_user_id");
 
-        onSnapshot(doc(db, "users", tgId), (snap) => {
-            if (snap.exists()) {
-                const data = snap.data();
-                document.getElementById('profileName').innerText = data.name || "User";
-                document.getElementById('profileBalance').innerText = data.coins || 0;
-                document.getElementById('profileEmail').innerText = "@" + (data.username || "user");
-                document.getElementById('profileRefer').innerText = data.referCode || "N/A";
-            }
-        });
+        if (!tgId) {
+            window.location.replace("login.html");
+        } else {
+            // ফায়ারবেস থেকে ডাটা লোড করা
+            onSnapshot(doc(db, "users", tgId), (snap) => {
+                if (snap.exists()) {
+                    const data = snap.data();
+                    
+                    // নাম এবং হ্যান্ডেল আপডেট
+                    document.getElementById('userName').innerText = data.name || "User Name";
+                    document.getElementById('userHandle').innerText = "@" + (data.username || "user");
+                    
+                    // মূল তথ্য আপডেট
+                    document.getElementById('profileBalance').innerText = data.coins || 0;
+                    document.getElementById('profileRefer').innerText = data.referCode || "N/A";
 
-        document.getElementById('btnExit').onclick = () => {
-            if(confirm("আপনি কি অ্যাপ থেকে বের হতে চান?")) window.Telegram?.WebApp.close();
-        };
+                    // নতুন স্ট্যাটাস আপডেট
+                    document.getElementById('totalRefer').innerText = data.totalRefer || 0;
+                    document.getElementById('totalTask').innerText = data.totalTask || 0;
+                    document.getElementById('vipLevel').innerText = data.vip || "No";
+                    document.getElementById('accStatus').innerText = data.status || "Active";
+                    
+                    // স্ট্যাটাস কালার পরিবর্তন
+                    if(data.status === "Banned") {
+                        document.getElementById('accStatus').style.color = "#ff4d4d";
+                    }
 
-        if (window.Telegram?.WebApp) {
-            window.Telegram.WebApp.ready();
-            window.Telegram.WebApp.BackButton.show();
-            window.Telegram.WebApp.BackButton.onClick(() => window.location.href = "index.html");
+                    // প্রোফাইল ছবি সেট করা
+                    if (data.photo) {
+                        document.getElementById('userAvatar').innerHTML = `<img src="${data.photo}" alt="Profile">`;
+                    }
+                }
+            });
         }
+
+        // এক্সিট বাটন লজিক
+        document.getElementById('btnLogOut').onclick = () => {
+            if (confirm("আপনি কি অ্যাপ থেকে বের হয়ে যেতে চান?")) {
+                if (tg) {
+                    tg.close();
+                } else {
+                    localStorage.clear();
+                    window.location.replace("login.html");
+                }
+            }
+        };
     </script>
 </body>
 </html>
