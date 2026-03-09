@@ -12,9 +12,9 @@
         .home-header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 40px 20px; text-align: center; border-bottom-left-radius: 30px; border-bottom-right-radius: 30px; }
         .balance-card { background: white; margin: -30px 20px 20px; padding: 20px; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); text-align: center; }
         .grid-container { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; padding: 0 20px; }
-        .grid-item { background: white; padding: 25px 15px; border-radius: 15px; text-align: center; box-shadow: 0 5px 15px rgba(0,0,0,0.03); text-decoration: none; color: #333; transition: 0.3s; }
+        .grid-item { background: white; padding: 20px 10px; border-radius: 15px; text-align: center; box-shadow: 0 5px 15px rgba(0,0,0,0.03); text-decoration: none; color: #333; transition: 0.3s; display: flex; flex-direction: column; align-items: center; justify-content: center; }
         .grid-item:active { transform: scale(0.95); }
-        .grid-item i { font-size: 30px; margin-bottom: 10px; display: block; }
+        .grid-item i { font-size: 28px; margin-bottom: 8px; }
         .bottom-nav { position: fixed; bottom: 0; width: 100%; background: white; display: flex; justify-content: space-around; padding: 10px 0; border-top: 1px solid #eee; z-index: 1000; }
         .nav-item { color: #888; text-decoration: none; text-align: center; flex: 1; font-size: 10px; }
         .nav-item i { display: block; font-size: 18px; margin-bottom: 2px; }
@@ -35,9 +35,16 @@
 
     <div class="grid-container">
         <a href="earn.html" class="grid-item"><i class="fas fa-play" style="color: #667eea;"></i><strong>Start Task</strong></a>
+        
         <a href="refer.html" class="grid-item"><i class="fas fa-share-alt" style="color: #2ecc71;"></i><strong>Share App</strong></a>
+        
         <a href="leaderboard.html" class="grid-item"><i class="fas fa-trophy" style="color: #f1c40f;"></i><strong>Leaderboard</strong></a>
+        
         <a href="history.html" class="grid-item"><i class="fas fa-history" style="color: #e74c3c;"></i><strong>History</strong></a>
+
+        <a href="how-to-earn.html" class="grid-item"><i class="fas fa-book-open" style="color: #3498db;"></i><strong>How to Earn</strong></a>
+
+        <a href="https://t.me/earnprosupport1" target="_blank" class="grid-item"><i class="fab fa-telegram-plane" style="color: #0088cc;"></i><strong>Support</strong></a>
     </div>
 
     <nav class="bottom-nav">
