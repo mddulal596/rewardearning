@@ -3,16 +3,26 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Refer & Earn - EarnPro</title>
+    <title>Refer & Earn - Earn Pro Official</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <style>
         body { background: #f4f7f6; font-family: 'Segoe UI', sans-serif; margin: 0; padding-bottom: 90px; text-align: center; }
         .refer-header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 40px 20px; border-bottom-left-radius: 30px; border-bottom-right-radius: 30px; }
         .refer-card { background: white; margin: -30px 20px 20px; padding: 30px 20px; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); }
-        .promo-box { background: #f8f9fa; border: 2px dashed #667eea; padding: 15px; border-radius: 12px; margin: 20px 0; font-size: 24px; font-weight: bold; color: #667eea; cursor: pointer; }
-        .share-btn { width: 100%; padding: 15px; background: #2ecc71; color: white; border: none; border-radius: 12px; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; }
-        .bottom-nav { position: fixed; bottom: 0; width: 100%; background: white; display: flex; justify-content: space-around; padding: 10px 0; border-top: 1px solid #eee; }
+        .promo-box { background: #f8f9fa; border: 2px dashed #667eea; padding: 15px; border-radius: 12px; margin: 20px 0; font-size: 24px; font-weight: bold; color: #667eea; cursor: pointer; transition: 0.3s; }
+        .promo-box:active { transform: scale(0.95); background: #eee; }
+        .share-btn { width: 100%; padding: 15px; background: #2ecc71; color: white; border: none; border-radius: 12px; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; font-size: 16px; }
+        
+        /* Promo Input Section */
+        .promo-input-card { background: white; margin: 0 20px 20px; padding: 20px; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); }
+        .p-input { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 10px; margin-bottom: 10px; outline: none; text-align: center; font-size: 16px; box-sizing: border-box; }
+        .apply-btn { width: 100%; padding: 12px; background: #667eea; color: white; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; }
+
+        .bottom-nav { position: fixed; bottom: 0; width: 100%; background: white; display: flex; justify-content: space-around; padding: 10px 0; border-top: 1px solid #eee; z-index: 1000; }
         .nav-item { color: #888; text-decoration: none; font-size: 10px; flex: 1; }
+        .nav-item i { font-size: 20px; display: block; margin-bottom: 2px; }
+        .nav-item.active { color: #667eea; }
     </style>
 </head>
 <body>
@@ -24,8 +34,8 @@
     </div>
 
     <div class="refer-card">
-        <p>Your Referral Code</p>
-        <div class="promo-box" id="referCodeBox">LOADING...</div>
+        <p style="color: #888; font-size: 14px;">Your Referral Code (Click to Copy)</p>
+        <div class="promo-box" id="referCodeBox" onclick="copyCode()">LOADING...</div>
         
         <div style="text-align: left; font-size: 14px; color: #555; margin-bottom: 20px;">
             <p>✅ <b>Level 1:</b> বন্ধু জয়েন করলে পাবেন ৫০ কয়েন।</p>
@@ -33,51 +43,102 @@
         </div>
 
         <button class="share-btn" id="shareBtn">
-            <i class="fab fa-telegram-plane" style="margin-right: 10px;"></i> Invite Friends
+            <i class="fab fa-telegram-plane"></i> Invite Friends
         </button>
     </div>
 
+    <div class="promo-input-card">
+        <h4 style="margin-top: 0; color: #333;">Apply Promo Code</h4>
+        <input type="text" id="promoInput" class="p-input" placeholder="Enter code here">
+        <button class="apply-btn" id="btnRedeem">Apply Code</button>
+    </div>
+
     <nav class="bottom-nav">
-        <a href="index.html" class="nav-item"><i class="fas fa-home"></i><br>Home</a>
-        <a href="earn.html" class="nav-item"><i class="fas fa-bolt"></i><br>Earn</a>
-        <a href="withdraw.html" class="nav-item"><i class="fas fa-wallet"></i><br>Withdraw</a>
-        <a href="profile.html" class="nav-item"><i class="fas fa-user"></i><br>Profile</a>
+        <a href="index.html" class="nav-item"><i class="fas fa-home"></i>Home</a>
+        <a href="earn.html" class="nav-item"><i class="fas fa-bolt"></i>Earn</a>
+        <a href="withdraw.html" class="nav-item"><i class="fas fa-wallet"></i>Withdraw</a>
+        <a href="profile.html" class="nav-item"><i class="fas fa-user"></i>Profile</a>
     </nav>
 
     <script type="module">
         import { db } from './firebase.js';
-        import { doc, getDoc, updateDoc, increment } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore.js";
+        import { doc, getDoc, updateDoc, increment, onSnapshot } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore.js";
 
         const tgId = localStorage.getItem("tg_user_id");
         const referBox = document.getElementById('referCodeBox');
 
-        // ১. রেফার কোড লোড করা
-        async function init() {
-            if (!tgId) return;
-            const snap = await getDoc(doc(db, "users", tgId));
-            if (snap.exists()) {
-                referBox.innerText = snap.data().referCode || "N/A";
-            }
-
-            // ২. রেফারেল চেক করা (যদি ইউজার নতুন লিঙ্কে আসে)
-            const urlParams = new URLSearchParams(window.location.search);
-            const startParam = urlParams.get('startapp'); 
-            
-            if (startParam && startParam !== snap.data().referCode) {
-                // এখানে রেফারেল বোনাস দেওয়ার লজিক কাজ করবে
-                console.log("Referred by: " + startParam);
-            }
+        // ১. ডাটা লোড করা
+        if (tgId) {
+            onSnapshot(doc(db, "users", tgId), (snap) => {
+                if (snap.exists()) {
+                    referBox.innerText = snap.data().referCode || "N/A";
+                }
+            });
         }
 
-        // ৩. শেয়ার লজিক (Deep Linking)
+        // ২. প্রোমো কোড লজিক এবং পপ-আপ সমাধান
+        document.getElementById('btnRedeem').onclick = async () => {
+            const code = document.getElementById('promoInput').value.trim();
+            
+            if(!code) {
+                Swal.fire({
+                    title: 'Earn Pro Official',
+                    text: 'অনুগ্রহ করে একটি কোড লিখুন!',
+                    icon: 'warning',
+                    confirmButtonColor: '#667eea'
+                });
+                return;
+            }
+
+            // এখানে আপনার ভ্যালিড কোডগুলো দিন
+            const validCodes = ["PRO8722", "WELCOME50", "GIFT100"];
+
+            if(validCodes.includes(code)) {
+                try {
+                    await updateDoc(doc(db, "users", tgId), {
+                        coins: increment(50)
+                    });
+                    Swal.fire({
+                        title: 'Earn Pro Official',
+                        text: 'সফলভাবে কোডটি ব্যবহার করা হয়েছে! ৫০ কয়েন বোনাস পেয়েছেন।',
+                        icon: 'success',
+                        confirmButtonColor: '#2ecc71'
+                    });
+                    document.getElementById('promoInput').value = "";
+                } catch (e) { console.error(e); }
+            } else {
+                // এটি আপনার মূল এরর সমস্যার সমাধান (ডোমেইন নাম আসবে না)
+                Swal.fire({
+                    title: 'Earn Pro Official',
+                    text: 'Invalid or Expired Code!',
+                    icon: 'error',
+                    confirmButtonColor: '#ff4d4d'
+                });
+            }
+        };
+
+        // ৩. কোড কপি ফাংশন
+        window.copyCode = () => {
+            const code = referBox.innerText;
+            if(code === "LOADING..." || code === "N/A") return;
+            navigator.clipboard.writeText(code);
+            Swal.fire({
+                title: 'Earn Pro Official',
+                text: 'Code Copied: ' + code,
+                icon: 'success',
+                timer: 1500,
+                showConfirmButton: false
+            });
+        };
+
+        // ৪. শেয়ার লজিক
         document.getElementById('shareBtn').onclick = () => {
             const code = referBox.innerText;
             const botLink = `https://t.me/earnpropfficial1_Bot?start=${code}`;
-            const shareText = `👋 EarnPro অ্যাপে জয়েন করে প্রতিদিন টাকা ইনকাম করুন! \n🎁 আমার রেফার কোড: ${code}`;
+            const shareText = `👋 Earn Pro Official অ্যাপে জয়েন করে প্রতিদিন টাকা ইনকাম করুন! \n🎁 আমার রেফার কোড: ${code}`;
             window.open(`https://t.me/share/url?url=${encodeURIComponent(botLink)}&text=${encodeURIComponent(shareText)}`);
         };
 
-        init();
     </script>
 </body>
 </html>
