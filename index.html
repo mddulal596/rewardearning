@@ -11,7 +11,7 @@
     <style>
         body { background: #f4f7f6; font-family: 'Segoe UI', sans-serif; margin: 0; padding-bottom: 90px; }
         .home-header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 40px 20px; text-align: center; border-bottom-left-radius: 30px; border-bottom-right-radius: 30px; }
-        .balance-card { background: white; margin: -30px 20px 20px; padding: 20px; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); text-align: center; }
+        .balance-card { background: white; margin: -30px 20px 20px; padding: 20px; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); text-align: center; position: relative; z-index: 10; }
         .grid-container { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; padding: 0 20px; }
         .grid-item { background: white; padding: 20px 10px; border-radius: 15px; text-align: center; box-shadow: 0 5px 15px rgba(0,0,0,0.03); text-decoration: none; color: #333; transition: 0.3s; display: flex; flex-direction: column; align-items: center; justify-content: center; border: 1px solid transparent; }
         .grid-item:active { transform: scale(0.95); border-color: #667eea; }
@@ -35,17 +35,12 @@
     </div>
 
     <div class="grid-container">
-        <a href="earn.html" class="grid-item"><i class="fas fa-play" style="color: #667eea;"></i><strong>Start Task</strong></a>
-        
-        <a href="how-to-earn.html" class="grid-item"><i class="fas fa-book-open" style="color: #3498db;"></i><strong>How to Earn</strong></a>
-        
-        <a href="leaderboard.html" class="grid-item"><i class="fas fa-trophy" style="color: #f1c40f;"></i><strong>Leaderboard</strong></a>
-        
+        <a href="earn.html" class="grid-item"><i class="fas fa-play-circle" style="color: #667eea;"></i><strong>Start Task</strong></a>
+        <a href="withdraw.html" class="grid-item"><i class="fas fa-wallet" style="color: #2ecc71;"></i><strong>Withdraw</strong></a>
         <a href="history.html" class="grid-item"><i class="fas fa-history" style="color: #e74c3c;"></i><strong>History</strong></a>
-
-        <a href="refer.html" class="grid-item"><i class="fas fa-share-alt" style="color: #2ecc71;"></i><strong>Share App</strong></a>
-
-        <a href="https://t.me/earnprosupport1" target="_blank" class="grid-item"><i class="fab fa-telegram-plane" style="color: #0088cc;"></i><strong>Support</strong></a>
+        <a href="profile.html" class="grid-item"><i class="fas fa-user-cog" style="color: #3498db;"></i><strong>My Profile</strong></a>
+        <a href="https://t.me/earnprosupport1" target="_blank" class="grid-item"><i class="fab fa-telegram-plane" style="color: #0088cc;"></i><strong>Telegram</strong></a>
+        <a href="how-to-earn.html" class="grid-item"><i class="fas fa-info-circle" style="color: #f1c40f;"></i><strong>Help</strong></a>
     </div>
 
     <nav class="bottom-nav">
@@ -65,19 +60,19 @@
         if (!tgId) {
             window.location.replace("login.html");
         } else {
+            // রিয়েলটাইম ব্যালেন্স আপডেট
             onSnapshot(doc(db, "users", tgId), (snap) => {
                 if (snap.exists()) {
                     const data = snap.data();
                     document.getElementById('welcomeName').innerText = "Hi, " + (data.name || "User");
-                    document.getElementById('homeBalance').innerText = data.coins || 0;
+                    document.getElementById('homeBalance').innerText = (data.coins || 0).toLocaleString();
                 }
             });
         }
 
-        // টেলিগ্রাম ওয়েব অ্যাপ সেটআপ
         if (tg) {
             tg.ready();
-            tg.expand(); // অ্যাপটিকে পূর্ণ স্ক্রিনে দেখানোর জন্য
+            tg.expand();
         }
     </script>
 </body>
