@@ -5,105 +5,63 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Withdraw - EarnPro</title>
     <link rel="stylesheet" href="style.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <style>
-        body { background: #f4f7f6; font-family: 'Segoe UI', sans-serif; margin: 0; padding-bottom: 90px; }
-        .header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 40px 20px; text-align: center; border-bottom-left-radius: 30px; border-bottom-right-radius: 30px; }
-        .card { background: white; margin: -20px 20px 20px; padding: 20px; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); }
-        .input-group { margin-bottom: 15px; }
-        .input-group label { display: block; margin-bottom: 5px; font-weight: 600; color: #555; }
-        .input-field { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 10px; box-sizing: border-box; outline: none; }
-        .btn-withdraw { width: 100%; padding: 15px; background: #667eea; color: white; border: none; border-radius: 12px; font-weight: bold; cursor: pointer; font-size: 16px; transition: 0.3s; }
-        .btn-withdraw:active { transform: scale(0.98); }
-        .balance-info { text-align: center; margin-bottom: 15px; color: #764ba2; font-weight: bold; font-size: 18px; }
+        body { background: #f4f7f6; font-family: sans-serif; padding-bottom: 90px; }
+        .card { background: white; margin: 20px; padding: 20px; border-radius: 15px; box-shadow: 0 5px 15px rgba(0,0,0,0.05); }
+        .input-field { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; }
+        .btn-withdraw { width: 100%; padding: 15px; background: #667eea; color: white; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; }
     </style>
 </head>
 <body>
-
-    <div class="header">
-        <h2>Withdraw</h2>
-        <p>আপনার উপার্জিত কয়েন তুলে নিন</p>
+    <div style="background: #667eea; color: white; padding: 30px; text-align: center;">
+        <h2>Withdraw Coins</h2>
+        <p>আপনার ব্যালেন্স: <span id="currentBalance">0</span> Coins</p>
     </div>
 
     <div class="card">
-        <div class="balance-info">
-            ব্যালেন্স: <span id="currentBalance">0</span> Coins
-        </div>
-
-        <div class="input-group">
-            <label>পেমেন্ট মেথড</label>
-            <select id="method" class="input-field">
-                <option value="bKash">bKash</option>
-                <option value="Nagad">Nagad</option>
-                <option value="Rocket">Rocket</option>
-            </select>
-        </div>
-
-        <div class="input-group">
-            <label>অ্যাকাউন্ট নম্বর</label>
-            <input type="number" id="accountNo" class="input-field" placeholder="017XXXXXXXX">
-        </div>
-
-        <div class="input-group">
-            <label>কয়েন এর পরিমাণ (Min 5000)</label>
-            <input type="number" id="amount" class="input-field" placeholder="500">
-        </div>
-
-        <button class="btn-withdraw" id="submitBtn">Request Withdrawal</button>
+        <select id="method" class="input-field">
+            <option value="bKash">bKash</option>
+            <option value="Nagad">Nagad</option>
+            <option value="Rocket">Rocket</option>
+        </select>
+        <input type="number" id="accountNo" class="input-field" placeholder="Account Number">
+        <input type="number" id="amount" class="input-field" placeholder="Amount (Min 500)">
+        <button class="btn-withdraw" id="submitBtn">Submit Request</button>
     </div>
-
-    <nav class="bottom-nav">
-        <a href="index.html" class="nav-item"><i class="fas fa-home"></i>Home</a>
-        <a href="earn.html" class="nav-item"><i class="fas fa-bolt"></i>Earn</a>
-        <a href="withdraw.html" class="nav-item active"><i class="fas fa-wallet"></i>Withdraw</a>
-        <a href="profile.html" class="nav-item"><i class="fas fa-user"></i>Profile</a>
-    </nav>
 
     <script type="module">
         import { db } from './firebase.js';
         import { doc, getDoc, updateDoc, collection, addDoc, increment } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore.js";
 
         const tgId = localStorage.getItem("tg_user_id");
-        const balanceTxt = document.getElementById('currentBalance');
         let userBalance = 0;
         let userName = "";
 
-        async function fetchUserData() {
-            if (!tgId) { window.location.href="login.html"; return; }
-            const userSnap = await getDoc(doc(db, "users", tgId));
-            if (userSnap.exists()) {
-                const data = userSnap.data();
-                userBalance = data.coins || 0;
-                userName = data.name || "User";
-                balanceTxt.innerText = userBalance;
+        async function init() {
+            if(!tgId) return window.location.href="login.html";
+            const snap = await getDoc(doc(db, "users", tgId));
+            if(snap.exists()){
+                userBalance = snap.data().coins || 0;
+                userName = snap.data().name || "User";
+                document.getElementById('currentBalance').innerText = userBalance;
             }
         }
-        fetchUserData();
+        init();
 
         document.getElementById('submitBtn').onclick = async () => {
             const method = document.getElementById('method').value;
             const number = document.getElementById('accountNo').value;
             const amount = parseInt(document.getElementById('amount').value);
 
-            if (!number || number.length < 11) {
-                Swal.fire('Error', 'সঠিক নম্বর দিন', 'error'); return;
-            }
-            if (isNaN(amount) || amount < 500) {
-                Swal.fire('Error', 'সর্বনিম্ন ৫০০ কয়েন প্রয়োজন', 'error'); return;
-            }
-            if (amount > userBalance) {
-                Swal.fire('Error', 'আপনার পর্যাপ্ত কয়েন নেই!', 'error'); return;
-            }
-
-            Swal.fire({ title: 'Processing...', allowOutsideClick: false, didOpen: () => { Swal.showLoading(); } });
+            if(amount > userBalance) return Swal.fire('Error', 'Insufficient Balance!', 'error');
+            if(amount < 5000) return Swal.fire('Error', 'Minimum 5000 coins!', 'error');
 
             try {
-                // ১. কয়েন কেটে নেওয়া
-                const userRef = doc(db, "users", tgId);
-                await updateDoc(userRef, { coins: increment(-amount) });
-
-                // ২. রিকোয়েস্ট সেভ করা
+                // ১. ব্যালেন্স থেকে কয়েন কেটে নেওয়া
+                await updateDoc(doc(db, "users", tgId), { coins: increment(-amount) });
+                
+                // ২. রিকোয়েস্ট তৈরি করা
                 await addDoc(collection(db, "withdrawals"), {
                     userId: tgId,
                     name: userName,
@@ -114,12 +72,8 @@
                     timestamp: Date.now()
                 });
 
-                Swal.fire('Success', 'রিকোয়েস্ট সফল হয়েছে!', 'success').then(() => {
-                    window.location.reload();
-                });
-            } catch (e) {
-                Swal.fire('Error', 'সমস্যা হয়েছে: ' + e.message, 'error');
-            }
+                Swal.fire('Success', 'Request sent!', 'success').then(()=> location.reload());
+            } catch(e) { Swal.fire('Error', e.message, 'error'); }
         };
     </script>
 </body>
