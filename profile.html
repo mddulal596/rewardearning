@@ -13,27 +13,21 @@
         .profile-header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 50px 20px; text-align: center; border-bottom-left-radius: 30px; border-bottom-right-radius: 30px; position: relative; }
         .profile-img { width: 100px; height: 100px; border-radius: 50%; border: 4px solid rgba(255,255,255,0.3); margin-bottom: 15px; background: #eee; display: flex; align-items: center; justify-content: center; font-size: 40px; color: #667eea; margin: 0 auto 15px; overflow: hidden; }
         .profile-img img { width: 100%; height: 100%; object-fit: cover; }
-        
         .info-card { background: white; margin: -30px 20px 15px; padding: 20px; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); }
         .info-row { display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid #f0f0f0; font-size: 14px; }
         .info-row:last-child { border-bottom: none; }
         .label { color: #888; font-weight: 500; }
         .value { color: #333; font-weight: bold; cursor: pointer; }
-
         .promo-section { margin: 0 20px 20px; background: white; padding: 10px; border-radius: 15px; display: flex; gap: 8px; box-shadow: 0 5px 15px rgba(0,0,0,0.02); }
         .promo-section input { flex: 1; padding: 12px; border: 1px solid #eee; border-radius: 10px; outline: none; font-size: 14px; background: #fafafa; }
         .promo-btn { padding: 0 20px; background: #667eea; color: white; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; transition: 0.3s; }
-
         .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 0 20px 20px; }
         .stat-box { background: white; padding: 15px; border-radius: 15px; text-align: center; box-shadow: 0 5px 15px rgba(0,0,0,0.02); }
         .stat-box i { font-size: 20px; margin-bottom: 5px; display: block; }
         .stat-title { font-size: 11px; color: #888; text-transform: uppercase; }
         .stat-value { font-size: 16px; font-weight: bold; color: #333; margin-top: 3px; display: block; }
-
         .logout-btn { width: calc(100% - 40px); margin: 0 20px; padding: 15px; background: white; border: 1.5px solid #ff4d4d; color: #ff4d4d; border-radius: 15px; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; }
-        
         .vip-active { color: #f1c40f !important; }
-
         .bottom-nav { position: fixed; bottom: 0; width: 100%; background: white; display: flex; justify-content: space-around; padding: 10px 0; border-top: 1px solid #eee; z-index: 1000; }
         .nav-item { color: #888; text-decoration: none; text-align: center; flex: 1; font-size: 10px; }
         .nav-item i { display: block; font-size: 18px; margin-bottom: 2px; }
@@ -41,7 +35,6 @@
     </style>
 </head>
 <body>
-
     <div class="profile-header">
         <div class="profile-img" id="userAvatar"><i class="fas fa-user"></i></div>
         <h3 id="userName" style="margin: 0;">Loading...</h3>
@@ -98,7 +91,7 @@
 
     <script type="module">
         import { db } from './firebase.js';
-        import { doc, onSnapshot, updateDoc, increment } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore.js";
+        import { doc, onSnapshot, updateDoc, increment, getDoc, arrayUnion } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore.js";
 
         const tg = window.Telegram?.WebApp;
         const tgId = localStorage.getItem("tg_user_id");
@@ -113,8 +106,10 @@
                     document.getElementById('userHandle').innerText = "@" + (data.username || "user");
                     document.getElementById('profileBalance').innerText = data.coins || 0;
                     document.getElementById('profileRefer').innerText = data.referCode || "N/A";
-                    document.getElementById('totalRefer').innerText = data.totalRefer || 0;
-                    document.getElementById('totalTask').innerText = data.totalTask || 0;
+                    
+                    // ফিক্স: আপনার ডাটাবেস ফিল্ডের সাথে মিলানো হলো
+                    document.getElementById('totalRefer').innerText = data.referCount || 0;
+                    document.getElementById('totalTask').innerText = data.taskCount || 0;
                     
                     const vipStat = data.vip || "No";
                     document.getElementById('vipLevel').innerText = vipStat;
@@ -124,7 +119,6 @@
                     } else {
                         document.getElementById('vipIcon').style.color = "#ccc";
                     }
-
                     document.getElementById('accStatus').innerText = data.status || "Active";
                     if (data.photo) {
                         document.getElementById('userAvatar').innerHTML = `<img src="${data.photo}" alt="Profile">`;
@@ -133,75 +127,29 @@
             });
         }
 
-        // রেফার কোড কপি লজিক (SweetAlert2)
         document.getElementById('copyRefer').onclick = () => {
             const code = document.getElementById('profileRefer').innerText;
             if (code === "N/A" || code === "PRO0000") return;
             navigator.clipboard.writeText(code);
-            if (tg?.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
-            
-            Swal.fire({
-                title: 'Earn Pro Official',
-                text: 'Refer code copied: ' + code,
-                icon: 'success',
-                timer: 1500,
-                showConfirmButton: false
-            });
+            Swal.fire({ title: 'Success', text: 'Refer code copied!', icon: 'success', timer: 1500, showConfirmButton: false });
         };
 
-        // প্রমো কোড রিডিম লজিক (SweetAlert2 সমাধান)
         document.getElementById('btnRedeem').onclick = async () => {
             const code = document.getElementById('promoInput').value.trim();
-            if(!code) {
-                return Swal.fire({
-                    title: 'Earn Pro Official',
-                    text: 'Please enter a code!',
-                    icon: 'warning'
-                });
-            }
+            if(!code) return Swal.fire('Error', 'Enter code', 'warning');
+            const userRef = doc(db, "users", tgId);
+            const userSnap = await getDoc(userRef);
+            if (userSnap.data().usedPromos?.includes(code)) return Swal.fire('Error', 'Already used', 'error');
 
-            // ভ্যালিড কোড চেক
-            if(code === "WELCOME50" || code === "PRO8722") {
-                await updateDoc(doc(db, "users", tgId), { coins: increment(50) });
-                Swal.fire({
-                    title: 'Earn Pro Official',
-                    text: '50 Coins added successfully!',
-                    icon: 'success'
-                });
-                document.getElementById('promoInput').value = "";
-            } else {
-                // Invalid Code সমাধান
-                Swal.fire({
-                    title: 'Earn Pro Official',
-                    text: 'Invalid or Expired Code!',
-                    icon: 'error'
-                });
-            }
+            if(code === "WELCOME50") {
+                await updateDoc(userRef, { coins: increment(50), usedPromos: arrayUnion(code) });
+                Swal.fire('Success', '50 Coins added!', 'success');
+            } else { Swal.fire('Error', 'Invalid code', 'error'); }
         };
 
-        // এক্সিট লজিক
         document.getElementById('btnLogOut').onclick = () => {
-            Swal.fire({
-                title: 'Earn Pro Official',
-                text: "Do you want to exit the application?",
-                icon: 'question',
-                showCancelButton: true,
-                confirmButtonColor: '#ff4d4d',
-                cancelButtonColor: '#667eea',
-                confirmButtonText: 'Yes, Exit!'
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    if (tg) tg.close();
-                    else window.location.replace("login.html");
-                }
-            });
+            if (tg) tg.close(); else window.location.replace("login.html");
         };
-
-        if (tg) {
-            tg.ready();
-            tg.BackButton.show();
-            tg.BackButton.onClick(() => window.location.href = "index.html");
-        }
     </script>
 </body>
 </html>
