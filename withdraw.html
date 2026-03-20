@@ -26,7 +26,7 @@
             <option value="Rocket">Rocket</option>
         </select>
         <input type="number" id="accountNo" class="input-field" placeholder="Account Number">
-        <input type="number" id="amount" class="input-field" placeholder="Amount (Min 500)">
+        <input type="number" id="amount" class="input-field" placeholder="Amount (Min 5000)">
         <button class="btn-withdraw" id="submitBtn">Submit Request</button>
     </div>
 
@@ -54,10 +54,15 @@
             const number = document.getElementById('accountNo').value;
             const amount = parseInt(document.getElementById('amount').value);
 
+            // ব্যালেন্স চেক
             if(amount > userBalance) return Swal.fire('Error', 'Insufficient Balance!', 'error');
-            if(amount < 5000) return Swal.fire('Error', 'Minimum 5000 coins!', 'error');
+            
+            // এখানে ৫০০ এর জায়গায় ৫০০০ এর লজিক দেওয়া হয়েছে
+            if(amount < 5000) return Swal.fire('Error', 'Minimum 5000 coins required!', 'error');
 
             try {
+                Swal.fire({ title: 'Processing...', allowOutsideClick: false, didOpen: () => { Swal.showLoading(); } });
+
                 // ১. ব্যালেন্স থেকে কয়েন কেটে নেওয়া
                 await updateDoc(doc(db, "users", tgId), { coins: increment(-amount) });
                 
@@ -72,7 +77,7 @@
                     timestamp: Date.now()
                 });
 
-                Swal.fire('Success', 'Request sent!', 'success').then(()=> location.reload());
+                Swal.fire('Success', 'উইথড্র রিকোয়েস্ট সফলভাবে পাঠানো হয়েছে!', 'success').then(()=> location.reload());
             } catch(e) { Swal.fire('Error', e.message, 'error'); }
         };
     </script>
