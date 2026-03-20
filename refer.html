@@ -4,8 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Refer & Earn - Earn Pro Official</title>
+    <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         body { background: #f4f7f6; font-family: 'Segoe UI', sans-serif; margin: 0; padding-bottom: 90px; text-align: center; }
         .refer-header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 40px 20px; border-bottom-left-radius: 30px; border-bottom-right-radius: 30px; }
@@ -19,7 +21,7 @@
         .apply-btn { width: 100%; padding: 12px; background: #667eea; color: white; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; }
 
         .bottom-nav { position: fixed; bottom: 0; width: 100%; background: white; display: flex; justify-content: space-around; padding: 10px 0; border-top: 1px solid #eee; z-index: 1000; }
-        .nav-item { color: #888; text-decoration: none; font-size: 10px; flex: 1; }
+        .nav-item { color: #888; text-decoration: none; font-size: 10px; flex: 1; text-align: center; }
         .nav-item i { font-size: 20px; display: block; margin-bottom: 2px; }
         .nav-item.active { color: #667eea; }
     </style>
@@ -34,7 +36,7 @@
 
     <div class="refer-card">
         <p style="color: #888; font-size: 14px;">Your Referral Code (Click to Copy)</p>
-        <div class="promo-box" id="referCodeBox" onclick="copyCode()">LOADING...</div>
+        <div class="promo-box" id="referCodeBox">LOADING...</div>
         
         <div style="text-align: left; font-size: 14px; color: #555; margin-bottom: 20px;">
             <p>✅ <b>Level 1:</b> বন্ধু জয়েন করলে পাবেন ৫০ কয়েন।</p>
@@ -47,7 +49,7 @@
     </div>
 
     <div class="promo-input-card">
-        <h4 style="margin-top: 0; color: #333;">Apply Promo Code</h4>
+        <h4 style="margin-top: 0; color: #333;">Apply Refer/Promo Code</h4>
         <input type="text" id="promoInput" class="p-input" placeholder="Enter code here">
         <button class="apply-btn" id="btnRedeem">Apply Code</button>
     </div>
@@ -61,10 +63,11 @@
 
     <script type="module">
         import { db } from './firebase.js';
-        import { doc, updateDoc, increment, onSnapshot, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore.js";
+        import { doc, updateDoc, increment, onSnapshot, collection, query, where, getDocs, getDoc, arrayUnion } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore.js";
 
         const tgId = localStorage.getItem("tg_user_id");
         const referBox = document.getElementById('referCodeBox');
+        const tg = window.Telegram?.WebApp;
 
         // ১. নিজের রেফার কোড লোড করা
         if (tgId) {
@@ -79,66 +82,93 @@
         document.getElementById('btnRedeem').onclick = async () => {
             const code = document.getElementById('promoInput').value.trim();
             
-            if(!code) {
-                Swal.fire({ title: 'Earn Pro Official', text: 'কোড লিখুন!', icon: 'warning' });
+            if(!code || !tgId) {
+                Swal.fire('Error', 'সঠিক কোড লিখুন!', 'warning');
                 return;
             }
 
             try {
-                // ডাটাবেসে চেক করা কোডটি কারোর রেফার কোড কি না
+                const userRef = doc(db, "users", tgId);
+                const userSnap = await getDoc(userRef);
+                const userData = userSnap.data();
+
+                // চেক: ইউজার কি আগে কোনো কোড ব্যবহার করেছে?
+                if (userData.hasUsedRefer) {
+                    Swal.fire('Error', 'আপনি ইতিমধ্যে একটি কোড ব্যবহার করেছেন!', 'error');
+                    return;
+                }
+
+                // নিজের কোড চেক
+                if (code === userData.referCode) {
+                    Swal.fire('Error', 'নিজের কোড ব্যবহার করা যাবে না!', 'error');
+                    return;
+                }
+
+                // ডাটাবেসে রেফার কোডটি খোঁজা
                 const q = query(collection(db, "users"), where("referCode", "==", code));
                 const querySnapshot = await getDocs(q);
 
                 if (!querySnapshot.empty) {
                     const referrerDoc = querySnapshot.docs[0];
-                    const referrerId = referrerDoc.id;
+                    const referrerRef = doc(db, "users", referrerDoc.id);
 
-                    if(referrerId === tgId) {
-                        Swal.fire({ title: 'Earn Pro Official', text: 'নিজের কোড ব্যবহার করা যাবে না!', icon: 'error' });
-                        return;
-                    }
-
-                    // রেফারারকে বোনাস এবং রেফার সংখ্যা বাড়ানো
-                    await updateDoc(doc(db, "users", referrerId), {
+                    // ১. রেফারারকে বোনাস এবং কাউন্ট বাড়ানো
+                    await updateDoc(referrerRef, {
                         coins: increment(50),
-                        totalRefer: increment(1)
+                        referCount: increment(1) // প্রোফাইল পেজের সাথে মিলানো হলো
                     });
 
-                    // নতুন ইউজারকে বোনাস
-                    await updateDoc(doc(db, "users", tgId), { coins: increment(20) });
+                    // ২. বর্তমান ইউজারকে বোনাস দেওয়া এবং লক করা
+                    await updateDoc(userRef, { 
+                        coins: increment(20),
+                        hasUsedRefer: true 
+                    });
 
-                    Swal.fire({ title: 'Earn Pro Official', text: 'রেফার সফল! বোনাস যোগ হয়েছে।', icon: 'success' });
+                    Swal.fire('Success', 'রেফার সফল! ২০ কয়েন বোনাস পেয়েছেন।', 'success');
                     document.getElementById('promoInput').value = "";
 
                 } else {
-                    // সাধারণ প্রোমো কোড চেক
-                    const validPromoCodes = ["PRO8722", "WELCOME50", "BONUS100"];
-                    if(validPromoCodes.includes(code)) {
-                        await updateDoc(doc(db, "users", tgId), { coins: increment(50) });
-                        Swal.fire({ title: 'Earn Pro Official', text: 'প্রোমো বোনাস যোগ হয়েছে!', icon: 'success' });
+                    // ৩. সাধারণ প্রোমো কোড চেক (যদি রেফার কোড না হয়)
+                    const validPromos = ["WELCOME50", "PRO8722"];
+                    if (validPromos.includes(code)) {
+                        await updateDoc(userRef, { 
+                            coins: increment(50),
+                            hasUsedRefer: true 
+                        });
+                        Swal.fire('Success', 'প্রোমো বোনাস যোগ হয়েছে!', 'success');
                         document.getElementById('promoInput').value = "";
                     } else {
-                        // ভুল কোড পপ-আপ
-                        Swal.fire({ title: 'Earn Pro Official', text: 'Invalid or Expired Code!', icon: 'error' });
+                        Swal.fire('Error', 'ভুল বা মেয়াদোত্তীর্ণ কোড!', 'error');
                     }
                 }
-            } catch (e) { console.error(e); }
+            } catch (e) { 
+                console.error(e);
+                Swal.fire('Error', 'কিছু একটা ভুল হয়েছে!', 'error');
+            }
         };
 
-        // ৩. কপি এবং শেয়ার ফাংশন
-        window.copyCode = () => {
+        // ৩. কপি ফাংশন
+        referBox.onclick = () => {
             const code = referBox.innerText;
             if(code === "LOADING..." || code === "N/A") return;
             navigator.clipboard.writeText(code);
-            Swal.fire({ title: 'Earn Pro Official', text: 'Copied: ' + code, icon: 'success', timer: 1000, showConfirmButton: false });
+            if(tg) tg.HapticFeedback.notificationOccurred('success');
+            Swal.fire({ title: 'Copied!', text: code, icon: 'success', timer: 1000, showConfirmButton: false });
         };
 
+        // ৪. শেয়ার ফাংশন (টেলিগ্রাম স্টাইল)
         document.getElementById('shareBtn').onclick = () => {
             const code = referBox.innerText;
-            const botLink = `https://t.me/earnpropfficial1_Bot?start=${code}`;
-            const shareText = `👋 Earn Pro Official অ্যাপে জয়েন করে টাকা ইনকাম করুন! \n🎁 রেফার কোড: ${code}`;
-            window.open(`https://t.me/share/url?url=${encodeURIComponent(botLink)}&text=${encodeURIComponent(shareText)}`);
+            const shareText = `👋 Earn Pro Official অ্যাপে জয়েন করুন এবং ইনকাম শুরু করুন!\n🎁 আমার রেফার কোড ব্যবহার করলে পাবেন বোনাস: ${code}\n\nবট লিঙ্ক: https://t.me/your_bot_username`;
+            const telegramUrl = `https://t.me/share/url?url=${encodeURIComponent(shareText)}`;
+            window.open(telegramUrl, '_blank');
         };
+
+        if (tg) {
+            tg.ready();
+            tg.BackButton.show();
+            tg.BackButton.onClick(() => window.location.href = "index.html");
+        }
     </script>
 </body>
 </html>
