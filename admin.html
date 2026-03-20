@@ -2,78 +2,96 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Admin Panel</title>
+    <title>Admin Panel - EarnPro</title>
     <link rel="stylesheet" href="style.css">
     <style>
-        #adminAuth { height: 100vh; display: flex; justify-content: center; align-items: center; }
+        #adminAuth { height: 100vh; display: flex; justify-content: center; align-items: center; background: #f0f2f5; }
         #adminContent { display: none; padding: 20px; }
-        table { width: 100%; border-collapse: collapse; background: white; }
+        table { width: 100%; border-collapse: collapse; background: white; box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
         th, td { border: 1px solid #ddd; padding: 12px; text-align: left; }
         th { background: #667eea; color: white; }
-        .btn-approve { background: #2ecc71; color: white; border: none; padding: 5px 10px; cursor: pointer; border-radius: 4px; }
+        .btn-approve { background: #27ae60; color: white; border: none; padding: 8px 12px; border-radius: 5px; cursor: pointer; }
     </style>
 </head>
 <body>
+
     <div id="adminAuth">
-        <div style="background: white; padding: 20px; border-radius: 10px; box-shadow: 0 0 10px rgba(0,0,0,0.1);">
+        <div style="background: white; padding: 30px; border-radius: 15px; text-align: center;">
             <h3>Admin Login</h3>
-            <input type="password" id="pass" style="padding:10px; margin-bottom:10px; width:100%;"><br>
-            <button onclick="login()" style="width:100%; padding:10px; background:#667eea; color:white; border:none;">Login</button>
+            <input type="password" id="adminPass" placeholder="Enter Password" style="width:100%; padding:10px; margin: 15px 0; border: 1px solid #ccc; border-radius: 5px;">
+            <button id="loginBtn" style="width:100%; padding:10px; background:#667eea; color:white; border:none; border-radius:5px; cursor:pointer;">Login</button>
         </div>
     </div>
 
     <div id="adminContent">
-        <h2>Withdrawal Requests</h2>
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+            <h2>Pending Withdraw Requests</h2>
+            <button onclick="location.reload()" style="background:#e74c3c; color:white; border:none; padding:8px 15px; border-radius:5px; cursor:pointer;">Logout</button>
+        </div>
+        <hr>
         <table>
             <thead>
                 <tr>
-                    <th>Name</th>
+                    <th>User Name</th>
                     <th>Method</th>
-                    <th>Number</th>
+                    <th>Account No</th>
                     <th>Amount</th>
                     <th>Action</th>
                 </tr>
             </thead>
-            <tbody id="reqTable"></tbody>
+            <tbody id="withdrawTable"></tbody>
         </table>
     </div>
 
     <script type="module">
         import { db } from './firebase.js';
-        import { collection, query, where, getDocs, doc, updateDoc } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore.js";
+        import { collection, getDocs, doc, updateDoc, query, where } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore.js";
 
-        window.login = () => {
-            if(document.getElementById('pass').value === "Admin@9900") {
+        const ADMIN_PASS = "Admin@9900";
+
+        document.getElementById('loginBtn').onclick = () => {
+            const input = document.getElementById('adminPass').value;
+            if (input === ADMIN_PASS) {
                 document.getElementById('adminAuth').style.display = 'none';
                 document.getElementById('adminContent').style.display = 'block';
-                loadData();
-            } else { alert("Wrong Password!"); }
+                loadRequests();
+            } else {
+                alert("ভুল পাসওয়ার্ড!");
+            }
         };
 
-        async function loadData() {
-            const table = document.getElementById('reqTable');
-            table.innerHTML = "";
+        async function loadRequests() {
+            const table = document.getElementById('withdrawTable');
+            table.innerHTML = "<tr><td colspan='5' style='text-align:center;'>লোড হচ্ছে...</td></tr>";
+            
             const q = query(collection(db, "withdrawals"), where("status", "==", "pending"));
             const snap = await getDocs(q);
-            snap.forEach(d => {
+            table.innerHTML = "";
+
+            if (snap.empty) {
+                table.innerHTML = "<tr><td colspan='5' style='text-align:center;'>কোনো পেন্ডিং রিকোয়েস্ট নেই।</td></tr>";
+                return;
+            }
+
+            snap.forEach((d) => {
                 const data = d.data();
                 table.innerHTML += `
                     <tr>
-                        <td>${data.name}</td>
+                        <td>${data.name || 'Unknown'}</td>
                         <td>${data.method}</td>
                         <td>${data.number}</td>
-                        <td>${data.amount}</td>
-                        <td><button class="btn-approve" onclick="approve('${d.id}')">Approve</button></td>
+                        <td>${data.amount} Coins</td>
+                        <td><button class="btn-approve" onclick="approveRequest('${d.id}')">Approve</button></td>
                     </tr>
                 `;
             });
         }
 
-        window.approve = async (id) => {
-            if(confirm("Confirm Payment?")) {
+        window.approveRequest = async (id) => {
+            if (confirm("আপনি কি পেমেন্ট করেছেন?")) {
                 await updateDoc(doc(db, "withdrawals", id), { status: "approved" });
-                alert("Success!");
-                loadData();
+                alert("Approved Successfully!");
+                loadRequests();
             }
         };
     </script>
