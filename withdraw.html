@@ -8,26 +8,24 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <style>
-        /* অতিরিক্ত ইনলাইন স্টাইল যাতে ফর্মটি সুন্দর দেখায় */
-        .withdraw-card { background: var(--white); margin: -20px 20px 20px; padding: 25px; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); }
-        .input-group { margin-bottom: 20px; }
+        /* ফিক্সড ডিজাইন স্টাইল */
+        .withdraw-card { background: white; margin: -25px 20px 20px; padding: 25px; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); position: relative; z-index: 10; }
+        .input-group { margin-bottom: 20px; text-align: left; }
         .input-group label { display: block; margin-bottom: 8px; font-weight: 600; color: #555; font-size: 14px; }
-        .input-field { width: 100%; padding: 12px; border: 1px solid #eee; border-radius: 12px; box-sizing: border-box; background: #f9f9f9; font-size: 15px; outline: none; transition: 0.3s; }
-        .input-field:focus { border-color: #667eea; background: #fff; }
-        .btn-submit { width: 100%; padding: 15px; background: var(--primary); color: white; border: none; border-radius: 12px; font-weight: bold; font-size: 16px; cursor: pointer; transition: 0.3s; }
-        .btn-submit:active { transform: scale(0.98); }
+        .input-field { width: 100%; padding: 12px; border: 1px solid #eee; border-radius: 12px; box-sizing: border-box; background: #f9f9f9; font-size: 15px; outline: none; }
+        .btn-submit { width: 100%; padding: 15px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; border-radius: 12px; font-weight: bold; font-size: 16px; cursor: pointer; }
     </style>
 </head>
 <body>
 
     <div class="header">
-        <h2 style="margin:0;">Withdraw</h2>
+        <h2 style="margin:0;">Withdraw Coins</h2>
         <p style="opacity:0.9; font-size: 14px;">আপনার ব্যালেন্স: <span id="currentBalance">0</span> Coins</p>
     </div>
 
     <div class="withdraw-card">
         <div class="input-group">
-            <label>পেমেন্ট মেথড বেছে নিন</label>
+            <label>পেমেন্ট মেথড</label>
             <select id="method" class="input-field">
                 <option value="bKash">bKash</option>
                 <option value="Nagad">Nagad</option>
@@ -42,7 +40,7 @@
 
         <div class="input-group">
             <label>কয়েন এর পরিমাণ (মিনিমাম ৫০০০)</label>
-            <input type="number" id="amount" class="input-field" placeholder="Min 5000 Coins">
+            <input type="number" id="amount" class="input-field" placeholder="Min 5000">
         </div>
 
         <button class="btn-submit" id="submitBtn">Submit Request</button>
@@ -64,12 +62,12 @@
         let userName = "";
 
         async function init() {
-            if (!tgId) { window.location.replace("login.html"); return; }
+            if (!tgId) { window.location.href="login.html"; return; }
             const snap = await getDoc(doc(db, "users", tgId));
             if (snap.exists()) {
                 userBalance = snap.data().coins || 0;
                 userName = snap.data().name || "User";
-                document.getElementById('currentBalance').innerText = userBalance.toLocaleString();
+                document.getElementById('currentBalance').innerText = userBalance;
             }
         }
         init();
@@ -79,37 +77,18 @@
             const number = document.getElementById('accountNo').value;
             const amount = parseInt(document.getElementById('amount').value);
 
-            if (!number || number.length < 11) {
-                return Swal.fire('Error', 'সঠিক নম্বর দিন!', 'error');
-            }
-            if (isNaN(amount) || amount < 5000) {
-                return Swal.fire('Error', 'মিনিমাম উইথড্র ৫০০০ কয়েন!', 'error');
-            }
-            if (amount > userBalance) {
-                return Swal.fire('Error', 'আপনার পর্যাপ্ত ব্যালেন্স নেই!', 'error');
-            }
+            if (!number || number.length < 11) { return Swal.fire('Error', 'সঠিক নম্বর দিন', 'error'); }
+            if (isNaN(amount) || amount < 5000) { return Swal.fire('Error', 'মিনিমাম ৫০০০ কয়েন লাগবে', 'error'); }
+            if (amount > userBalance) { return Swal.fire('Error', 'পর্যাপ্ত কয়েন নেই', 'error'); }
 
             try {
-                Swal.fire({ title: 'Processing...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
-
-                // ১. ব্যালেন্স কাটা
+                Swal.fire({ title: 'প্রসেসিং...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
                 await updateDoc(doc(db, "users", tgId), { coins: increment(-amount) });
-
-                // ২. রিকোয়েস্ট জমা দেওয়া
                 await addDoc(collection(db, "withdrawals"), {
-                    userId: tgId,
-                    name: userName,
-                    method: method,
-                    number: number,
-                    amount: amount,
-                    status: "pending",
-                    timestamp: Date.now()
+                    userId: tgId, name: userName, method: method, number: number, amount: amount, status: "pending", timestamp: Date.now()
                 });
-
-                Swal.fire('Success', 'উইথড্র রিকোয়েস্ট সফল হয়েছে!', 'success').then(() => location.reload());
-            } catch (e) {
-                Swal.fire('Error', e.message, 'error');
-            }
+                Swal.fire('Success', 'রিকোয়েস্ট পাঠানো হয়েছে', 'success').then(() => location.reload());
+            } catch (e) { Swal.fire('Error', e.message, 'error'); }
         };
     </script>
 </body>
