@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Earn Coins - EarnPro</title>
-    <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
@@ -34,7 +33,7 @@
         </button>
 
         <button id="watchAdBtn" class="btn-earn" style="background: #2e7d32;">
-            <i class="fa fa-play-circle"></i> &nbsp; Watch Video & Earn (+5)
+            <i class="fa fa-play-circle"></i> &nbsp; Watch Video & Earn (<span id="rewardText">+0</span>)
         </button>
 
         <div class="earn-card">
@@ -55,16 +54,27 @@
 
     <script type="module">
         import { db } from './firebase.js';
-        import { doc, getDoc, updateDoc, increment } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore.js";
+        import { doc, getDoc, updateDoc, increment, onSnapshot } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore.js";
 
         const tgId = localStorage.getItem("tg_user_id");
         const tg = window.Telegram?.WebApp;
 
+        // অ্যাডমিন প্যানেল থেকে আসা অ্যাড লিঙ্ক
         const AD_DAILY = "https://middayopened.com/uuh65fp1c?key=0d0044249c1cef410a86dcfa8f7e3460";
         const AD_WATCH = "https://middayopened.com/c95t5ad9nb?key=9e9e3820d54db2d2cbe11cbfc394a5e9";
         const AD_SPIN = "https://middayopened.com/rmm8pbwe?key=a42d11bce0966c10bc9b3f909ae44009";
 
-        // ১. চেক-ইন স্ট্যাটাস লোড
+        let currentTaskReward = 5; // ডিফল্ট ৫ কয়েন
+
+        // ১. অ্যাডমিন সেটিংস লোড করা (Real-time)
+        onSnapshot(doc(db, "settings", "app_config"), (snap) => {
+            if (snap.exists()) {
+                currentTaskReward = snap.data().taskReward || 5;
+                document.getElementById('rewardText').innerText = `+${currentTaskReward}`;
+            }
+        });
+
+        // ২. চেক-ইন স্ট্যাটাস লোড
         async function checkDailyStatus() {
             if (!tgId) return;
             const snap = await getDoc(doc(db, "users", tgId));
@@ -79,30 +89,30 @@
             }
         }
 
-        // ২. ডেইলি চেক-ইন লজিক
+        // ৩. ডেইলি চেক-ইন লজিক
         document.getElementById('checkInBtn').onclick = async () => {
             if (!tgId) return;
             window.open(AD_DAILY, '_blank');
             await updateDoc(doc(db, "users", tgId), { 
-                coins: increment(10),
-                taskCount: increment(1), // টাস্ক কাউন্ট বৃদ্ধি
+                coins: increment(10), // ডেইলি চেক-ইন সাধারণত ফিক্সড থাকে, চাইলে এটাও ডাইনামিক করা যায়
+                taskCount: increment(1),
                 lastCheckIn: Date.now() 
             });
             Swal.fire('Success', '১০ কয়েন ডেইলি বোনাস যোগ হয়েছে!', 'success').then(() => location.reload());
         };
 
-        // ৩. ভিডিও অ্যাড লজিক
+        // ৪. ভিডিও অ্যাড লজিক (অ্যাডমিন ভ্যালু অনুযায়ী)
         document.getElementById('watchAdBtn').onclick = async () => {
             if (!tgId) return;
             window.open(AD_WATCH, '_blank');
             await updateDoc(doc(db, "users", tgId), { 
-                coins: increment(5),
-                taskCount: increment(1) // টাস্ক কাউন্ট বৃদ্ধি
+                coins: increment(currentTaskReward), // অ্যাডমিন থেকে পাওয়া ভ্যালু
+                taskCount: increment(1)
             });
-            Swal.fire('Success', '৫ কয়েন যোগ হয়েছে!', 'success');
+            Swal.fire('Success', `${currentTaskReward} কয়েন যোগ হয়েছে!`, 'success');
         };
 
-        // ৪. স্পিন লজিক
+        // ৫. স্পিন লজিক
         let spinning = false;
         document.getElementById('spinBtn').onclick = () => {
             if (spinning || !tgId) return;
@@ -112,7 +122,8 @@
             wheel.style.transform = `rotate(${randomDeg}deg)`;
 
             setTimeout(async () => {
-                const bonus = Math.floor(Math.random() * 20) + 1;
+                // স্পিন রিওয়ার্ড ও অ্যাডমিন ভ্যালুর সমন্বয় (র‍্যান্ডম ১ থেকে আপনার সেট করা ভ্যালু পর্যন্ত)
+                const bonus = Math.floor(Math.random() * currentTaskReward) + 1;
                 
                 Swal.fire({
                     title: 'Congratulations!',
@@ -124,7 +135,7 @@
                     if (result.isConfirmed) {
                         await updateDoc(doc(db, "users", tgId), { 
                             coins: increment(bonus),
-                            taskCount: increment(1) // টাস্ক কাউন্ট বৃদ্ধি
+                            taskCount: increment(1)
                         });
                         window.open(AD_SPIN, '_blank');
                     }
