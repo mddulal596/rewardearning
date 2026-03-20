@@ -6,12 +6,14 @@
     <title>Earn Coins - EarnPro</title>
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         body { background: #f4f7f6; font-family: 'Segoe UI', sans-serif; margin: 0; padding-bottom: 90px; }
         .header-section { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 40px 20px; text-align: center; border-bottom-left-radius: 30px; border-bottom-right-radius: 30px; }
         .earn-card { background: white; padding: 25px; border-radius: 20px; margin: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); text-align: center; }
-        .btn-earn { width: 100%; padding: 15px; margin-bottom: 15px; border: none; border-radius: 12px; color: white; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: 0.3s; }
+        .btn-earn { width: 100%; padding: 15px; margin-bottom: 15px; border: none; border-radius: 12px; color: white; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: 0.3s; font-size: 15px; }
+        .btn-earn:active { transform: scale(0.98); }
         .btn-earn:disabled { background: #ccc !important; cursor: not-allowed; opacity: 0.8; }
         #wheel-container { font-size: 80px; margin: 20px 0; display: inline-block; transition: transform 4s cubic-bezier(0.1, 0, 0.1, 1); }
         .bottom-nav { position: fixed; bottom: 0; width: 100%; background: white; display: flex; justify-content: space-around; padding: 10px 0; border-top: 1px solid #eee; z-index: 1000; }
@@ -55,23 +57,21 @@
         import { db } from './firebase.js';
         import { doc, getDoc, updateDoc, increment } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore.js";
 
-        const userId = localStorage.getItem("tg_user_id");
+        const tgId = localStorage.getItem("tg_user_id");
+        const tg = window.Telegram?.WebApp;
 
-        // ৩টি আলাদা অ্যাড লিঙ্ক
         const AD_DAILY = "https://middayopened.com/uuh65fp1c?key=0d0044249c1cef410a86dcfa8f7e3460";
         const AD_WATCH = "https://middayopened.com/c95t5ad9nb?key=9e9e3820d54db2d2cbe11cbfc394a5e9";
         const AD_SPIN = "https://middayopened.com/rmm8pbwe?key=a42d11bce0966c10bc9b3f909ae44009";
 
-        // ১. ডেইলি চেক-ইন লক স্ট্যাটাস চেক (২৪ ঘণ্টা)
+        // ১. চেক-ইন স্ট্যাটাস লোড
         async function checkDailyStatus() {
-            if (!userId) return;
-            const snap = await getDoc(doc(db, "users", userId));
+            if (!tgId) return;
+            const snap = await getDoc(doc(db, "users", tgId));
             if (snap.exists()) {
                 const lastCheck = snap.data().lastCheckIn || 0;
                 const currentTime = Date.now();
-                const twentyFourHours = 24 * 60 * 60 * 1000;
-
-                if (currentTime - lastCheck < twentyFourHours) {
+                if (currentTime - lastCheck < 24 * 60 * 60 * 1000) {
                     const btn = document.getElementById('checkInBtn');
                     btn.disabled = true;
                     btn.innerHTML = '<i class="fa fa-check-circle"></i> &nbsp; Already Checked-in';
@@ -79,29 +79,33 @@
             }
         }
 
+        // ২. ডেইলি চেক-ইন লজিক
         document.getElementById('checkInBtn').onclick = async () => {
-            if (!userId) return;
+            if (!tgId) return;
             window.open(AD_DAILY, '_blank');
-            await updateDoc(doc(db, "users", userId), { 
+            await updateDoc(doc(db, "users", tgId), { 
                 coins: increment(10),
+                taskCount: increment(1), // টাস্ক কাউন্ট বৃদ্ধি
                 lastCheckIn: Date.now() 
             });
-            alert("১০ কয়েন ডেইলি বোনাস যোগ হয়েছে!");
-            location.reload();
+            Swal.fire('Success', '১০ কয়েন ডেইলি বোনাস যোগ হয়েছে!', 'success').then(() => location.reload());
         };
 
-        // ২. ভিডিও অ্যাড লজিক
+        // ৩. ভিডিও অ্যাড লজিক
         document.getElementById('watchAdBtn').onclick = async () => {
-            if (!userId) return;
+            if (!tgId) return;
             window.open(AD_WATCH, '_blank');
-            await updateDoc(doc(db, "users", userId), { coins: increment(5) });
-            alert("৫ কয়েন যোগ হয়েছে!");
+            await updateDoc(doc(db, "users", tgId), { 
+                coins: increment(5),
+                taskCount: increment(1) // টাস্ক কাউন্ট বৃদ্ধি
+            });
+            Swal.fire('Success', '৫ কয়েন যোগ হয়েছে!', 'success');
         };
 
-        // ৩. স্পিন লজিক (১-২০ কয়েন + অ্যাড ফিক্স)
+        // ৪. স্পিন লজিক
         let spinning = false;
         document.getElementById('spinBtn').onclick = () => {
-            if (spinning || !userId) return;
+            if (spinning || !tgId) return;
             spinning = true;
             const wheel = document.getElementById('wheel-container');
             const randomDeg = Math.floor(Math.random() * 360) + 1800;
@@ -110,25 +114,21 @@
             setTimeout(async () => {
                 const bonus = Math.floor(Math.random() * 20) + 1;
                 
-                // ইউজার OK ক্লিক করলে অ্যাড নিশ্চিতভাবে ওপেন করার জন্য Fallback লজিক
-                const userConfirmed = confirm(`অভিনন্দন! আপনি ${bonus} কয়েন পেয়েছেন। বিজ্ঞাপনটি দেখে কয়েন কালেক্ট করতে 'OK' ক্লিক করুন।`);
-                
-                if (userConfirmed) {
-                    try {
-                        // ব্যালেন্স আপডেট
-                        await updateDoc(doc(db, "users", userId), { coins: increment(bonus) });
-                        
-                        // পপ-আপ ব্লক এড়িয়ে অ্যাড ওপেন করা
-                        const adWindow = window.open(AD_SPIN, '_blank');
-                        
-                        // যদি পপ-আপ ব্লক হয়, সরাসরি লিঙ্কে রিডাইরেক্ট করা
-                        if (!adWindow || adWindow.closed || typeof adWindow.closed == 'undefined') {
-                            window.location.href = AD_SPIN;
-                        } else {
-                            alert(`${bonus} কয়েন যোগ করা হয়েছে!`);
-                        }
-                    } catch (e) { console.error(e); }
-                }
+                Swal.fire({
+                    title: 'Congratulations!',
+                    text: `আপনি ${bonus} কয়েন পেয়েছেন। বিজ্ঞাপনটি দেখে কয়েন কালেক্ট করুন।`,
+                    icon: 'success',
+                    showCancelButton: false,
+                    confirmButtonText: 'Collect Coins'
+                }).then(async (result) => {
+                    if (result.isConfirmed) {
+                        await updateDoc(doc(db, "users", tgId), { 
+                            coins: increment(bonus),
+                            taskCount: increment(1) // টাস্ক কাউন্ট বৃদ্ধি
+                        });
+                        window.open(AD_SPIN, '_blank');
+                    }
+                });
                 
                 spinning = false;
                 wheel.style.transform = `rotate(0deg)`;
@@ -137,10 +137,10 @@
 
         checkDailyStatus();
 
-        if (window.Telegram?.WebApp) {
-            window.Telegram.WebApp.ready();
-            window.Telegram.WebApp.BackButton.show();
-            window.Telegram.WebApp.BackButton.onClick(() => window.location.href = "index.html");
+        if (tg) {
+            tg.ready();
+            tg.BackButton.show();
+            tg.BackButton.onClick(() => window.location.href = "index.html");
         }
     </script>
 </body>
