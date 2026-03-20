@@ -13,13 +13,18 @@
         .history-link { position: absolute; top: 20px; right: 20px; color: white; background: rgba(255,255,255,0.2); padding: 5px 10px; border-radius: 8px; text-decoration: none; font-size: 12px; }
         .balance-card { background: white; margin: -30px 20px 20px; padding: 25px; border-radius: 20px; text-align: center; box-shadow: 0 10px 25px rgba(0,0,0,0.05); }
         .method-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; padding: 0 20px; }
-        .method-item { background: white; padding: 15px; border-radius: 15px; text-align: center; cursor: pointer; border: 2px solid transparent; }
-        .method-item img { width: 45px; height: 45px; margin-bottom: 8px; }
-        .method-item.selected { border-color: #667eea; background: #f0f4ff; }
+        .method-item { background: white; padding: 15px; border-radius: 15px; text-align: center; cursor: pointer; border: 2px solid transparent; box-shadow: 0 4px 10px rgba(0,0,0,0.05); transition: 0.3s; }
+        .method-item img { width: 50px; height: 50px; margin-bottom: 8px; object-fit: contain; }
+        .method-item.selected { border-color: #667eea; background: #f0f4ff; transform: scale(1.05); }
         .input-box { padding: 20px; }
         .w-input { width: 100%; padding: 15px; margin-bottom: 12px; border: 1px solid #eee; border-radius: 12px; box-sizing: border-box; }
-        .btn-withdraw { width: 100%; padding: 15px; background: #667eea; color: white; border: none; border-radius: 12px; font-weight: bold; }
-        .bottom-nav { position: fixed; bottom: 0; width: 100%; background: white; display: flex; justify-content: space-around; padding: 12px 0; border-top: 1px solid #eee; }
+        .btn-withdraw { width: 100%; padding: 15px; background: #667eea; color: white; border: none; border-radius: 12px; font-weight: bold; cursor: pointer; }
+        
+        /* Bottom Navigation Styling */
+        .bottom-nav { position: fixed; bottom: 0; width: 100%; background: white; display: flex; justify-content: space-around; padding: 12px 0; border-top: 1px solid #eee; z-index: 1000; }
+        .nav-item { text-decoration: none; color: #888; text-align: center; font-size: 11px; flex: 1; }
+        .nav-item i { display: block; font-size: 20px; margin-bottom: 3px; }
+        .nav-item.active { color: #667eea; }
     </style>
 </head>
 <body>
@@ -27,10 +32,12 @@
         <a href="history.html" class="history-link"><i class="fas fa-history"></i> History</a>
         <h2>Withdraw</h2>
     </div>
+
     <div class="balance-card">
         <p>Total Balance</p>
         <h1 id="userCoins">0</h1>
     </div>
+
     <div class="method-grid">
         <div class="method-item" onclick="selectMethod('bKash', this)">
             <img src="https://raw.githubusercontent.com/Ariful-Islam-720/Logo-Store/main/bkash.png" alt="bKash">
@@ -41,11 +48,19 @@
             <b>Nagad</b>
         </div>
     </div>
+
     <div class="input-box">
         <input type="number" id="withdrawAmount" class="w-input" placeholder="Amount (min 5000)">
         <input type="text" id="walletNumber" class="w-input" placeholder="Wallet Number">
-        <button class="btn-withdraw" id="submitBtn">Submit</button>
+        <button class="btn-withdraw" id="submitBtn">Submit Withdrawal</button>
     </div>
+
+    <nav class="bottom-nav">
+        <a href="index.html" class="nav-item"><i class="fas fa-home"></i>Home</a>
+        <a href="earn.html" class="nav-item"><i class="fas fa-bolt"></i>Earn</a>
+        <a href="withdraw.html" class="nav-item active"><i class="fas fa-wallet"></i>Withdraw</a>
+        <a href="profile.html" class="nav-item"><i class="fas fa-user"></i>Profile</a>
+    </nav>
 
     <script type="module">
         import { db } from './firebase.js';
@@ -76,19 +91,27 @@
         document.getElementById('submitBtn').onclick = async () => {
             const amount = Number(document.getElementById('withdrawAmount').value);
             const num = document.getElementById('walletNumber').value;
-            if(!selectedMethod || amount < 5000 || amount > currentBalance) return Swal.fire('Error', 'Check inputs!', 'error');
+            
+            if(!selectedMethod) return Swal.fire('Wait', 'পেমেন্ট মেথড সিলেক্ট করুন!', 'warning');
+            if(amount < 5000) return Swal.fire('Error', 'সর্বনিম্ন ৫০০০ কয়েন লাগবে!', 'error');
+            if(amount > currentBalance) return Swal.fire('Error', 'আপনার ব্যালেন্স কম!', 'error');
+            if(!num) return Swal.fire('Wait', 'ওয়ালেট নম্বর দিন!', 'warning');
 
-            await addDoc(collection(db, "withdrawals"), {
-                uid: tgId,
-                userName: userName,
-                method: selectedMethod,
-                amount: amount,
-                number: num,
-                status: "Pending",
-                timestamp: Date.now()
-            });
-            await updateDoc(doc(db, "users", tgId), { coins: increment(-amount) });
-            Swal.fire('Success', 'Request Sent!', 'success').then(() => location.reload());
+            try {
+                await addDoc(collection(db, "withdrawals"), {
+                    uid: tgId,
+                    userName: userName,
+                    method: selectedMethod,
+                    amount: amount,
+                    number: num,
+                    status: "Pending",
+                    timestamp: Date.now()
+                });
+                await updateDoc(doc(db, "users", tgId), { coins: increment(-amount) });
+                Swal.fire('Success', 'আপনার রিকোয়েস্ট সফল হয়েছে!', 'success').then(() => location.reload());
+            } catch (e) {
+                Swal.fire('Error', 'কিছু সমস্যা হয়েছে, আবার চেষ্টা করুন!', 'error');
+            }
         };
     </script>
 </body>
