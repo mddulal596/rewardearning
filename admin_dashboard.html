@@ -16,9 +16,16 @@
         .btn-update { background: #667eea; color: white; border: none; padding: 12px; width: 100%; border-radius: 10px; cursor: pointer; font-weight: bold; }
         table { width: 100%; border-collapse: collapse; margin-top: 10px; }
         th, td { padding: 15px; text-align: left; border-bottom: 1px solid #f0f0f0; }
-        th { background: #f9f9f9; color: #888; font-size: 13px; }
-        .btn-approve { background: #2ecc71; color: white; border: none; padding: 8px 12px; border-radius: 6px; cursor: pointer; }
-        .btn-reject { background: #e74c3c; color: white; border: none; padding: 8px 12px; border-radius: 6px; cursor: pointer; margin-left: 5px; }
+        th { background: #f9f9f9; color: #888; font-size: 13px; text-transform: uppercase; }
+        
+        /* Action Buttons */
+        .action-btns { display: flex; gap: 8px; }
+        .btn-approve { background: #2ecc71; color: white; border: none; padding: 8px 12px; border-radius: 6px; cursor: pointer; font-size: 12px; }
+        .btn-reject { background: #e74c3c; color: white; border: none; padding: 8px 12px; border-radius: 6px; cursor: pointer; font-size: 12px; }
+        
+        /* Method Badges */
+        .method-badge { display: flex; align-items: center; gap: 5px; background: #f0f0f0; padding: 4px 8px; border-radius: 5px; font-size: 12px; font-weight: bold; }
+        .method-img { width: 18px; height: 18px; border-radius: 3px; }
     </style>
 </head>
 <body>
@@ -26,29 +33,22 @@
 <div class="container">
     <div class="header">
         <h2 style="margin:0; color:#667eea;">🚀 EarnPro Admin</h2>
-        <button onclick="logout()" style="background:#ff4757; color:white; border:none; padding:10px 20px; border-radius:10px; cursor:pointer;">Logout</button>
+        <button onclick="logout()" style="background:#ff4757; color:white; border:none; padding:10px 20px; border-radius:10px; cursor:pointer; font-weight:bold;">Logout</button>
     </div>
 
     <div class="card">
-        <h3><i class="fas fa-tools"></i> App Settings</h3>
+        <h3><i class="fas fa-tools"></i> Global Settings</h3>
         <input type="text" id="appNotice" placeholder="Scrolling Notice Content">
-        <button class="btn-update" onclick="saveSettings()">Update Notice</button>
+        <button class="btn-update" onclick="saveSettings()">Save Notice</button>
     </div>
 
     <div class="card">
-        <h3><i class="fas fa-coins"></i> Add/Cut Coins</h3>
-        <input type="text" id="targetUserId" placeholder="User Telegram ID">
-        <input type="number" id="coinAmount" placeholder="Amount (ex: 500 or -500)">
-        <button class="btn-update" onclick="updateCoins()" style="background:#2ecc71;">Update Balance</button>
-    </div>
-
-    <div class="card">
-        <h3><i class="fas fa-hand-holding-usd"></i> Pending Withdrawals</h3>
+        <h3><i class="fas fa-hand-holding-usd"></i> Withdrawal Requests</h3>
         <div style="overflow-x: auto;">
             <table>
                 <thead>
                     <tr>
-                        <th>User Name</th>
+                        <th>User</th>
                         <th>Method</th>
                         <th>Number</th>
                         <th>Amount</th>
@@ -56,7 +56,7 @@
                     </tr>
                 </thead>
                 <tbody id="withdrawTable">
-                    <tr><td colspan="5" style="text-align:center; padding:20px;">Loading requests...</td></tr>
+                    <tr><td colspan="5" style="text-align:center; padding:30px;">Loading requests...</td></tr>
                 </tbody>
             </table>
         </div>
@@ -65,27 +65,44 @@
 
 <script type="module">
     import { db } from './firebase.js';
-    import { collection, doc, updateDoc, increment, onSnapshot, setDoc, query, where } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore.js";
+    import { collection, doc, updateDoc, onSnapshot, query, where, setDoc } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore.js";
 
+    // ১. সিকিউরিটি চেক
     if (sessionStorage.getItem("admin_auth") !== "true") { window.location.href = "admin_login.html"; }
     window.logout = () => { sessionStorage.clear(); window.location.href = "admin_login.html"; };
 
-    // ১. উইথড্র রিকোয়েস্ট লোড করা (শুধুমাত্র Pending)
+    // ২. রিকোয়েস্ট ফেচিং ও আইকন লজিক
     const q = query(collection(db, "withdrawals"), where("status", "==", "Pending"));
     onSnapshot(q, (snapshot) => {
         let html = "";
-        if(snapshot.empty) html = "<tr><td colspan='5' style='text-align:center;'>No pending requests!</td></tr>";
+        if(snapshot.empty) {
+            html = "<tr><td colspan='5' style='text-align:center;'>No pending requests!</td></tr>";
+        }
+        
         snapshot.forEach((doc) => {
             const data = doc.data();
+            const method = data.method || "Unknown";
+            
+            // বিকাশ ও নগদ আইকন লিঙ্ক
+            let iconUrl = "https://cdn-icons-png.flaticon.com/512/349/349221.png"; // Default
+            if(method.toLowerCase() === 'bkash') iconUrl = "https://raw.githubusercontent.com/Ariful-Islam-720/Logo-Store/main/bkash.png";
+            if(method.toLowerCase() === 'nagad') iconUrl = "https://raw.githubusercontent.com/Ariful-Islam-720/Logo-Store/main/nagad.png";
+
             html += `
                 <tr>
-                    <td><b>${data.userName || 'Unknown'}</b><br><small>${data.uid}</small></td>
-                    <td>${data.method}</td>
-                    <td>${data.number}</td>
+                    <td><b>${data.userName || 'Unknown'}</b><br><small>${data.uid || 'N/A'}</small></td>
+                    <td>
+                        <div class="method-badge">
+                            <img src="${iconUrl}" class="method-img"> ${method}
+                        </div>
+                    </td>
+                    <td style="font-family:monospace; font-weight:bold;">${data.number}</td>
                     <td style="color:#2ecc71; font-weight:bold;">${data.amount}</td>
                     <td>
-                        <button class="btn-approve" onclick="action('${doc.id}', 'Approve')">Approve</button>
-                        <button class="btn-reject" onclick="action('${doc.id}', 'Reject')">Reject</button>
+                        <div class="action-btns">
+                            <button class="btn-approve" onclick="updateStatus('${doc.id}', 'Approve')">Approve</button>
+                            <button class="btn-reject" onclick="actionReject('${doc.id}')">Reject</button>
+                        </div>
                     </td>
                 </tr>
             `;
@@ -93,28 +110,33 @@
         document.getElementById('withdrawTable').innerHTML = html;
     });
 
-    // ২. সেটিংস সেভ
+    // ৩. Approve অ্যাকশন
+    window.updateStatus = async (id, type) => {
+        try {
+            await updateDoc(doc(db, "withdrawals", id), { status: "Approved" });
+            Swal.fire('Approved', 'Payment request approved!', 'success');
+        } catch(e) { Swal.fire('Error', 'Failed to update!', 'error'); }
+    };
+
+    // ৪. Reject অ্যাকশন (এটি ডাটাবেস থেকে ডিলিট করবে না, শুধু স্ট্যাটাস বদলাবে)
+    window.actionReject = async (id) => {
+        const confirm = await Swal.fire({
+            title: 'Reject Request?',
+            text: "Are you sure you want to reject this?",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#e74c3c'
+        });
+        if(confirm.isConfirmed) {
+            await updateDoc(doc(db, "withdrawals", id), { status: "Rejected" });
+            Swal.fire('Rejected', 'Request marked as rejected.', 'info');
+        }
+    };
+
     window.saveSettings = async () => {
         const nt = document.getElementById('appNotice').value;
         await setDoc(doc(db, "settings", "global"), { notice: nt }, { merge: true });
-        Swal.fire('Updated', 'Notice updated successfully!', 'success');
-    };
-
-    // ৩. কয়েন আপডেট
-    window.updateCoins = async () => {
-        const uid = document.getElementById('targetUserId').value;
-        const amt = document.getElementById('coinAmount').value;
-        try {
-            await updateDoc(doc(db, "users", uid), { coins: increment(Number(amt)) });
-            Swal.fire('Success', 'Coins updated!', 'success');
-        } catch(e) { Swal.fire('Error', 'User ID not found!', 'error'); }
-    };
-
-    // ৪. অ্যাকশন (Approve/Reject)
-    window.action = async (id, type) => {
-        const docRef = doc(db, "withdrawals", id);
-        await updateDoc(docRef, { status: type === 'Approve' ? 'Approved' : 'Rejected' });
-        Swal.fire('Done', `Request ${type}ed!`, 'success');
+        Swal.fire('Success', 'Notice Updated!', 'success');
     };
 </script>
 </body>
