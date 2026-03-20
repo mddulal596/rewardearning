@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Login - EarnPro</title>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <style>
+        body { background: #f0f2f5; font-family: 'Segoe UI', sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+        .login-card { background: white; padding: 40px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); width: 320px; text-align: center; }
+        .login-card h2 { color: #333; margin-bottom: 25px; font-size: 24px; }
+        input { width: 100%; padding: 12px; margin-bottom: 20px; border: 1px solid #ddd; border-radius: 10px; box-sizing: border-box; outline: none; transition: 0.3s; }
+        input:focus { border-color: #667eea; box-shadow: 0 0 5px rgba(102,126,234,0.3); }
+        button { width: 100%; padding: 12px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; border-radius: 10px; cursor: pointer; font-weight: bold; font-size: 16px; }
+        button:hover { opacity: 0.9; }
+    </style>
+</head>
+<body>
+    <div class="login-card">
+        <h2>🚀 Admin Login</h2>
+        <input type="password" id="adminPass" placeholder="পাসওয়ার্ড লিখুন">
+        <button onclick="login()">Login</button>
+    </div>
+
+    <script>
+        function login() {
+            const pass = document.getElementById('adminPass').value;
+            // আপনার সিক্রেট পাসওয়ার্ড এখানে দিন
+            if (pass === "admin123") { 
+                sessionStorage.setItem("admin_auth", "true");
+                window.location.href = "admin_dashboard.html"; 
+            } else {
+                Swal.fire('Error', 'ভুল পাসওয়ার্ড! আবার চেষ্টা করুন।', 'error');
+            }
+        }
+    </script>
+</body>
+</html>
