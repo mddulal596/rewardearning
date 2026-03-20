@@ -10,14 +10,21 @@
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         body { background: #f4f7f6; font-family: 'Segoe UI', sans-serif; margin: 0; padding-bottom: 90px; }
-        .header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 40px 20px; text-align: center; border-bottom-left-radius: 30px; border-bottom-right-radius: 30px; }
+        .header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 40px 20px; text-align: center; border-bottom-left-radius: 30px; border-bottom-right-radius: 30px; position: relative; }
+        
+        /* হিস্ট্রি বাটন */
+        .history-btn { position: absolute; top: 20px; right: 20px; background: rgba(255,255,255,0.2); color: white; padding: 8px 12px; border-radius: 10px; text-decoration: none; font-size: 12px; }
+
         .balance-card { background: white; margin: -30px 20px 20px; padding: 25px; border-radius: 20px; text-align: center; box-shadow: 0 10px 25px rgba(0,0,0,0.05); }
         .balance-card h1 { margin: 10px 0; color: #667eea; font-size: 32px; }
         
         .method-container { padding: 0 20px; margin-bottom: 20px; }
         .method-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
         .method-item { background: white; padding: 15px; border-radius: 15px; text-align: center; border: 2px solid transparent; cursor: pointer; transition: 0.3s; box-shadow: 0 5px 15px rgba(0,0,0,0.02); }
-        .method-item img { width: 45px; height: 45px; object-fit: contain; margin-bottom: 8px; }
+        
+        /* আইকন ফিক্স */
+        .method-item img { width: 50px; height: 50px; object-fit: contain; margin-bottom: 8px; border-radius: 8px; }
+        
         .method-item b { display: block; font-size: 14px; color: #333; }
         .method-item.selected { border-color: #667eea; background: #f0f4ff; transform: scale(1.02); }
 
@@ -35,6 +42,7 @@
 <body>
 
     <div class="header">
+        <a href="History.html" class="history-btn"><i class="fas fa-history"></i> History</a>
         <h2>Withdraw Money</h2>
         <p style="opacity: 0.8; font-size: 14px;">আপনার কয়েনগুলো বিকাশ বা নগদে নিন</p>
     </div>
@@ -51,11 +59,11 @@
         <p style="font-weight:bold; color:#444; margin-bottom:10px;">Select Payment Method:</p>
         <div class="method-grid">
             <div class="method-item" onclick="selectMethod('bKash', this)">
-                <img src="https://freelogopng.com/images/all_img/1656234745bkash-app-logo.png" alt="bKash">
+                <img src="https://raw.githubusercontent.com/Ariful-Islam-720/Logo-Store/main/bkash.png" alt="bKash">
                 <b>bKash</b>
             </div>
             <div class="method-item" onclick="selectMethod('Nagad', this)">
-                <img src="https://freelogopng.com/images/all_img/1679248787Nagad-Logo.png" alt="Nagad">
+                <img src="https://raw.githubusercontent.com/Ariful-Islam-720/Logo-Store/main/nagad.png" alt="Nagad">
                 <b>Nagad</b>
             </div>
         </div>
@@ -83,9 +91,8 @@
         
         let selectedMethod = "";
         let currentBalance = 0;
-        let userName = "Unknown User"; // ডিফল্ট নাম
+        let userName = "Unknown User";
 
-        // ১. ইউজারের ডাটা এবং নাম লোড করা
         async function loadUserData() {
             if (!tgId) return;
             try {
@@ -94,14 +101,13 @@
                 if (userSnap.exists()) {
                     const data = userSnap.data();
                     currentBalance = data.coins || 0;
-                    userName = data.name || "User " + tgId; // ইউজারের আসল নাম সংগ্রহ
+                    userName = data.name || "User";
                     document.getElementById('userCoins').innerText = currentBalance.toLocaleString();
                 }
             } catch (e) { console.error(e); }
         }
         loadUserData();
 
-        // ২. মেথড সিলেক্ট করা
         window.selectMethod = (method, element) => {
             selectedMethod = method;
             document.querySelectorAll('.method-item').forEach(el => el.classList.remove('selected'));
@@ -109,7 +115,6 @@
             if (tg) tg.HapticFeedback?.impactOccurred('light');
         };
 
-        // ৩. উইথড্র প্রসেস
         document.getElementById('submitBtn').onclick = async () => {
             const amount = Number(document.getElementById('withdrawAmount').value);
             const number = document.getElementById('walletNumber').value.trim();
@@ -120,10 +125,9 @@
             if (number.length < 11) return Swal.fire('Invalid', 'সঠিক মোবাইল নাম্বার দিন!', 'warning');
 
             try {
-                // উইথড্রাল রিকোয়েস্ট ডাটাবেসে সেভ (নাম সহ)
                 await addDoc(collection(db, "withdrawals"), {
                     uid: tgId,
-                    userName: userName, // এখানে ইউজারের আসল নাম যাবে
+                    userName: userName,
                     method: selectedMethod,
                     amount: amount,
                     number: number,
@@ -131,23 +135,19 @@
                     timestamp: Date.now()
                 });
 
-                // ইউজারের ব্যালেন্স থেকে কয়েন কেটে নেওয়া
                 await updateDoc(doc(db, "users", tgId), {
                     coins: increment(-amount)
                 });
 
                 Swal.fire({
                     title: 'Success!',
-                    text: 'আপনার রিকোয়েস্টটি পেন্ডিং আছে। ২৪ ঘণ্টার মধ্যে পেমেন্ট পাবেন।',
+                    text: 'রিকোয়েস্ট সফল হয়েছে। ২৪ ঘণ্টার মধ্যে পেমেন্ট পাবেন।',
                     icon: 'success',
                     confirmButtonColor: '#667eea'
-                }).then(() => {
-                    window.location.reload();
-                });
+                }).then(() => window.location.reload());
 
             } catch (error) {
-                console.error(error);
-                Swal.fire('Error', 'সার্ভার সমস্যা! আবার চেষ্টা করুন।', 'error');
+                Swal.fire('Error', 'সার্ভার সমস্যা!', 'error');
             }
         };
 
