@@ -7,95 +7,45 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
-        /* হোয়াইট থিম স্টাইল */
-        body { 
-            background: #f4f7f6; 
-            font-family: 'Segoe UI', sans-serif; 
-            margin: 0; 
-            padding-bottom: 90px; 
-            color: #333; 
-        }
+        body { background: #f4f7f6; font-family: 'Segoe UI', sans-serif; margin: 0; padding-bottom: 90px; color: #333; }
         
+        /* নোটিশ বার স্টাইল */
+        .notice-container {
+            background: #fff3cd;
+            color: #856404;
+            padding: 10px;
+            font-size: 13px;
+            border-bottom: 1px solid #ffeeba;
+            display: none; /* অ্যাডমিন থেকে নোটিশ থাকলে দেখাবে */
+        }
+
         .home-header { 
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); 
-            color: white; 
-            padding: 50px 20px; 
-            text-align: center; 
-            border-bottom-left-radius: 40px; 
-            border-bottom-right-radius: 40px; 
+            color: white; padding: 40px 20px; text-align: center; 
+            border-bottom-left-radius: 40px; border-bottom-right-radius: 40px; 
         }
 
         .balance-card { 
-            background: #ffffff; 
-            margin: -40px 20px 20px; 
-            padding: 25px; 
-            border-radius: 25px; 
-            box-shadow: 0 10px 25px rgba(0,0,0,0.05); 
-            text-align: center; 
-            border: 1px solid #eee;
-            position: relative;
-            z-index: 10;
+            background: #ffffff; margin: -40px 20px 20px; padding: 25px; 
+            border-radius: 25px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); 
+            text-align: center; border: 1px solid #eee; position: relative; z-index: 10;
         }
 
-        .balance-card p { 
-            color: #888; 
-            font-size: 13px; 
-            margin: 0; 
-            text-transform: uppercase; 
-            letter-spacing: 1px; 
-        }
-        
-        .balance-card h1 { 
-            margin: 10px 0; 
-            color: #667eea; 
-            font-size: 42px; 
-        }
-        
-        .coin-tag { 
-            background: #f1c40f; 
-            color: #000; 
-            display: inline-block; 
-            padding: 4px 15px; 
-            border-radius: 12px; 
-            font-size: 12px; 
-            font-weight: bold; 
-        }
+        .balance-card p { color: #888; font-size: 13px; margin: 0; text-transform: uppercase; letter-spacing: 1px; }
+        .balance-card h1 { margin: 10px 0; color: #667eea; font-size: 42px; }
+        .coin-tag { background: #f1c40f; color: #000; display: inline-block; padding: 4px 15px; border-radius: 12px; font-size: 12px; font-weight: bold; }
 
-        .grid-container { 
-            display: grid; 
-            grid-template-columns: 1fr 1fr; 
-            gap: 15px; 
-            padding: 10px 20px; 
-        }
-
+        .grid-container { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; padding: 10px 20px; }
         .grid-item { 
-            background: #ffffff; 
-            padding: 25px 10px; 
-            border-radius: 20px; 
-            text-align: center; 
-            text-decoration: none; 
-            color: #333; 
-            transition: 0.3s; 
-            display: flex; 
-            flex-direction: column; 
-            align-items: center; 
-            justify-content: center; 
-            box-shadow: 0 4px 12px rgba(0,0,0,0.03);
-            border: 1px solid #f0f0f0; 
+            background: #ffffff; padding: 25px 10px; border-radius: 20px; 
+            text-align: center; text-decoration: none; color: #333; transition: 0.3s; 
+            display: flex; flex-direction: column; align-items: center; justify-content: center; 
+            box-shadow: 0 4px 12px rgba(0,0,0,0.03); border: 1px solid #f0f0f0; 
         }
 
-        .grid-item:active { 
-            transform: scale(0.95); 
-            background: #f9f9f9; 
-            border-color: #667eea;
-        }
+        .grid-item:active { transform: scale(0.95); background: #f9f9f9; }
+        .grid-item i { font-size: 32px; margin-bottom: 12px; }
         
-        .grid-item i { 
-            font-size: 32px; 
-            margin-bottom: 12px; 
-        }
-        
-        /* বাটন আইকন কালার */
         .icon-task { color: #667eea; }
         .icon-how { color: #3498db; }
         .icon-leader { color: #f1c40f; }
@@ -103,38 +53,17 @@
         .icon-share { color: #2ecc71; }
         .icon-support { color: #0088cc; }
 
-        .bottom-nav { 
-            position: fixed; 
-            bottom: 0; 
-            width: 100%; 
-            background: #ffffff; 
-            display: flex; 
-            justify-content: space-around; 
-            padding: 12px 0; 
-            border-top: 1px solid #eee; 
-            z-index: 1000; 
-        }
-        
-        .nav-item { 
-            color: #888; 
-            text-decoration: none; 
-            text-align: center; 
-            flex: 1; 
-            font-size: 11px; 
-        }
-        
-        .nav-item i { 
-            display: block; 
-            font-size: 20px; 
-            margin-bottom: 3px; 
-        }
-        
-        .nav-item.active { 
-            color: #667eea; 
-        }
+        .bottom-nav { position: fixed; bottom: 0; width: 100%; background: #ffffff; display: flex; justify-content: space-around; padding: 12px 0; border-top: 1px solid #eee; z-index: 1000; }
+        .nav-item { color: #888; text-decoration: none; text-align: center; flex: 1; font-size: 11px; }
+        .nav-item i { display: block; font-size: 20px; margin-bottom: 3px; }
+        .nav-item.active { color: #667eea; }
     </style>
 </head>
 <body>
+
+    <div class="notice-container" id="adminNotice">
+        <marquee id="noticeText" scrollamount="5"></marquee>
+    </div>
 
     <div class="home-header">
         <h2 id="welcomeName" style="margin: 0;">Hi, User</h2>
@@ -152,27 +81,22 @@
             <i class="fas fa-play-circle icon-task"></i>
             <strong>Start Task</strong>
         </a>
-        
         <a href="how-to-earn.html" class="grid-item">
             <i class="fas fa-book-open icon-how"></i>
             <strong>How to Earn</strong>
         </a>
-        
         <a href="leaderboard.html" class="grid-item">
             <i class="fas fa-trophy icon-leader"></i>
             <strong>Leaderboard</strong>
         </a>
-        
         <a href="history.html" class="grid-item">
             <i class="fas fa-history icon-history"></i>
             <strong>History</strong>
         </a>
-
         <a href="refer.html" class="grid-item">
             <i class="fas fa-share-alt icon-share"></i>
             <strong>Share App</strong>
         </a>
-
         <a href="https://t.me/earnprosupport1" target="_blank" class="grid-item">
             <i class="fab fa-telegram-plane icon-support"></i>
             <strong>Support</strong>
@@ -196,7 +120,7 @@
         if (!tgId) {
             window.location.replace("login.html");
         } else {
-            // রিয়েলটাইম ব্যালেন্স আপডেট
+            // ১. ইউজারের ডাটা লোড (ব্যালেন্স ও নাম)
             onSnapshot(doc(db, "users", tgId), (snap) => {
                 if (snap.exists()) {
                     const data = snap.data();
@@ -204,12 +128,27 @@
                     document.getElementById('homeBalance').innerText = (data.coins || 0).toLocaleString();
                 }
             });
+
+            // ২. অ্যাডমিন প্যানেল থেকে নোটিশ লোড
+            onSnapshot(doc(db, "settings", "app_config"), (snap) => {
+                if (snap.exists()) {
+                    const config = snap.data();
+                    const noticeBox = document.getElementById('adminNotice');
+                    const noticeText = document.getElementById('noticeText');
+                    
+                    if (config.appNotice && config.appNotice.trim() !== "") {
+                        noticeText.innerText = config.appNotice;
+                        noticeBox.style.display = 'block';
+                    } else {
+                        noticeBox.style.display = 'none';
+                    }
+                }
+            });
         }
 
         if (tg) {
             tg.ready();
             tg.expand();
-            // টেলিগ্রামের উপরের বারের কালার হেডারের সাথে মিলিয়ে দেওয়া
             tg.setHeaderColor("#667eea"); 
         }
     </script>
