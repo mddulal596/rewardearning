@@ -3,57 +3,22 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Withdraw History - EarnPro</title>
+    <title>History - EarnPro</title>
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
-        body { background: #f4f7f6; font-family: 'Segoe UI', sans-serif; margin: 0; padding-bottom: 80px; }
+        body { background: #f4f7f6; font-family: 'Segoe UI', sans-serif; margin: 0; }
         .header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 40px 20px; text-align: center; border-bottom-left-radius: 30px; border-bottom-right-radius: 30px; }
-        
         .history-container { padding: 20px; }
-        .history-card { background: white; border-radius: 15px; padding: 15px; margin-bottom: 15px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 4px 10px rgba(0,0,0,0.03); border-left: 5px solid #ddd; }
-        
-        .history-info b { font-size: 16px; color: #333; display: block; }
-        .history-info span { font-size: 12px; color: #888; }
-        
-        .status-badge { padding: 5px 12px; border-radius: 20px; font-size: 11px; font-weight: bold; text-transform: uppercase; }
+        .history-card { background: white; border-radius: 15px; padding: 15px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; border-left: 5px solid #ddd; }
+        .status-badge { padding: 5px 10px; border-radius: 20px; font-size: 10px; font-weight: bold; }
         .pending { background: #fff9e6; color: #f1c40f; }
         .approved { background: #e6ffed; color: #2ecc71; }
-        .rejected { background: #ffe6e6; color: #e74c3c; }
-
-        .empty-state { text-align: center; margin-top: 50px; color: #999; }
-        
-        /* বর্ডার কালার পেমেন্ট মেথড অনুযায়ী */
-        .card-bkash { border-left-color: #e2136e; }
-        .card-nagad { border-left-color: #f7941d; }
-
-        .bottom-nav { position: fixed; bottom: 0; width: 100%; background: white; display: flex; justify-content: space-around; padding: 12px 0; border-top: 1px solid #eee; }
-        .nav-item { color: #888; text-decoration: none; text-align: center; flex: 1; font-size: 11px; }
-        .nav-item i { display: block; font-size: 20px; margin-bottom: 3px; }
-        .nav-item.active { color: #667eea; }
     </style>
 </head>
 <body>
-
-    <div class="header">
-        <i class="fas fa-history" style="font-size: 30px; margin-bottom: 10px;"></i>
-        <h2 style="margin: 0;">Withdraw History</h2>
-        <p style="opacity: 0.8; font-size: 13px;">আপনার সকল পেমেন্ট রেকর্ড</p>
-    </div>
-
-    <div class="history-container" id="historyList">
-        <div style="text-align:center; padding:40px; color:#667eea;">
-            <i class="fas fa-spinner fa-spin fa-2x"></i>
-        </div>
-    </div>
-
-    <nav class="bottom-nav">
-        <a href="index.html" class="nav-item"><i class="fas fa-home"></i>Home</a>
-        <a href="earn.html" class="nav-item"><i class="fas fa-bolt"></i>Earn</a>
-        <a href="withdraw.html" class="nav-item"><i class="fas fa-wallet"></i>Withdraw</a>
-        <a href="profile.html" class="nav-item"><i class="fas fa-user"></i>Profile</a>
-    </nav>
+    <div class="header"><h2>Withdraw History</h2></div>
+    <div class="history-container" id="historyList">Loading...</div>
 
     <script type="module">
         import { db } from './firebase.js';
@@ -62,64 +27,18 @@
         const tgId = localStorage.getItem("tg_user_id");
         const historyList = document.getElementById('historyList');
 
-        function loadHistory() {
-            if (!tgId) {
-                historyList.innerHTML = "<p class='empty-state'>User ID not found!</p>";
-                return;
-            }
-
-            // ইউজারের নিজস্ব উইথড্র ডাটা ফিল্টার করে আনা
-            const q = query(
-                collection(db, "withdrawals"),
-                where("uid", "==", tgId),
-                orderBy("timestamp", "desc")
-            );
-
-            onSnapshot(q, (snapshot) => {
+        if (tgId) {
+            const q = query(collection(db, "withdrawals"), where("uid", "==", tgId), orderBy("timestamp", "desc"));
+            onSnapshot(q, (snap) => {
                 let html = "";
-                if (snapshot.empty) {
-                    historyList.innerHTML = `
-                        <div class="empty-state">
-                            <i class="fas fa-folder-open fa-3x" style="margin-bottom:10px;"></i>
-                            <p>এখনো কোনো উইথড্র করেননি</p>
-                        </div>`;
-                    return;
-                }
-
-                snapshot.forEach((doc) => {
-                    const data = doc.data();
-                    const status = data.status || "Pending";
-                    const method = data.method || "Unknown";
-                    const date = new Date(data.timestamp).toLocaleString('bn-BD');
-                    
-                    const methodClass = method.toLowerCase() === 'bkash' ? 'card-bkash' : 'card-nagad';
-                    const statusClass = status.toLowerCase();
-
-                    html += `
-                        <div class="history-card ${methodClass}">
-                            <div class="history-info">
-                                <b>${method} - ${data.amount} 💰</b>
-                                <span><i class="fas fa-phone-alt"></i> ${data.number}</span><br>
-                                <span><i class="far fa-clock"></i> ${date}</span>
-                            </div>
-                            <div class="status-badge ${statusClass}">
-                                ${status}
-                            </div>
-                        </div>
-                    `;
+                snap.forEach(doc => {
+                    const d = doc.data();
+                    html += `<div class="history-card">
+                        <div><b>${d.method} - ${d.amount}</b><br><small>${d.number}</small></div>
+                        <div class="status-badge ${d.status.toLowerCase()}">${d.status}</div>
+                    </div>`;
                 });
-                historyList.innerHTML = html;
-            });
-        }
-
-        loadHistory();
-
-        // টেলিগ্রাম ব্যাক বাটন
-        if (window.Telegram && window.Telegram.WebApp) {
-            window.Telegram.WebApp.ready();
-            window.Telegram.WebApp.BackButton.show();
-            window.Telegram.WebApp.BackButton.onClick(() => {
-                window.location.href = "withdraw.html";
+                historyList.innerHTML = html || "No records found.";
             });
         }
     </script>
