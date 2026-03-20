@@ -3,76 +3,64 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>EarnPro - Admin Dashboard</title>
+    <title>EarnPro Admin Dashboard</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <style>
-        body { background: #f0f2f5; font-family: 'Segoe UI', sans-serif; margin: 0; padding: 20px; }
-        .container { max-width: 900px; margin: auto; }
-        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
-        .card { background: white; padding: 20px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); margin-bottom: 20px; }
-        h3 { margin-top: 0; color: #333; display: flex; align-items: center; gap: 10px; }
-        
-        /* Input Styles */
-        .p-input { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; margin: 10px 0; box-sizing: border-box; outline: none; }
-        .btn-primary { width: 100%; padding: 12px; background: #667eea; color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; transition: 0.3s; }
-        .btn-primary:hover { background: #764ba2; }
-
-        /* Settings Grid */
-        .settings-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
-
-        /* Table Styles */
+        body { font-family: 'Segoe UI', sans-serif; background: #f8f9fa; margin: 0; padding: 20px; }
+        .container { max-width: 1000px; margin: 0 auto; }
+        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; background: white; padding: 15px 25px; border-radius: 15px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
+        .card { background: white; padding: 25px; border-radius: 15px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); margin-bottom: 25px; }
+        h3 { margin-top: 0; color: #444; border-bottom: 2px solid #f0f0f0; padding-bottom: 10px; margin-bottom: 20px; }
+        input { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #eee; border-radius: 10px; box-sizing: border-box; background: #fafafa; }
+        .btn-update { background: #2ecc71; color: white; border: none; padding: 12px; width: 100%; border-radius: 10px; cursor: pointer; font-weight: bold; font-size: 15px; transition: 0.3s; }
+        .btn-update:hover { background: #27ae60; }
         table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-        th, td { padding: 12px; text-align: left; border-bottom: 1px solid #eee; font-size: 14px; }
-        th { background: #f8f9fa; color: #666; }
-        .status-badge { padding: 4px 8px; border-radius: 12px; font-size: 11px; font-weight: bold; text-transform: uppercase; }
-        .pending { background: #fffbe6; color: #faad14; }
-
-        /* Action Buttons */
-        .btn-action { padding: 6px 12px; border: none; border-radius: 5px; cursor: pointer; font-size: 12px; font-weight: bold; margin-right: 5px; }
-        .btn-approve { background: #52c41a; color: white; }
-        .btn-reject { background: #ff4d4f; color: white; }
+        th, td { padding: 15px; text-align: left; border-bottom: 1px solid #f0f0f0; }
+        th { background: #f9f9f9; font-size: 13px; color: #888; text-transform: uppercase; }
+        .btn-approve { background: #2ecc71; color: white; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; }
+        .btn-reject { background: #e74c3c; color: white; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; margin-left: 5px; }
     </style>
 </head>
 <body>
 
 <div class="container">
     <div class="header">
-        <h2>🚀 EarnPro Admin</h2>
-        <button onclick="location.reload()" class="btn-action" style="background:#888; color:white;">Refresh Data</button>
+        <h2 style="margin:0; color:#667eea;">🚀 EarnPro Admin</h2>
+        <button onclick="logout()" style="background:#ff4757; color:white; border:none; padding:10px 20px; border-radius:10px; cursor:pointer; font-weight:bold;">Logout</button>
     </div>
 
     <div class="card">
-        <h3><i class="fas fa-cog"></i> Global Settings</h3>
-        <div class="settings-grid">
+        <h3><i class="fas fa-tools"></i> Global Settings</h3>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
             <div>
-                <label style="font-size:12px;">Task Reward (Coins)</label>
-                <input type="number" id="setTaskReward" class="p-input" placeholder="20">
+                <label style="font-size:12px; color:#999;">Task Reward</label>
+                <input type="number" id="taskReward" placeholder="Reward Coins">
             </div>
             <div>
-                <label style="font-size:12px;">Refer Bonus (Coins)</label>
-                <input type="number" id="setReferBonus" class="p-input" placeholder="50">
+                <label style="font-size:12px; color:#999;">Refer Bonus</label>
+                <input type="number" id="referBonus" placeholder="Refer Coins">
             </div>
         </div>
-        <label style="font-size:12px;">App Notice (Scrolling text on Home)</label>
-        <input type="text" id="setAppNotice" class="p-input" placeholder="পেমেন্ট রিকোয়েস্ট দেওয়ার ২৪ ঘণ্টার মধ্যে পেমেন্ট পাবেন...">
-        <button onclick="updateSettings()" class="btn-primary">Save Global Settings</button>
+        <label style="font-size:12px; color:#999;">Notice Text</label>
+        <input type="text" id="appNotice" placeholder="App Scrolling Notice">
+        <button class="btn-update" onclick="saveSettings()" style="background: #667eea; margin-top:10px;">Save Changes</button>
     </div>
 
     <div class="card">
-        <h3><i class="fas fa-user-edit"></i> Manage User Coins</h3>
-        <input type="text" id="userEmail" class="p-input" placeholder="User ID (Telegram ID)">
-        <input type="number" id="coinAmount" class="p-input" placeholder="Amount (e.g. 500 or -500)">
-        <button onclick="updateUserBalance()" class="btn-primary" style="background:#2ecc71;">Update Balance</button>
+        <h3><i class="fas fa-coins"></i> Manage User Coins</h3>
+        <input type="text" id="targetUserId" placeholder="User ID (Telegram ID)">
+        <input type="number" id="coinAmount" placeholder="Amount (e.g. 500 or -500)">
+        <button class="btn-update" onclick="updateCoins()">Update Balance</button>
     </div>
 
     <div class="card">
-        <h3><i class="fas fa-wallet"></i> Withdrawal Requests</h3>
-        <div style="overflow-x:auto;">
+        <h3><i class="fas fa-hand-holding-usd"></i> Withdrawal Requests</h3>
+        <div style="overflow-x: auto;">
             <table>
                 <thead>
                     <tr>
-                        <th>User</th>
+                        <th>User Name</th>
                         <th>Method</th>
                         <th>Number</th>
                         <th>Amount</th>
@@ -80,7 +68,8 @@
                     </tr>
                 </thead>
                 <tbody id="withdrawTable">
-                    </tbody>
+                    <tr><td colspan="5" style="text-align:center; padding:30px;">Loading requests...</td></tr>
+                </tbody>
             </table>
         </div>
     </div>
@@ -88,82 +77,96 @@
 
 <script type="module">
     import { db } from './firebase.js';
-    import { collection, doc, getDoc, setDoc, updateDoc, increment, onSnapshot, query, where, deleteDoc } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore.js";
+    import { collection, doc, updateDoc, increment, onSnapshot, deleteDoc, setDoc } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore.js";
 
-    // --- ১. Global Settings Logic ---
-    window.updateSettings = async () => {
-        const reward = document.getElementById('setTaskReward').value;
-        const refer = document.getElementById('setReferBonus').value;
-        const notice = document.getElementById('setAppNotice').value;
+    // ১. সিকিউরিটি চেক
+    if (sessionStorage.getItem("admin_auth") !== "true") {
+        window.location.href = "admin_login.html";
+    }
 
-        try {
-            await setDoc(doc(db, "settings", "app_config"), {
-                taskReward: Number(reward),
-                referBonus: Number(refer),
-                appNotice: notice
-            }, { merge: true });
-            Swal.fire('Updated!', 'Settings successfully saved.', 'success');
-        } catch (e) { Swal.fire('Error', e.message, 'error'); }
+    window.logout = () => {
+        sessionStorage.clear();
+        window.location.href = "admin_login.html";
     };
 
-    // Load Initial Settings
-    const loadSettings = async () => {
-        const snap = await getDoc(doc(db, "settings", "app_config"));
-        if (snap.exists()) {
-            document.getElementById('setTaskReward').value = snap.data().taskReward || "";
-            document.getElementById('setReferBonus').value = snap.data().referBonus || "";
-            document.getElementById('setAppNotice').value = snap.data().appNotice || "";
+    // ২. উইথড্র রিকোয়েস্ট ফেচিং (নাম সমাধান সহ)
+    onSnapshot(collection(db, "withdrawals"), (snapshot) => {
+        let html = "";
+        if(snapshot.empty) {
+            html = "<tr><td colspan='5' style='text-align:center;'>No pending requests!</td></tr>";
         }
-    };
-    loadSettings();
-
-    // --- ২. Update User Balance Logic ---
-    window.updateUserBalance = async () => {
-        const userId = document.getElementById('userEmail').value.trim();
-        const amount = document.getElementById('coinAmount').value;
-
-        if(!userId || !amount) return Swal.fire('Wait', 'Fill all fields', 'warning');
-
-        try {
-            const userRef = doc(db, "users", userId);
-            await updateDoc(userRef, { coins: increment(Number(amount)) });
-            Swal.fire('Success', 'User balance updated!', 'success');
-            document.getElementById('coinAmount').value = "";
-        } catch (e) { Swal.fire('Error', 'User ID not found!', 'error'); }
-    };
-
-    // --- ৩. Withdrawal Requests Realtime ---
-    const withdrawTable = document.getElementById('withdrawTable');
-    const q = query(collection(db, "withdrawals"), where("status", "==", "Pending"));
-
-    onSnapshot(q, (snapshot) => {
-        withdrawTable.innerHTML = "";
-        snapshot.forEach((docSnap) => {
-            const data = docSnap.data();
-            const row = `
+        
+        snapshot.forEach((doc) => {
+            const data = doc.data();
+            // ইউজারের নাম না থাকলে "Unknown" দেখাবে, কিন্তু আমরা ডাটাবেস থেকে ID-ও দেখাচ্ছি
+            const name = data.userName || "Unknown User";
+            const uid = data.uid || "N/A";
+            
+            html += `
                 <tr>
-                    <td>${data.userName || 'Unknown'}</td>
-                    <td>${data.method}</td>
-                    <td>${data.number}</td>
-                    <td><b>${data.amount}</b></td>
                     <td>
-                        <button onclick="handleWithdraw('${docSnap.id}', 'Approved')" class="btn-action btn-approve">Approve</button>
-                        <button onclick="handleWithdraw('${docSnap.id}', 'Rejected')" class="btn-action btn-reject">Reject</button>
+                        <div style="font-weight:bold; color:#333;">${name}</div>
+                        <div style="font-size:11px; color:#999;">ID: ${uid}</div>
+                    </td>
+                    <td><span style="background:#eee; padding:4px 8px; border-radius:5px; font-size:12px;">${data.method}</span></td>
+                    <td style="font-family:monospace; font-weight:bold;">${data.number}</td>
+                    <td style="color:#2ecc71; font-weight:bold;">${data.amount}</td>
+                    <td>
+                        <button class="btn-approve" onclick="action('${doc.id}', 'Approve')"><i class="fas fa-check"></i></button>
+                        <button class="btn-reject" onclick="action('${doc.id}', 'Reject')"><i class="fas fa-times"></i></button>
                     </td>
                 </tr>
             `;
-            withdrawTable.innerHTML += row;
         });
+        document.getElementById('withdrawTable').innerHTML = html;
     });
 
-    // Handle Approve/Reject
-    window.handleWithdraw = async (id, status) => {
+    // ৩. সেটিংস সেভ করা
+    window.saveSettings = async () => {
+        const tr = document.getElementById('taskReward').value;
+        const rb = document.getElementById('referBonus').value;
+        const nt = document.getElementById('appNotice').value;
+        
         try {
-            await updateDoc(doc(db, "withdrawals", id), { status: status });
-            Swal.fire('Done!', `Request ${status}`, 'success');
-        } catch (e) { Swal.fire('Error', e.message, 'error'); }
+            await setDoc(doc(db, "settings", "global"), {
+                taskReward: Number(tr),
+                referBonus: Number(rb),
+                notice: nt
+            });
+            Swal.fire('Success', 'Global Settings Updated!', 'success');
+        } catch(e) { Swal.fire('Error', 'Failed to update!', 'error'); }
     };
 
+    // ৪. কয়েন আপডেট লজিক
+    window.updateCoins = async () => {
+        const uid = document.getElementById('targetUserId').value.trim();
+        const amt = document.getElementById('coinAmount').value;
+        if(!uid || !amt) return Swal.fire('Wait', 'সবগুলো ঘর পূরণ করুন!', 'warning');
+
+        try {
+            const userRef = doc(db, "users", uid);
+            await updateDoc(userRef, { coins: increment(Number(amt)) });
+            Swal.fire('Success', 'কয়েন আপডেট করা হয়েছে!', 'success');
+            document.getElementById('targetUserId').value = "";
+            document.getElementById('coinAmount').value = "";
+        } catch (e) { Swal.fire('Error', 'ইউজার আইডি খুঁজে পাওয়া যায়নি!', 'error'); }
+    };
+
+    // ৫. Approve/Reject অ্যাকশন
+    window.action = async (id, type) => {
+        const confirmResult = await Swal.fire({
+            title: 'Are you sure?',
+            text: `You want to ${type} this request?`,
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'Yes, do it!'
+        });
+
+        if (confirmResult.isConfirmed) {
+            await deleteDoc(doc(db, "withdrawals", id));
+            Swal.fire(type, `Request has been ${type}d.`, 'success');
+        }
+    };
 </script>
 </body>
 </html>
