@@ -11,30 +11,36 @@
     <style>
         body { background: #f4f7f6; font-family: 'Segoe UI', sans-serif; margin: 0; padding-bottom: 90px; }
         .profile-header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 50px 20px; text-align: center; border-bottom-left-radius: 30px; border-bottom-right-radius: 30px; position: relative; }
-        .profile-img { width: 100px; height: 100px; border-radius: 50%; border: 4px solid rgba(255,255,255,0.3); margin-bottom: 15px; background: #eee; display: flex; align-items: center; justify-content: center; font-size: 40px; color: #667eea; margin: 0 auto 15px; overflow: hidden; }
+        .profile-img { width: 90px; height: 90px; border-radius: 50%; border: 4px solid rgba(255,255,255,0.3); margin-bottom: 12px; background: #eee; display: flex; align-items: center; justify-content: center; font-size: 35px; color: #667eea; margin: 0 auto 12px; overflow: hidden; }
         .profile-img img { width: 100%; height: 100%; object-fit: cover; }
+        
         .info-card { background: white; margin: -30px 20px 15px; padding: 20px; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); }
         .info-row { display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid #f0f0f0; font-size: 14px; }
         .info-row:last-child { border-bottom: none; }
         .label { color: #888; font-weight: 500; }
         .value { color: #333; font-weight: bold; cursor: pointer; }
-        .promo-section { margin: 0 20px 20px; background: white; padding: 10px; border-radius: 15px; display: flex; gap: 8px; box-shadow: 0 5px 15px rgba(0,0,0,0.02); }
-        .promo-section input { flex: 1; padding: 12px; border: 1px solid #eee; border-radius: 10px; outline: none; font-size: 14px; background: #fafafa; }
-        .promo-btn { padding: 0 20px; background: #667eea; color: white; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; transition: 0.3s; }
-        .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 0 20px 20px; }
-        .stat-box { background: white; padding: 15px; border-radius: 15px; text-align: center; box-shadow: 0 5px 15px rgba(0,0,0,0.02); }
-        .stat-box i { font-size: 20px; margin-bottom: 5px; display: block; }
-        .stat-title { font-size: 11px; color: #888; text-transform: uppercase; }
-        .stat-value { font-size: 16px; font-weight: bold; color: #333; margin-top: 3px; display: block; }
-        .logout-btn { width: calc(100% - 40px); margin: 0 20px; padding: 15px; background: white; border: 1.5px solid #ff4d4d; color: #ff4d4d; border-radius: 15px; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; }
-        .vip-active { color: #f1c40f !important; }
-        .bottom-nav { position: fixed; bottom: 0; width: 100%; background: white; display: flex; justify-content: space-around; padding: 10px 0; border-top: 1px solid #eee; z-index: 1000; }
-        .nav-item { color: #888; text-decoration: none; text-align: center; flex: 1; font-size: 10px; }
-        .nav-item i { display: block; font-size: 18px; margin-bottom: 2px; }
+
+        .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 0 20px 20px; }
+        .stat-box { background: white; padding: 15px; border-radius: 15px; text-align: center; box-shadow: 0 5px 15px rgba(0,0,0,0.03); border: 1px solid #f0f0f0; }
+        .stat-box i { font-size: 22px; margin-bottom: 8px; display: block; }
+        .stat-title { font-size: 11px; color: #999; text-transform: uppercase; letter-spacing: 0.5px; }
+        .stat-value { font-size: 18px; font-weight: bold; color: #333; margin-top: 4px; display: block; }
+        
+        .promo-section { margin: 0 20px 20px; background: white; padding: 10px; border-radius: 15px; display: flex; gap: 8px; box-shadow: 0 5px 15px rgba(0,0,0,0.02); border: 1px solid #eee; }
+        .promo-section input { flex: 1; padding: 12px; border: 1px solid #f0f0f0; border-radius: 10px; outline: none; font-size: 14px; background: #fafafa; }
+        .promo-btn { padding: 0 20px; background: #667eea; color: white; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; }
+
+        .logout-btn { width: calc(100% - 40px); margin: 0 20px; padding: 15px; background: #fff1f1; border: 1.5px solid #ff4d4d; color: #ff4d4d; border-radius: 15px; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; }
+        
+        .bottom-nav { position: fixed; bottom: 0; width: 100%; background: white; display: flex; justify-content: space-around; padding: 12px 0; border-top: 1px solid #eee; z-index: 1000; }
+        .nav-item { color: #aaa; text-decoration: none; text-align: center; flex: 1; font-size: 11px; }
+        .nav-item i { display: block; font-size: 20px; margin-bottom: 3px; }
         .nav-item.active { color: #667eea; }
+        .vip-active { color: #f1c40f !important; }
     </style>
 </head>
 <body>
+
     <div class="profile-header">
         <div class="profile-img" id="userAvatar"><i class="fas fa-user"></i></div>
         <h3 id="userName" style="margin: 0;">Loading...</h3>
@@ -43,12 +49,35 @@
 
     <div class="info-card">
         <div class="info-row">
-            <span class="label">Current Balance</span>
-            <span class="value" style="color: #667eea;"><span id="profileBalance">0</span> 💰</span>
+            <span class="label">Balance</span>
+            <span class="value" style="color: #667eea;"><span id="profileBalance">0</span> COINS</span>
         </div>
         <div class="info-row" id="copyRefer">
-            <span class="label">Refer Code (Click to Copy)</span>
+            <span class="label">Refer Code</span>
             <span class="value" id="profileRefer" style="color: #2ecc71;">PRO0000</span>
+        </div>
+    </div>
+
+    <div class="stats-grid">
+        <div class="stat-box">
+            <i class="fas fa-users" style="color: #3498db;"></i>
+            <span class="stat-title">Refers</span>
+            <span id="totalRefer" class="stat-value">0</span>
+        </div>
+        <div class="stat-box">
+            <i class="fas fa-check-circle" style="color: #2ecc71;"></i>
+            <span class="stat-title">Tasks</span>
+            <span id="totalTask" class="stat-value">0</span>
+        </div>
+        <div class="stat-box">
+            <i class="fas fa-crown" id="vipIcon" style="color: #ccc;"></i>
+            <span class="stat-title">VIP Status</span>
+            <span id="vipLevel" class="stat-value">No</span>
+        </div>
+        <div class="stat-box">
+            <i class="fas fa-shield-alt" style="color: #e67e22;"></i>
+            <span class="stat-title">Status</span>
+            <span id="accStatus" class="stat-value">Active</span>
         </div>
     </div>
 
@@ -57,30 +86,7 @@
         <button class="promo-btn" id="btnRedeem">Apply</button>
     </div>
 
-    <div class="stats-grid">
-        <div class="stat-box">
-            <i class="fas fa-users" style="color: #3498db;"></i>
-            <span class="stat-title">Refers</span>
-            <span class="stat-value" id="totalRefer">0</span>
-        </div>
-        <div class="stat-box">
-            <i class="fas fa-tasks" style="color: #9b59b6;"></i>
-            <span class="stat-title">Tasks</span>
-            <span class="stat-value" id="totalTask">0</span>
-        </div>
-        <div class="stat-box">
-            <i class="fas fa-crown" id="vipIcon"></i>
-            <span class="stat-title">VIP Status</span>
-            <span class="stat-value" id="vipLevel">No</span>
-        </div>
-        <div class="stat-box">
-            <i class="fas fa-shield-alt" style="color: #2ecc71;"></i>
-            <span class="stat-title">Account</span>
-            <span class="stat-value" id="accStatus">Active</span>
-        </div>
-    </div>
-
-    <button id="btnLogOut" class="logout-btn"><i class="fas fa-sign-out-alt"></i> Exit Application</button>
+    <button id="btnLogOut" class="logout-btn"><i class="fas fa-sign-out-alt"></i> Exit App</button>
 
     <nav class="bottom-nav">
         <a href="index.html" class="nav-item"><i class="fas fa-home"></i>Home</a>
@@ -99,27 +105,28 @@
         if (!tgId) {
             window.location.replace("login.html");
         } else {
+            // রিয়েলটাইম প্রোফাইল ডাটা লোড
             onSnapshot(doc(db, "users", tgId), (snap) => {
                 if (snap.exists()) {
                     const data = snap.data();
                     document.getElementById('userName').innerText = data.name || "User";
                     document.getElementById('userHandle').innerText = "@" + (data.username || "user");
-                    document.getElementById('profileBalance').innerText = data.coins || 0;
+                    document.getElementById('profileBalance').innerText = (data.coins || 0).toLocaleString();
                     document.getElementById('profileRefer').innerText = data.referCode || "N/A";
                     
-                    // ফিক্স: আপনার ডাটাবেস ফিল্ডের সাথে মিলানো হলো
+                    // ফিক্সড ফিল্ড নাম আপনার ডাটাবেস অনুযায়ী
                     document.getElementById('totalRefer').innerText = data.referCount || 0;
                     document.getElementById('totalTask').innerText = data.taskCount || 0;
                     
-                    const vipStat = data.vip || "No";
-                    document.getElementById('vipLevel').innerText = vipStat;
-                    if(vipStat === "Yes") {
+                    const isVip = data.isVip || false;
+                    document.getElementById('vipLevel').innerText = isVip ? "Yes" : "No";
+                    if(isVip) {
                         document.getElementById('vipLevel').classList.add('vip-active');
                         document.getElementById('vipIcon').style.color = "#f1c40f";
-                    } else {
-                        document.getElementById('vipIcon').style.color = "#ccc";
                     }
+                    
                     document.getElementById('accStatus').innerText = data.status || "Active";
+                    
                     if (data.photo) {
                         document.getElementById('userAvatar').innerHTML = `<img src="${data.photo}" alt="Profile">`;
                     }
@@ -127,29 +134,69 @@
             });
         }
 
+        // কপি রেফার কোড
         document.getElementById('copyRefer').onclick = () => {
             const code = document.getElementById('profileRefer').innerText;
-            if (code === "N/A" || code === "PRO0000") return;
+            if (code === "N/A") return;
             navigator.clipboard.writeText(code);
-            Swal.fire({ title: 'Success', text: 'Refer code copied!', icon: 'success', timer: 1500, showConfirmButton: false });
+            if(tg) tg.HapticFeedback?.impactOccurred('medium');
+            Swal.fire({ title: 'Copied!', text: code, icon: 'success', timer: 1000, showConfirmButton: false });
         };
 
+        // প্রোমো কোড অ্যাপ্লাই
         document.getElementById('btnRedeem').onclick = async () => {
-            const code = document.getElementById('promoInput').value.trim();
-            if(!code) return Swal.fire('Error', 'Enter code', 'warning');
-            const userRef = doc(db, "users", tgId);
-            const userSnap = await getDoc(userRef);
-            if (userSnap.data().usedPromos?.includes(code)) return Swal.fire('Error', 'Already used', 'error');
+            const code = document.getElementById('promoInput').value.trim().toUpperCase();
+            if(!code) return Swal.fire('Error', 'কোড লিখুন!', 'warning');
+            
+            try {
+                const userRef = doc(db, "users", tgId);
+                const userSnap = await getDoc(userRef);
+                const userData = userSnap.data();
 
-            if(code === "WELCOME50") {
-                await updateDoc(userRef, { coins: increment(50), usedPromos: arrayUnion(code) });
-                Swal.fire('Success', '50 Coins added!', 'success');
-            } else { Swal.fire('Error', 'Invalid code', 'error'); }
+                if (userData.usedPromos?.includes(code)) {
+                    return Swal.fire('Error', 'এই কোডটি আপনি একবার ব্যবহার করেছেন!', 'error');
+                }
+
+                // স্পেশাল প্রোমো কোড চেক
+                const promos = { "WELCOME50": 50, "PRO8722": 20, "EARNPRO": 100 };
+
+                if (promos[code]) {
+                    await updateDoc(userRef, { 
+                        coins: increment(promos[code]), 
+                        usedPromos: arrayUnion(code) 
+                    });
+                    Swal.fire('Success', `${promos[code]} কয়েন বোনাস পেয়েছেন!`, 'success');
+                    document.getElementById('promoInput').value = "";
+                } else {
+                    Swal.fire('Error', 'ভুল বা মেয়াদোত্তীর্ণ কোড!', 'error');
+                }
+            } catch (e) {
+                Swal.fire('Error', 'সার্ভার সমস্যা!', 'error');
+            }
         };
 
+        // লগআউট / এক্সিট
         document.getElementById('btnLogOut').onclick = () => {
-            if (tg) tg.close(); else window.location.replace("login.html");
+            Swal.fire({
+                title: 'Exit?',
+                text: "আপনি কি অ্যাপটি বন্ধ করতে চান?",
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonColor: '#667eea',
+                cancelButtonColor: '#ff4d4d',
+                confirmButtonText: 'Yes, Exit'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    if (tg) tg.close(); else window.location.replace("login.html");
+                }
+            });
         };
+
+        if (tg) {
+            tg.ready();
+            tg.BackButton.show();
+            tg.BackButton.onClick(() => window.location.href = "index.html");
+        }
     </script>
 </body>
 </html>
