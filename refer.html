@@ -63,13 +63,21 @@
 
     <script type="module">
         import { db } from './firebase.js';
-        import { doc, updateDoc, increment, onSnapshot, collection, query, where, getDocs, getDoc, arrayUnion } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore.js";
+        import { doc, updateDoc, increment, onSnapshot, collection, query, where, getDocs, getDoc } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore.js";
 
         const tgId = localStorage.getItem("tg_user_id");
         const referBox = document.getElementById('referCodeBox');
+        const promoInput = document.getElementById('promoInput');
         const tg = window.Telegram?.WebApp;
 
-        // ১. নিজের রেফার কোড লোড করা
+        // ১. বোট লিঙ্ক থেকে আসা অটো-ফিল কোড (PRO8722 ইত্যাদি)
+        const urlParams = new URLSearchParams(window.location.search);
+        const startCode = urlParams.get('start');
+        if (startCode) {
+            promoInput.value = startCode;
+        }
+
+        // ২. ইউজারের নিজের রেফার কোড লোড করা
         if (tgId) {
             onSnapshot(doc(db, "users", tgId), (snap) => {
                 if (snap.exists()) {
@@ -78,12 +86,12 @@
             });
         }
 
-        // ২. রেফার এবং প্রোমো কোড লজিক
+        // ৩. রেফার এবং প্রোমো কোড অ্যাপ্লাই করার লজিক
         document.getElementById('btnRedeem').onclick = async () => {
-            const code = document.getElementById('promoInput').value.trim();
+            const code = promoInput.value.trim().toUpperCase();
             
             if(!code || !tgId) {
-                Swal.fire('Error', 'সঠিক কোড লিখুন!', 'warning');
+                Swal.fire('Wait', 'সঠিক কোড লিখুন!', 'warning');
                 return;
             }
 
@@ -92,15 +100,13 @@
                 const userSnap = await getDoc(userRef);
                 const userData = userSnap.data();
 
-                // চেক: ইউজার কি আগে কোনো কোড ব্যবহার করেছে?
                 if (userData.hasUsedRefer) {
-                    Swal.fire('Error', 'আপনি ইতিমধ্যে একটি কোড ব্যবহার করেছেন!', 'error');
+                    Swal.fire('Already Used', 'আপনি ইতিমধ্যে একটি কোড ব্যবহার করেছেন!', 'error');
                     return;
                 }
 
-                // নিজের কোড চেক
                 if (code === userData.referCode) {
-                    Swal.fire('Error', 'নিজের কোড ব্যবহার করা যাবে না!', 'error');
+                    Swal.fire('Invalid', 'নিজের কোড ব্যবহার করা যাবে না!', 'error');
                     return;
                 }
 
@@ -112,54 +118,57 @@
                     const referrerDoc = querySnapshot.docs[0];
                     const referrerRef = doc(db, "users", referrerDoc.id);
 
-                    // ১. রেফারারকে বোনাস এবং কাউন্ট বাড়ানো
+                    // ১. রেফারারকে বোনাস এবং কাউন্ট আপডেট
                     await updateDoc(referrerRef, {
                         coins: increment(50),
-                        referCount: increment(1) // প্রোফাইল পেজের সাথে মিলানো হলো
+                        referCount: increment(1) 
                     });
 
-                    // ২. বর্তমান ইউজারকে বোনাস দেওয়া এবং লক করা
+                    // ২. বর্তমান ইউজারকে বোনাস দেওয়া
                     await updateDoc(userRef, { 
                         coins: increment(20),
                         hasUsedRefer: true 
                     });
 
                     Swal.fire('Success', 'রেফার সফল! ২০ কয়েন বোনাস পেয়েছেন।', 'success');
-                    document.getElementById('promoInput').value = "";
+                    promoInput.value = "";
 
                 } else {
-                    // ৩. সাধারণ প্রোমো কোড চেক (যদি রেফার কোড না হয়)
-                    const validPromos = ["WELCOME50", "PRO8722"];
-                    if (validPromos.includes(code)) {
+                    // ৩. স্পেশাল প্রোমো কোড চেক (অ্যাডমিন থেকে কন্ট্রোল করা যাবে)
+                    const specialPromos = ["WELCOME50", "PRO8722", "EARNPRO"];
+                    if (specialPromos.includes(code)) {
                         await updateDoc(userRef, { 
                             coins: increment(50),
                             hasUsedRefer: true 
                         });
-                        Swal.fire('Success', 'প্রোমো বোনাস যোগ হয়েছে!', 'success');
-                        document.getElementById('promoInput').value = "";
+                        Swal.fire('Success', 'স্পেশাল প্রোমো বোনাস যোগ হয়েছে!', 'success');
+                        promoInput.value = "";
                     } else {
-                        Swal.fire('Error', 'ভুল বা মেয়াদোত্তীর্ণ কোড!', 'error');
+                        Swal.fire('Oops!', 'ভুল বা মেয়াদোত্তীর্ণ কোড!', 'error');
                     }
                 }
             } catch (e) { 
                 console.error(e);
-                Swal.fire('Error', 'কিছু একটা ভুল হয়েছে!', 'error');
+                Swal.fire('Error', 'সার্ভার সমস্যা! আবার চেষ্টা করুন।', 'error');
             }
         };
 
-        // ৩. কপি ফাংশন
+        // ৪. ক্লিক করলে কপি হওয়া
         referBox.onclick = () => {
             const code = referBox.innerText;
             if(code === "LOADING..." || code === "N/A") return;
             navigator.clipboard.writeText(code);
-            if(tg) tg.HapticFeedback.notificationOccurred('success');
+            if(tg && tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
             Swal.fire({ title: 'Copied!', text: code, icon: 'success', timer: 1000, showConfirmButton: false });
         };
 
-        // ৪. শেয়ার ফাংশন (টেলিগ্রাম স্টাইল)
+        // ৫. শেয়ার বাটন (বোট ইউজারনেম সহ ঠিক করা হয়েছে)
         document.getElementById('shareBtn').onclick = () => {
             const code = referBox.innerText;
-            const shareText = `👋 Earn Pro Official অ্যাপে জয়েন করুন এবং ইনকাম শুরু করুন!\n🎁 আমার রেফার কোড ব্যবহার করলে পাবেন বোনাস: ${code}\n\nবট লিঙ্ক: https://t.me/your_bot_username`;
+            const botUsername = "earnproofficial1_Bot"; // আপনার বোটের অরিজিনাল ইউজারনেম
+            
+            const shareText = `👋 Earn Pro Official অ্যাপে জয়েন করুন এবং ইনকাম শুরু করুন!\n🎁 আমার রেফার কোড ব্যবহার করলে পাবেন বোনাস: ${code}\n\nজয়েন লিঙ্ক: https://t.me/${botUsername}?start=${code}`;
+            
             const telegramUrl = `https://t.me/share/url?url=${encodeURIComponent(shareText)}`;
             window.open(telegramUrl, '_blank');
         };
