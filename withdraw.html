@@ -6,131 +6,121 @@
     <title>Withdraw - EarnPro</title>
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <style>
+        body { background: #f4f7f6; font-family: 'Segoe UI', sans-serif; margin: 0; padding-bottom: 90px; }
+        .header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 40px 20px; text-align: center; border-bottom-left-radius: 30px; border-bottom-right-radius: 30px; }
+        .card { background: white; margin: -20px 20px 20px; padding: 20px; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); }
+        .input-group { margin-bottom: 15px; }
+        .input-group label { display: block; margin-bottom: 5px; font-weight: 600; color: #555; }
+        .input-field { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 10px; box-sizing: border-box; outline: none; }
+        .btn-withdraw { width: 100%; padding: 15px; background: #667eea; color: white; border: none; border-radius: 12px; font-weight: bold; cursor: pointer; font-size: 16px; transition: 0.3s; }
+        .btn-withdraw:active { transform: scale(0.98); }
+        .balance-info { text-align: center; margin-bottom: 15px; color: #764ba2; font-weight: bold; font-size: 18px; }
+    </style>
 </head>
-<body style="background-color: #f8f9ff; margin: 0; padding-bottom: 90px; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">
+<body>
 
-    <div class="header" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 40px 20px; text-align: center; border-bottom-left-radius: 30px; border-bottom-right-radius: 30px;">
-        <h2 style="margin:0;">Withdraw</h2>
-        <p style="font-size: 13px; opacity: 0.9;">আপনার উপার্জিত কয়েন টাকা হিসেবে নিন</p>
+    <div class="header">
+        <h2>Withdraw</h2>
+        <p>আপনার উপার্জিত কয়েন তুলে নিন</p>
     </div>
 
-    <div class="balance-card" style="background: white; margin: -25px 20px 20px; padding: 25px; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); text-align: center;">
-        <p style="margin:0; color:#888; font-size:14px;">Your Balance</p>
-        <h3 id="userCoins" style="font-size:35px; color:#667eea; margin:5px 0;">0</h3>
-        <div style="background:#f1c40f; display:inline-block; padding:2px 12px; border-radius:10px; font-size:11px; font-weight:bold;">💰 COINS</div>
-    </div>
+    <div class="card">
+        <div class="balance-info">
+            ব্যালেন্স: <span id="currentBalance">0</span> Coins
+        </div>
 
-    <div class="card" style="margin:20px; padding:25px; background:white; border-radius:20px; box-shadow:0 5px 15px rgba(0,0,0,0.05);">
-        <form id="withdrawForm">
-            <label style="font-size: 13px; color: #555; font-weight: bold;">Payment Method</label>
-            <select id="method" style="width:100%; padding:12px; margin:8px 0 20px; border-radius: 10px; border: 1px solid #ddd; background: #fdfdfd; font-size: 15px;">
+        <div class="input-group">
+            <label>পেমেন্ট মেথড</label>
+            <select id="method" class="input-field">
                 <option value="bKash">bKash</option>
                 <option value="Nagad">Nagad</option>
-                <option value="Recharge">Mobile Recharge</option>
+                <option value="Rocket">Rocket</option>
             </select>
+        </div>
 
-            <label style="font-size: 13px; color: #555; font-weight: bold;">Account Number</label>
-            <input type="number" id="num" placeholder="017xxxxxxxx" style="width:100%; padding:12px; margin:8px 0 20px; border-radius: 10px; border: 1px solid #ddd; box-sizing: border-box;" required>
+        <div class="input-group">
+            <label>অ্যাকাউন্ট নম্বর</label>
+            <input type="number" id="accountNo" class="input-field" placeholder="017XXXXXXXX">
+        </div>
 
-            <label style="font-size: 13px; color: #555; font-weight: bold;">Amount (Min 500 Coins)</label>
-            <input type="number" id="amount" placeholder="Minimum 500" style="width:100%; padding:12px; margin:8px 0 20px; border-radius: 10px; border: 1px solid #ddd; box-sizing: border-box;" required>
+        <div class="input-group">
+            <label>কয়েন এর পরিমাণ (Min 500)</label>
+            <input type="number" id="amount" class="input-field" placeholder="500">
+        </div>
 
-            <button type="submit" id="submitBtn" style="background:#667eea; color:white; border:none; width:100%; padding:15px; border-radius:12px; font-weight:bold; font-size:16px; box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4); cursor: pointer;">Submit Request</button>
-        </form>
-        <p style="font-size: 11px; color: #f39c12; margin-top: 15px; text-align: center;"><i class="fas fa-info-circle"></i> ২৪ থেকে ৪৮ ঘণ্টার মধ্যে পেমেন্ট সফল করা হবে।</p>
+        <button class="btn-withdraw" id="submitBtn">Request Withdrawal</button>
     </div>
 
-    <nav class="bottom-nav" style="position: fixed; bottom: 0; left: 0; right: 0; background: white; display: flex; justify-content: space-around; padding: 10px 0; border-top: 1px solid #eee; box-shadow: 0 -2px 10px rgba(0,0,0,0.05);">
-        <a href="index.html" style="text-align: center; color: #888; text-decoration: none; font-size: 12px; flex: 1;"><i class="fas fa-home" style="display: block; font-size: 20px; margin-bottom: 3px;"></i>Home</a>
-        <a href="earn.html" style="text-align: center; color: #888; text-decoration: none; font-size: 12px; flex: 1;"><i class="fas fa-bolt" style="display: block; font-size: 20px; margin-bottom: 3px;"></i>Earn</a>
-        <a href="withdraw.html" style="text-align: center; color: #667eea; text-decoration: none; font-size: 12px; flex: 1;"><i class="fas fa-wallet" style="display: block; font-size: 20px; margin-bottom: 3px;"></i>Withdraw</a>
-        <a href="profile.html" style="text-align: center; color: #888; text-decoration: none; font-size: 12px; flex: 1;"><i class="fas fa-user" style="display: block; font-size: 20px; margin-bottom: 3px;"></i>Profile</a>
+    <nav class="bottom-nav">
+        <a href="index.html" class="nav-item"><i class="fas fa-home"></i>Home</a>
+        <a href="earn.html" class="nav-item"><i class="fas fa-bolt"></i>Earn</a>
+        <a href="withdraw.html" class="nav-item active"><i class="fas fa-wallet"></i>Withdraw</a>
+        <a href="profile.html" class="nav-item"><i class="fas fa-user"></i>Profile</a>
     </nav>
 
     <script type="module">
         import { db } from './firebase.js';
-        import { collection, addDoc, doc, getDoc, updateDoc, increment, serverTimestamp } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore.js";
+        import { doc, getDoc, updateDoc, collection, addDoc, increment } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore.js";
 
-        const tg = window.Telegram?.WebApp;
         const tgId = localStorage.getItem("tg_user_id");
+        const balanceTxt = document.getElementById('currentBalance');
+        let userBalance = 0;
+        let userName = "";
 
-        if (tg) {
-            tg.ready();
-            tg.BackButton.show();
-            tg.BackButton.onClick(() => window.location.href = "index.html");
+        async function fetchUserData() {
+            if (!tgId) { window.location.href="login.html"; return; }
+            const userSnap = await getDoc(doc(db, "users", tgId));
+            if (userSnap.exists()) {
+                const data = userSnap.data();
+                userBalance = data.coins || 0;
+                userName = data.name || "User";
+                balanceTxt.innerText = userBalance;
+            }
         }
+        fetchUserData();
 
-        async function loadBalance() {
-            if (!tgId) return window.location.replace("login.html");
-            try {
-                const snap = await getDoc(doc(db, "users", tgId));
-                if (snap.exists()) {
-                    document.getElementById('userCoins').innerText = snap.data().coins || 0;
-                }
-            } catch (err) { console.error(err); }
-        }
-
-        document.getElementById('withdrawForm').onsubmit = async (e) => {
-            e.preventDefault();
-            const btn = document.getElementById('submitBtn');
+        document.getElementById('submitBtn').onclick = async () => {
             const method = document.getElementById('method').value;
-            const number = document.getElementById('num').value;
+            const number = document.getElementById('accountNo').value;
             const amount = parseInt(document.getElementById('amount').value);
 
-            if (amount < 500) {
-                alert("সর্বনিম্ন ৫০০ কয়েন উইথড্র করা যাবে।");
-                return;
+            if (!number || number.length < 11) {
+                Swal.fire('Error', 'সঠিক নম্বর দিন', 'error'); return;
+            }
+            if (isNaN(amount) || amount < 500) {
+                Swal.fire('Error', 'সর্বনিম্ন ৫০০ কয়েন প্রয়োজন', 'error'); return;
+            }
+            if (amount > userBalance) {
+                Swal.fire('Error', 'আপনার পর্যাপ্ত কয়েন নেই!', 'error'); return;
             }
 
-            btn.disabled = true;
-            btn.innerText = "Processing...";
+            Swal.fire({ title: 'Processing...', allowOutsideClick: false, didOpen: () => { Swal.showLoading(); } });
 
             try {
+                // ১. কয়েন কেটে নেওয়া
                 const userRef = doc(db, "users", tgId);
-                const userSnap = await getDoc(userRef);
-                const currentCoins = userSnap.data().coins || 0;
-
-                if (currentCoins < amount) {
-                    alert("আপনার পর্যাপ্ত ব্যালেন্স নেই!");
-                    btn.disabled = false;
-                    btn.innerText = "Submit Request";
-                    return;
-                }
-
-                // ১. ডাটাবেসে উইথড্রাল রিকোয়েস্ট সেভ করা
-                await addDoc(collection(db, "withdrawals"), {
-                    uid: tgId,
-                    name: userSnap.data().name || "Unknown",
-                    method, 
-                    number, 
-                    amount, 
-                    status: "Pending", 
-                    createdAt: serverTimestamp()
-                });
-
-                // ২. ইউজারের ব্যালেন্স থেকে কয়েন কেটে নেওয়া
                 await updateDoc(userRef, { coins: increment(-amount) });
 
-                // ৩. টেলিগ্রাম অ্যাডমিন নোটিফিকেশন (আপনার দেয়া বট এবং চ্যাট আইডি ব্যবহার করা হয়েছে)
-                const botToken = "8663196887:AAGF_5h90yS70FV6yPZWiM-MtDrRXoTzTZM";
-                const chatId = "-1003803044476";
-                const msg = `💰 *New Withdrawal Request*\n\n👤 User: ${userSnap.data().name}\n💵 Amount: ${amount} Coins\n🏦 Method: ${method}\n📱 Number: ${number}`;
-                
-                fetch(`https://api.telegram.org/bot${botToken}/sendMessage?chat_id=${chatId}&text=${encodeURIComponent(msg)}&parse_mode=Markdown`);
+                // ২. রিকোয়েস্ট সেভ করা
+                await addDoc(collection(db, "withdrawals"), {
+                    userId: tgId,
+                    name: userName,
+                    method: method,
+                    number: number,
+                    amount: amount,
+                    status: "pending",
+                    timestamp: Date.now()
+                });
 
-                alert("উইথড্র রিকোয়েস্ট সফল হয়েছে!");
-                window.location.reload();
-
-            } catch (error) {
-                console.error("Error:", error);
-                alert("কিছু একটা সমস্যা হয়েছে। আবার চেষ্টা করুন।");
-                btn.disabled = false;
-                btn.innerText = "Submit Request";
+                Swal.fire('Success', 'রিকোয়েস্ট সফল হয়েছে!', 'success').then(() => {
+                    window.location.reload();
+                });
+            } catch (e) {
+                Swal.fire('Error', 'সমস্যা হয়েছে: ' + e.message, 'error');
             }
         };
-
-        loadBalance();
     </script>
 </body>
 </html>
