@@ -2,103 +2,78 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Dashboard - EarnPro</title>
+    <title>Admin Panel</title>
     <link rel="stylesheet" href="style.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        #adminAuth { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; background: #f0f2f5; }
+        #adminAuth { height: 100vh; display: flex; justify-content: center; align-items: center; }
         #adminContent { display: none; padding: 20px; }
-        table { width: 100%; border-collapse: collapse; background: white; border-radius: 10px; overflow: hidden; box-shadow: 0 5px 15px rgba(0,0,0,0.05); }
-        th, td { border: 1px solid #eee; padding: 15px; text-align: left; }
+        table { width: 100%; border-collapse: collapse; background: white; }
+        th, td { border: 1px solid #ddd; padding: 12px; text-align: left; }
         th { background: #667eea; color: white; }
-        .btn-approve { background: #27ae60; color: white; border: none; padding: 8px 15px; border-radius: 5px; cursor: pointer; font-weight: bold; }
-        .card { background: white; padding: 20px; border-radius: 15px; margin-bottom: 20px; }
+        .btn-approve { background: #2ecc71; color: white; border: none; padding: 5px 10px; cursor: pointer; border-radius: 4px; }
     </style>
 </head>
 <body>
-
     <div id="adminAuth">
-        <div class="card" style="width: 90%; max-width: 350px; text-align: center;">
-            <h3>Admin Access</h3>
-            <input type="password" id="adminPassInput" class="input-field" placeholder="Password" style="width:100%; margin: 15px 0; padding: 10px; border: 1px solid #ddd; border-radius: 5px;">
-            <button id="adminLoginBtn" class="btn-main" style="width:100%; padding:10px; background:#667eea; color:white; border:none; border-radius:5px; cursor:pointer;">Login</button>
+        <div style="background: white; padding: 20px; border-radius: 10px; box-shadow: 0 0 10px rgba(0,0,0,0.1);">
+            <h3>Admin Login</h3>
+            <input type="password" id="pass" style="padding:10px; margin-bottom:10px; width:100%;"><br>
+            <button onclick="login()" style="width:100%; padding:10px; background:#667eea; color:white; border:none;">Login</button>
         </div>
     </div>
 
     <div id="adminContent">
-        <div class="card" style="background: #34495e; color: white; display: flex; justify-content: space-between; align-items: center;">
-            <h2>Admin Panel</h2>
-            <button onclick="location.reload()" style="background:#e74c3c; color:white; border:none; padding:8px 15px; border-radius:5px;">Logout</button>
-        </div>
-
-        <div class="card">
-            <h4>Pending Withdrawals</h4>
-            <div style="overflow-x:auto;">
-                <table>
-                    <thead>
-                        <tr>
-                            <th>User Name</th>
-                            <th>Method</th>
-                            <th>Number</th>
-                            <th>Amount</th>
-                            <th>Action</th>
-                        </tr>
-                    </thead>
-                    <tbody id="withdrawTable"></tbody>
-                </table>
-            </div>
-        </div>
+        <h2>Withdrawal Requests</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Method</th>
+                    <th>Number</th>
+                    <th>Amount</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody id="reqTable"></tbody>
+        </table>
     </div>
 
     <script type="module">
         import { db } from './firebase.js';
-        import { collection, getDocs, doc, updateDoc, query, where } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore.js";
+        import { collection, query, where, getDocs, doc, updateDoc } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore.js";
 
-        const CORRECT_PASS = "Admin@9900";
-        const loginBtn = document.getElementById('adminLoginBtn');
-        const passInput = document.getElementById('adminPassInput');
-
-        loginBtn.onclick = () => {
-            if(passInput.value === CORRECT_PASS) {
+        window.login = () => {
+            if(document.getElementById('pass').value === "Admin@9900") {
                 document.getElementById('adminAuth').style.display = 'none';
                 document.getElementById('adminContent').style.display = 'block';
-                loadRequests();
+                loadData();
             } else { alert("Wrong Password!"); }
         };
 
-        async function loadRequests() {
-            const table = document.getElementById('withdrawTable');
-            table.innerHTML = "<tr><td colspan='5' style='text-align:center;'>Loading...</td></tr>";
-            
-            try {
-                const q = query(collection(db, "withdrawals"), where("status", "==", "pending"));
-                const snap = await getDocs(q);
-                table.innerHTML = "";
-
-                if(snap.empty) { table.innerHTML = "<tr><td colspan='5' style='text-align:center;'>No pending requests.</td></tr>"; return; }
-
-                snap.forEach((document) => {
-                    const data = document.data();
-                    const id = document.id;
-                    table.innerHTML += `
-                        <tr>
-                            <td>${data.name || 'Unknown'}</td>
-                            <td>${data.method}</td>
-                            <td>${data.number}</td>
-                            <td>${data.amount} Coins</td>
-                            <td><button class="btn-approve" onclick="approveRequest('${id}')">Approve</button></td>
-                        </tr>
-                    `;
-                });
-            } catch (e) { table.innerHTML = e.message; }
+        async function loadData() {
+            const table = document.getElementById('reqTable');
+            table.innerHTML = "";
+            const q = query(collection(db, "withdrawals"), where("status", "==", "pending"));
+            const snap = await getDocs(q);
+            snap.forEach(d => {
+                const data = d.data();
+                table.innerHTML += `
+                    <tr>
+                        <td>${data.name}</td>
+                        <td>${data.method}</td>
+                        <td>${data.number}</td>
+                        <td>${data.amount}</td>
+                        <td><button class="btn-approve" onclick="approve('${d.id}')">Approve</button></td>
+                    </tr>
+                `;
+            });
         }
 
-        window.approveRequest = async (id) => {
-            if(confirm("Mark as Paid?")) {
+        window.approve = async (id) => {
+            if(confirm("Confirm Payment?")) {
                 await updateDoc(doc(db, "withdrawals", id), { status: "approved" });
-                alert("Approved!");
-                loadRequests();
+                alert("Success!");
+                loadData();
             }
         };
     </script>
