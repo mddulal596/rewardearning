@@ -3,68 +3,106 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Panel - EarnPro</title>
+    <title>Admin - EarnPro</title>
     <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
         #adminAuth { height: 100vh; display: flex; justify-content: center; align-items: center; background: #f0f2f5; }
-        #adminContent { display: none; padding: 20px; }
-        .table-card { background: white; border-radius: 15px; overflow: hidden; box-shadow: 0 5px 15px rgba(0,0,0,0.05); }
-        table { width: 100%; border-collapse: collapse; }
-        th, td { padding: 15px; text-align: left; border-bottom: 1px solid #eee; }
-        th { background: #667eea; color: white; font-size: 14px; }
-        .btn-approve { background: #27ae60; color: white; border: none; padding: 8px 15px; border-radius: 8px; cursor: pointer; font-weight: bold; }
+        #adminContent { display: none; padding: 20px; max-width: 800px; margin: auto; }
+        .admin-section { background: white; padding: 20px; border-radius: 15px; box-shadow: 0 5px 15px rgba(0,0,0,0.05); margin-bottom: 20px; }
+        input, select { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; }
+        .btn-action { width: 100%; padding: 12px; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; color: white; transition: 0.3s; }
+        .btn-blue { background: #667eea; }
+        .btn-green { background: #27ae60; }
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 14px; }
+        th, td { border-bottom: 1px solid #eee; padding: 12px; text-align: left; }
+        th { background: #f8f9fa; color: #666; }
     </style>
 </head>
 <body>
 
     <div id="adminAuth">
-        <div class="balance-card" style="width: 300px;">
-            <h3>Admin Access</h3>
-            <input type="password" id="adminPass" placeholder="Enter Password" style="width:100%; padding:12px; margin: 15px 0; border-radius: 10px; border: 1px solid #ddd;">
-            <button id="loginBtn" class="btn-submit" style="background:#667eea; color:white; width:100%; padding:12px; border:none; border-radius:10px; cursor:pointer;">Login</button>
+        <div class="card" style="width: 320px; text-align: center;">
+            <i class="fas fa-user-shield fa-3x" style="color: #667eea; margin-bottom: 15px;"></i>
+            <h3>Admin Login</h3>
+            <input type="password" id="adminPass" placeholder="Enter Password">
+            <button id="loginBtn" class="btn-action btn-blue">Login Now</button>
         </div>
     </div>
 
     <div id="adminContent">
-        <h2 style="color: #444;">Pending Withdrawals</h2>
-        <div class="table-card">
-            <table>
-                <thead>
-                    <tr>
-                        <th>User</th>
-                        <th>Method</th>
-                        <th>Number</th>
-                        <th>Coins</th>
-                        <th>Action</th>
-                    </tr>
-                </thead>
-                <tbody id="withdrawTable"></tbody>
-            </table>
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+            <h2 style="margin:0;">Dashboard</h2>
+            <button onclick="location.reload()" class="btn-action" style="background:#e74c3c; width: auto; padding: 8px 15px;">Logout</button>
+        </div>
+
+        <div class="admin-section">
+            <h4><i class="fas fa-coins"></i> Manage User Coins</h4>
+            <input type="text" id="targetUserId" placeholder="Paste User Telegram ID">
+            <input type="number" id="coinAmount" placeholder="Amount (e.g. 1000 or -1000)">
+            <button id="updateCoinBtn" class="btn-action btn-green">Update Balance</button>
+        </div>
+
+        <div class="admin-section">
+            <h4><i class="fas fa-wallet"></i> Withdrawal Requests</h4>
+            <div style="overflow-x: auto;">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>User Name</th>
+                            <th>Method</th>
+                            <th>Number</th>
+                            <th>Amount</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="withdrawTable"></tbody>
+                </table>
+            </div>
         </div>
     </div>
 
     <script type="module">
         import { db } from './firebase.js';
-        import { collection, getDocs, doc, updateDoc, query, where } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore.js";
+        import { collection, getDocs, doc, updateDoc, query, where, increment } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore.js";
 
+        // ১. পাসওয়ার্ড দিয়ে লগইন (Admin@9900)
         document.getElementById('loginBtn').onclick = () => {
             if (document.getElementById('adminPass').value === "Admin@9900") {
                 document.getElementById('adminAuth').style.display = 'none';
                 document.getElementById('adminContent').style.display = 'block';
                 loadRequests();
-            } else { alert("ভুল পাসওয়ার্ড!"); }
+            } else { alert("Wrong Password!"); }
         };
 
+        // ২. ইউজারের ব্যালেন্স কমানো বা বাড়ানো
+        document.getElementById('updateCoinBtn').onclick = async () => {
+            const uid = document.getElementById('targetUserId').value.trim();
+            const amount = parseInt(document.getElementById('coinAmount').value);
+
+            if (!uid || isNaN(amount)) return alert("Please fill all fields!");
+
+            try {
+                const userRef = doc(db, "users", uid);
+                await updateDoc(userRef, { coins: increment(amount) });
+                alert("Success! Balance Updated.");
+                document.getElementById('coinAmount').value = "";
+            } catch (e) {
+                alert("Error: User ID not found!");
+            }
+        };
+
+        // ৩. উইথড্র রিকোয়েস্ট লোড করা
         async function loadRequests() {
             const table = document.getElementById('withdrawTable');
-            table.innerHTML = "<tr><td colspan='5' style='text-align:center;'>লোড হচ্ছে...</td></tr>";
+            table.innerHTML = "<tr><td colspan='5' style='text-align:center;'>Loading...</td></tr>";
             
             const q = query(collection(db, "withdrawals"), where("status", "==", "pending"));
             const snap = await getDocs(q);
             table.innerHTML = "";
 
             if (snap.empty) {
-                table.innerHTML = "<tr><td colspan='5' style='text-align:center;'>কোনো রিকোয়েস্ট নেই।</td></tr>";
+                table.innerHTML = "<tr><td colspan='5' style='text-align:center;'>No pending requests.</td></tr>";
                 return;
             }
 
@@ -72,20 +110,20 @@
                 const data = d.data();
                 table.innerHTML += `
                     <tr>
-                        <td style="font-size:12px;">${data.name}</td>
+                        <td>${data.name}</td>
                         <td>${data.method}</td>
                         <td>${data.number}</td>
                         <td><b>${data.amount}</b></td>
-                        <td><button class="btn-approve" onclick="approveRequest('${d.id}')">Approve</button></td>
+                        <td><button class="btn-approve" onclick="approveRequest('${d.id}')" style="background:#27ae60; color:white; border:none; padding:5px 10px; border-radius:5px; cursor:pointer;">Approve</button></td>
                     </tr>
                 `;
             });
         }
 
         window.approveRequest = async (id) => {
-            if (confirm("আপনি কি পেমেন্ট করেছেন?")) {
+            if (confirm("Confirm Payment?")) {
                 await updateDoc(doc(db, "withdrawals", id), { status: "approved" });
-                alert("Approved Successfully!");
+                alert("Request Approved!");
                 loadRequests();
             }
         };
