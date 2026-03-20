@@ -6,28 +6,18 @@
     <title>Withdraw History - EarnPro</title>
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         body { background: #f4f7f6; font-family: 'Poppins', sans-serif; margin: 0; padding-bottom: 90px; }
         .top-header { background: var(--primary); color: white; padding: 40px 20px; text-align: center; border-bottom-left-radius: 30px; border-bottom-right-radius: 30px; }
-        
         .history-container { padding: 15px; margin-top: -20px; }
-        .history-card { background: white; border-radius: 15px; padding: 15px; margin-bottom: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); display: flex; justify-content: space-between; align-items: center; border-left: 5px solid #ccc; transition: 0.3s; }
-        
+        .history-card { background: white; border-radius: 15px; padding: 15px; margin-bottom: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); display: flex; justify-content: space-between; align-items: center; border-left: 5px solid #ccc; }
         .history-info h4 { margin: 0; color: #333; font-size: 15px; }
         .history-info p { margin: 4px 0 0; color: #777; font-size: 11px; }
-        
         .status { padding: 5px 10px; border-radius: 20px; font-size: 10px; font-weight: bold; text-transform: uppercase; }
-        
-        /* Status Styles */
         .status-pending { background: #fffbe6; color: #faad14; }
         .status-approved { background: #f6ffed; color: #52c41a; }
-        .status-rejected { background: #fff1f0; color: #ff4d4f; }
-        
         .border-pending { border-left-color: #faad14; }
         .border-approved { border-left-color: #52c41a; }
-        .border-rejected { border-left-color: #ff4d4f; }
-
         #no-data { text-align: center; padding: 50px; color: #999; display: none; }
         #loader { text-align: center; padding: 50px; color: #667eea; }
     </style>
@@ -36,7 +26,7 @@
 
     <div class="top-header">
         <h2 style="margin: 0; font-size: 22px;">Payment History</h2>
-        <p style="opacity: 0.8; font-size: 13px;">আপনার সকল পেমেন্ট রেকর্ড এখানে থাকবে</p>
+        <p style="opacity: 0.8; font-size: 13px;">আপনার সকল পেমেন্ট রেকর্ড</p>
     </div>
 
     <div class="history-container" id="historyList">
@@ -44,7 +34,6 @@
             <i class="fas fa-circle-notch fa-spin fa-2x"></i>
             <p style="margin-top:10px;">লোড হচ্ছে...</p>
         </div>
-        
         <div id="no-data">
             <i class="fas fa-history fa-3x" style="opacity: 0.2;"></i>
             <p style="margin-top: 15px;">এখনো কোনো উইথড্র করা হয়নি!</p>
@@ -60,7 +49,7 @@
 
     <script type="module">
         import { db } from './firebase.js';
-        import { collection, query, where, orderBy, getDocs } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore.js";
+        import { collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore.js";
 
         const userId = localStorage.getItem("tg_user_id");
 
@@ -72,11 +61,10 @@
             if (!userId) { window.location.href = "login.html"; return; }
 
             try {
-                // এখানে "userId" ব্যবহার করা হয়েছে কারণ withdraw.html এ আপনি userId দিয়ে ডাটা সেভ করেছেন
+                // ইনডেক্সিং ঝামেলা এড়াতে orderBy সরানো হয়েছে
                 const q = query(
                     collection(db, "withdrawals"), 
-                    where("userId", "==", userId),
-                    orderBy("timestamp", "desc")
+                    where("userId", "==", userId)
                 );
                 
                 const querySnapshot = await getDocs(q);
@@ -87,8 +75,12 @@
                     return;
                 }
 
-                querySnapshot.forEach((doc) => {
-                    const data = doc.data();
+                // ডাটাগুলো পাওয়ার পর জাভাস্ক্রিপ্ট দিয়ে সর্টিং করা (লেটেস্টগুলো আগে দেখাবে)
+                const docs = [];
+                querySnapshot.forEach(doc => docs.push(doc.data()));
+                docs.sort((a, b) => b.timestamp - a.timestamp);
+
+                docs.forEach((data) => {
                     const status = data.status || "pending";
                     const statusClass = "status-" + status.toLowerCase();
                     const borderClass = "border-" + status.toLowerCase();
@@ -107,21 +99,11 @@
                 });
 
             } catch (error) {
-                console.error("History Error:", error);
+                console.error("Error:", error);
                 loader.innerHTML = "<p style='color:red;'>ডাটা লোড করতে সমস্যা হয়েছে।</p>";
             }
         }
-
         loadHistory();
-
-        // টেলিগ্রাম ব্যাক বাটন
-        if (window.Telegram && window.Telegram.WebApp) {
-            window.Telegram.WebApp.ready();
-            window.Telegram.WebApp.BackButton.show();
-            window.Telegram.WebApp.BackButton.onClick(() => {
-                window.location.href = "withdraw.html";
-            });
-        }
     </script>
 </body>
 </html>
