@@ -17,7 +17,7 @@
             font-size: 13px;
             font-weight: bold;
             border-bottom: 1px solid #ffeeba;
-            display: none;
+            display: none; /* ডাটা আসলে ব্লক হবে */
         }
 
         .home-header { 
@@ -66,7 +66,7 @@
 <body>
 
     <div class="notice-container" id="adminNotice">
-        <marquee id="noticeText" scrollamount="6">Loading notice...</marquee>
+        <marquee id="noticeText" scrollamount="6"></marquee>
     </div>
 
     <div class="home-header">
@@ -85,11 +85,11 @@
             <i class="fas fa-play-circle icon-task"></i>
             <strong>Start Task</strong>
         </a>
-        <a href="#" onclick="alert('Coming Soon!')" class="grid-item">
+        <a href="how-to-earn.html" class="grid-item">
             <i class="fas fa-book-open icon-how"></i>
             <strong>How to Earn</strong>
         </a>
-        <a href="#" class="grid-item">
+        <a href="leaderboard.html" class="grid-item">
             <i class="fas fa-trophy icon-leader"></i>
             <strong>Leaderboard</strong>
         </a>
@@ -97,7 +97,7 @@
             <i class="fas fa-history icon-history"></i>
             <strong>History</strong>
         </a>
-        <a href="#" class="grid-item">
+        <a href="refer.html" class="grid-item">
             <i class="fas fa-share-alt icon-share"></i>
             <strong>Refer & Earn</strong>
         </a>
@@ -120,10 +120,11 @@
 
         const tgId = localStorage.getItem("tg_user_id");
         
+        // আইডি না থাকলে লগইন পেজে পাঠাবে
         if (!tgId) {
             window.location.replace("login.html");
         } else {
-            // ১. ইউজারের ডাটা লোড (ব্যালেন্স ও নাম)
+            // ১. ইউজারের রিয়েলটাইম ব্যালেন্স আপডেট
             onSnapshot(doc(db, "users", tgId), (snap) => {
                 if (snap.exists()) {
                     const data = snap.data();
@@ -132,13 +133,14 @@
                 }
             });
 
-            // ২. অ্যাডমিন প্যানেল থেকে নোটিশ লোড (পাথ ঠিক করা হয়েছে)
+            // ২. অ্যাডমিন প্যানেল থেকে নোটিশ লোড (settings/global পাথ ব্যবহার করে)
             onSnapshot(doc(db, "settings", "global"), (snap) => {
                 const noticeBox = document.getElementById('adminNotice');
                 const noticeText = document.getElementById('noticeText');
                 
                 if (snap.exists()) {
                     const config = snap.data();
+                    // যদি নোটিশ থাকে তবেই দেখাবে
                     if (config.notice && config.notice.trim() !== "") {
                         noticeText.innerText = config.notice;
                         noticeBox.style.display = 'block';
