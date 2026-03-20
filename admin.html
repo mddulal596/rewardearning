@@ -3,48 +3,44 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Login - EarnPro</title>
+    <title>Admin Dashboard - EarnPro</title>
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        /* লগইন ফর্মের স্টাইল */
-        #adminAuth { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 80vh; }
-        #adminContent { display: none; } /* পাসওয়ার্ড সঠিক না হওয়া পর্যন্ত লুকানো থাকবে */
-        table { width: 100%; border-collapse: collapse; margin-top: 20px; font-size: 14px; }
-        th, td { border: 1px solid #ddd; padding: 12px; text-align: left; }
+        #adminAuth { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; background: #f0f2f5; }
+        #adminContent { display: none; padding: 20px; }
+        table { width: 100%; border-collapse: collapse; background: white; border-radius: 10px; overflow: hidden; box-shadow: 0 5px 15px rgba(0,0,0,0.05); }
+        th, td { border: 1px solid #eee; padding: 15px; text-align: left; }
         th { background: #667eea; color: white; }
-        .btn-approve { background: #27ae60; color: white; border: none; padding: 5px 10px; border-radius: 5px; cursor: pointer; }
+        .btn-approve { background: #27ae60; color: white; border: none; padding: 8px 15px; border-radius: 5px; cursor: pointer; font-weight: bold; }
+        .card { background: white; padding: 20px; border-radius: 15px; margin-bottom: 20px; }
     </style>
 </head>
 <body>
 
     <div id="adminAuth">
-        <div class="card" style="text-align: center; width: 90%; max-width: 400px;">
-            <h3><i class="fa fa-lock"></i> Admin Access</h3>
-            <p>Enter password to continue</p>
-            <input type="password" id="adminPassInput" class="input-field" placeholder="Enter Admin Password">
-            <button id="adminLoginBtn" class="btn-main">Unlock Dashboard</button>
+        <div class="card" style="width: 90%; max-width: 350px; text-align: center;">
+            <h3>Admin Access</h3>
+            <input type="password" id="adminPassInput" class="input-field" placeholder="Password" style="width:100%; margin: 15px 0; padding: 10px; border: 1px solid #ddd; border-radius: 5px;">
+            <button id="adminLoginBtn" class="btn-main" style="width:100%; padding:10px; background:#667eea; color:white; border:none; border-radius:5px; cursor:pointer;">Login</button>
         </div>
     </div>
 
     <div id="adminContent">
         <div class="card" style="background: #34495e; color: white; display: flex; justify-content: space-between; align-items: center;">
-            <div>
-                <h2><i class="fa fa-user-shield"></i> Admin Dashboard</h2>
-                <p>Manage Withdraw Requests</p>
-            </div>
-            <button onclick="location.reload()" class="btn-main" style="width: auto; background: #e74c3c; padding: 5px 15px;">Logout</button>
+            <h2>Admin Panel</h2>
+            <button onclick="location.reload()" style="background:#e74c3c; color:white; border:none; padding:8px 15px; border-radius:5px;">Logout</button>
         </div>
 
         <div class="card">
-            <h4>Pending Requests</h4>
+            <h4>Pending Withdrawals</h4>
             <div style="overflow-x:auto;">
                 <table>
                     <thead>
                         <tr>
-                            <th>User Email</th>
+                            <th>User Name</th>
                             <th>Method</th>
-                            <th>Account No</th>
+                            <th>Number</th>
                             <th>Amount</th>
                             <th>Action</th>
                         </tr>
@@ -59,70 +55,50 @@
         import { db } from './firebase.js';
         import { collection, getDocs, doc, updateDoc, query, where } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore.js";
 
-        // --- এডমিন পাসওয়ার্ড সেট করুন ---
-        const CORRECT_PASSWORD = "Admin@9900"; // এখানে আপনার পছন্দের পাসওয়ার্ড দিন
-
-        const authDiv = document.getElementById('adminAuth');
-        const contentDiv = document.getElementById('adminContent');
-        const passInput = document.getElementById('adminPassInput');
+        const CORRECT_PASS = "Admin@9900";
         const loginBtn = document.getElementById('adminLoginBtn');
+        const passInput = document.getElementById('adminPassInput');
 
-        // লগইন বাটন ক্লিক লজিক
         loginBtn.onclick = () => {
-            if (passInput.value === CORRECT_PASSWORD) {
-                authDiv.style.display = 'none';
-                contentDiv.style.display = 'block';
-                loadRequests(); // পাসওয়ার্ড মিললে ডেটা লোড হবে
-            } else {
-                alert("ভুল পাসওয়ার্ড! আবার চেষ্টা করুন।");
-                passInput.value = "";
-            }
+            if(passInput.value === CORRECT_PASS) {
+                document.getElementById('adminAuth').style.display = 'none';
+                document.getElementById('adminContent').style.display = 'block';
+                loadRequests();
+            } else { alert("Wrong Password!"); }
         };
 
-        // ডাটাবেস থেকে উইথড্র রিকোয়েস্ট লোড করা
         async function loadRequests() {
-            const withdrawTable = document.getElementById('withdrawTable');
-            withdrawTable.innerHTML = "<tr><td colspan='5' style='text-align:center;'>Loading Requests...</td></tr>";
-
+            const table = document.getElementById('withdrawTable');
+            table.innerHTML = "<tr><td colspan='5' style='text-align:center;'>Loading...</td></tr>";
+            
             try {
-                const q = query(collection(db, "withdrawals"), where("status", "in", ["Pending", "pending"]));
-                const querySnapshot = await getDocs(q);
-                
-                withdrawTable.innerHTML = "";
+                const q = query(collection(db, "withdrawals"), where("status", "==", "pending"));
+                const snap = await getDocs(q);
+                table.innerHTML = "";
 
-                querySnapshot.forEach((documentSnapshot) => {
-                    const data = documentSnapshot.data();
-                    const id = documentSnapshot.id;
+                if(snap.empty) { table.innerHTML = "<tr><td colspan='5' style='text-align:center;'>No pending requests.</td></tr>"; return; }
 
-                    const row = `
+                snap.forEach((document) => {
+                    const data = document.data();
+                    const id = document.id;
+                    table.innerHTML += `
                         <tr>
-                            <td>${data.email || 'N/A'}</td>
+                            <td>${data.name || 'Unknown'}</td>
                             <td>${data.method}</td>
                             <td>${data.number}</td>
                             <td>${data.amount} Coins</td>
-                            <td>
-                                <button class="btn-approve" onclick="approveRequest('${id}')">Approve</button>
-                            </td>
+                            <td><button class="btn-approve" onclick="approveRequest('${id}')">Approve</button></td>
                         </tr>
                     `;
-                    withdrawTable.innerHTML += row;
                 });
-
-                if(withdrawTable.innerHTML === "") {
-                    withdrawTable.innerHTML = "<tr><td colspan='5' style='text-align:center;'>No pending requests found.</td></tr>";
-                }
-            } catch (err) {
-                withdrawTable.innerHTML = "Error loading data: " + err.message;
-            }
+            } catch (e) { table.innerHTML = e.message; }
         }
 
-        // রিকোয়েস্ট অ্যাপ্রুভ করার ফাংশন
-        window.approveRequest = async (docId) => {
-            if(confirm("আপনি কি পেমেন্ট করেছেন? অ্যাপ্রুভ করলে এটি লিস্ট থেকে চলে যাবে।")) {
-                const docRef = doc(db, "withdrawals", docId);
-                await updateDoc(docRef, { status: "Approved" });
-                alert("Request Approved Successfully!");
-                loadRequests(); 
+        window.approveRequest = async (id) => {
+            if(confirm("Mark as Paid?")) {
+                await updateDoc(doc(db, "withdrawals", id), { status: "approved" });
+                alert("Approved!");
+                loadRequests();
             }
         };
     </script>
