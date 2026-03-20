@@ -4,21 +4,51 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>History - EarnPro</title>
-    <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        body { background: #f4f7f6; font-family: 'Segoe UI', sans-serif; margin: 0; }
+        /* মূল বডি স্টাইল */
+        body { background: #f4f7f6; font-family: 'Segoe UI', sans-serif; margin: 0; padding-bottom: 80px; }
+        
         .header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 40px 20px; text-align: center; border-bottom-left-radius: 30px; border-bottom-right-radius: 30px; }
+        
         .history-container { padding: 20px; }
-        .history-card { background: white; border-radius: 15px; padding: 15px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; border-left: 5px solid #ddd; }
-        .status-badge { padding: 5px 10px; border-radius: 20px; font-size: 10px; font-weight: bold; }
+        
+        /* হিস্ট্রি কার্ড ডিজাইন */
+        .history-card { background: white; border-radius: 15px; padding: 15px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 4px 10px rgba(0,0,0,0.03); border-left: 5px solid #ddd; }
+        
+        .status-badge { padding: 5px 12px; border-radius: 20px; font-size: 10px; font-weight: bold; text-transform: uppercase; }
         .pending { background: #fff9e6; color: #f1c40f; }
         .approved { background: #e6ffed; color: #2ecc71; }
+        .rejected { background: #ffe6e6; color: #e74c3c; }
+
+        /* বটম নেভিগেশন (মেনু বাটন) */
+        .bottom-nav { position: fixed; bottom: 0; width: 100%; background: white; display: flex; justify-content: space-around; padding: 12px 0; border-top: 1px solid #eee; z-index: 1000; }
+        .nav-item { text-decoration: none; color: #888; text-align: center; font-size: 11px; flex: 1; transition: 0.3s; }
+        .nav-item i { display: block; font-size: 20px; margin-bottom: 3px; }
+        .nav-item.active { color: #667eea; }
+        
+        /* লোডিং স্পিনার */
+        .loader { text-align: center; padding: 40px; color: #667eea; }
     </style>
 </head>
 <body>
-    <div class="header"><h2>Withdraw History</h2></div>
-    <div class="history-container" id="historyList">Loading...</div>
+
+    <div class="header">
+        <i class="fas fa-history" style="font-size: 30px; margin-bottom: 10px;"></i>
+        <h2 style="margin:0;">Withdraw History</h2>
+        <p style="opacity: 0.8; font-size: 13px;">আপনার পেমেন্ট রেকর্ড দেখুন</p>
+    </div>
+
+    <div class="history-container" id="historyList">
+        <div class="loader"><i class="fas fa-spinner fa-spin fa-2x"></i><br>Loading...</div>
+    </div>
+
+    <nav class="bottom-nav">
+        <a href="index.html" class="nav-item"><i class="fas fa-home"></i>Home</a>
+        <a href="earn.html" class="nav-item"><i class="fas fa-bolt"></i>Earn</a>
+        <a href="withdraw.html" class="nav-item active"><i class="fas fa-wallet"></i>Withdraw</a>
+        <a href="profile.html" class="nav-item"><i class="fas fa-user"></i>Profile</a>
+    </nav>
 
     <script type="module">
         import { db } from './firebase.js';
@@ -28,18 +58,39 @@
         const historyList = document.getElementById('historyList');
 
         if (tgId) {
+            // ইউজারের ডাটা ফেচ করা
             const q = query(collection(db, "withdrawals"), where("uid", "==", tgId), orderBy("timestamp", "desc"));
+            
             onSnapshot(q, (snap) => {
                 let html = "";
+                if (snap.empty) {
+                    historyList.innerHTML = "<div style='text-align:center; color:#999; margin-top:50px;'><i class='fas fa-folder-open fa-3x'></i><p>কোনো রেকর্ড পাওয়া যায়নি</p></div>";
+                    return;
+                }
+
                 snap.forEach(doc => {
                     const d = doc.data();
-                    html += `<div class="history-card">
-                        <div><b>${d.method} - ${d.amount}</b><br><small>${d.number}</small></div>
-                        <div class="status-badge ${d.status.toLowerCase()}">${d.status}</div>
-                    </div>`;
+                    const status = d.status || "Pending";
+                    const statusClass = status.toLowerCase();
+                    const date = d.timestamp ? new Date(d.timestamp).toLocaleDateString() : "Date N/A";
+
+                    html += `
+                        <div class="history-card" style="border-left-color: ${status === 'Approved' ? '#2ecc71' : '#f1c40f'}">
+                            <div>
+                                <b>${d.method} - ${d.amount} 💰</b><br>
+                                <small><i class="fas fa-phone-alt"></i> ${d.number}</small><br>
+                                <small style="color:#bbb;"><i class="far fa-calendar-alt"></i> ${date}</small>
+                            </div>
+                            <div class="status-badge ${statusClass}">${status}</div>
+                        </div>`;
                 });
-                historyList.innerHTML = html || "No records found.";
+                historyList.innerHTML = html;
+            }, (error) => {
+                console.error("Error fetching history: ", error);
+                historyList.innerHTML = "Error loading history.";
             });
+        } else {
+            historyList.innerHTML = "User ID not found!";
         }
     </script>
 </body>
