@@ -3,146 +3,124 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Withdraw History - EarnPro Official</title>
+    <title>Withdraw History - EarnPro</title>
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
-        body { background: #f4f7f6; font-family: 'Segoe UI', sans-serif; margin: 0; padding-bottom: 90px; }
-        .top-header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 40px 20px; text-align: center; border-bottom-left-radius: 30px; border-bottom-right-radius: 30px; }
-        .history-container { padding: 15px; margin-top: -20px; min-height: 200px; }
-        .history-card { background: white; border-radius: 15px; padding: 15px; margin-bottom: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); display: flex; justify-content: space-between; align-items: center; border-left: 5px solid #ccc; transition: 0.3s; }
-        .history-info h4 { margin: 0; color: #333; font-size: 15px; font-weight: bold; }
-        .history-info p { margin: 4px 0 0; color: #777; font-size: 11px; display: flex; align-items: center; gap: 5px; }
-        .status { padding: 5px 12px; border-radius: 20px; font-size: 10px; font-weight: bold; text-transform: uppercase; }
+        body { background: #f4f7f6; font-family: 'Segoe UI', sans-serif; margin: 0; padding-bottom: 80px; }
+        .header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 40px 20px; text-align: center; border-bottom-left-radius: 30px; border-bottom-right-radius: 30px; }
         
-        .status-pending { background: #fffbe6; color: #faad14; }
-        .status-approved { background: #f6ffed; color: #52c41a; }
-        .status-rejected { background: #fff1f0; color: #ff4d4f; }
+        .history-container { padding: 20px; }
+        .history-card { background: white; border-radius: 15px; padding: 15px; margin-bottom: 15px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 4px 10px rgba(0,0,0,0.03); border-left: 5px solid #ddd; }
         
-        .border-pending { border-left-color: #faad14; }
-        .border-approved { border-left-color: #52c41a; }
-        .border-rejected { border-left-color: #ff4d4f; }
+        .history-info b { font-size: 16px; color: #333; display: block; }
+        .history-info span { font-size: 12px; color: #888; }
+        
+        .status-badge { padding: 5px 12px; border-radius: 20px; font-size: 11px; font-weight: bold; text-transform: uppercase; }
+        .pending { background: #fff9e6; color: #f1c40f; }
+        .approved { background: #e6ffed; color: #2ecc71; }
+        .rejected { background: #ffe6e6; color: #e74c3c; }
 
-        #no-data { text-align: center; padding: 50px 20px; color: #999; display: none; }
-        #loader { text-align: center; padding: 50px; color: #667eea; }
+        .empty-state { text-align: center; margin-top: 50px; color: #999; }
         
-        .bottom-nav { position: fixed; bottom: 0; width: 100%; background: white; display: flex; justify-content: space-around; padding: 10px 0; border-top: 1px solid #eee; z-index: 1000; }
-        .nav-item { color: #888; text-decoration: none; text-align: center; flex: 1; font-size: 10px; }
-        .nav-item i { display: block; font-size: 18px; margin-bottom: 2px; }
+        /* বর্ডার কালার পেমেন্ট মেথড অনুযায়ী */
+        .card-bkash { border-left-color: #e2136e; }
+        .card-nagad { border-left-color: #f7941d; }
+
+        .bottom-nav { position: fixed; bottom: 0; width: 100%; background: white; display: flex; justify-content: space-around; padding: 12px 0; border-top: 1px solid #eee; }
+        .nav-item { color: #888; text-decoration: none; text-align: center; flex: 1; font-size: 11px; }
+        .nav-item i { display: block; font-size: 20px; margin-bottom: 3px; }
         .nav-item.active { color: #667eea; }
     </style>
 </head>
 <body>
 
-    <div class="top-header">
-        <h2 style="margin: 0; font-size: 20px;">Withdraw History</h2>
+    <div class="header">
+        <i class="fas fa-history" style="font-size: 30px; margin-bottom: 10px;"></i>
+        <h2 style="margin: 0;">Withdraw History</h2>
         <p style="opacity: 0.8; font-size: 13px;">আপনার সকল পেমেন্ট রেকর্ড</p>
     </div>
 
     <div class="history-container" id="historyList">
-        <div id="loader">
+        <div style="text-align:center; padding:40px; color:#667eea;">
             <i class="fas fa-spinner fa-spin fa-2x"></i>
-            <p style="margin-top:10px;">লোড হচ্ছে...</p>
-        </div>
-        
-        <div id="no-data">
-            <i class="fas fa-history fa-3x" style="opacity: 0.2; margin-bottom: 15px;"></i>
-            <p>এখনো কোনো উইথড্র করা হয়নি!</p>
-            <a href="withdraw.html" style="color: #667eea; text-decoration: none; font-weight: bold; font-size: 14px;">উইথড্র করুন</a>
         </div>
     </div>
 
     <nav class="bottom-nav">
         <a href="index.html" class="nav-item"><i class="fas fa-home"></i>Home</a>
         <a href="earn.html" class="nav-item"><i class="fas fa-bolt"></i>Earn</a>
-        <a href="withdraw.html" class="nav-item active"><i class="fas fa-wallet"></i>Withdraw</a>
+        <a href="withdraw.html" class="nav-item"><i class="fas fa-wallet"></i>Withdraw</a>
         <a href="profile.html" class="nav-item"><i class="fas fa-user"></i>Profile</a>
     </nav>
 
     <script type="module">
         import { db } from './firebase.js';
-        import { collection, query, where, onSnapshot } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore.js";
+        import { collection, query, where, orderBy, onSnapshot } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore.js";
 
         const tgId = localStorage.getItem("tg_user_id");
-        const tg = window.Telegram?.WebApp;
+        const historyList = document.getElementById('historyList');
 
-        async function loadHistory() {
-            const listDiv = document.getElementById('historyList');
-            const noDataDiv = document.getElementById('no-data');
-            const loader = document.getElementById('loader');
-            
-            if (!tgId) { window.location.replace("login.html"); return; }
-
-            try {
-                const q = query(
-                    collection(db, "withdrawals"), 
-                    where("userId", "==", tgId)
-                );
-                
-                onSnapshot(q, (querySnapshot) => {
-                    loader.style.display = 'none';
-                    
-                    // বিদ্যমান কার্ডগুলো ক্লিয়ার করা
-                    const existingCards = listDiv.querySelectorAll('.history-card');
-                    existingCards.forEach(card => card.remove());
-
-                    if (querySnapshot.empty) {
-                        noDataDiv.style.display = 'block';
-                        return;
-                    }
-
-                    noDataDiv.style.display = 'none';
-
-                    const docs = [];
-                    querySnapshot.forEach(doc => {
-                        docs.push({ id: doc.id, ...doc.data() });
-                    });
-                    
-                    // লেটেস্ট পেমেন্ট উপরে দেখানোর জন্য সর্টিং
-                    docs.sort((a, b) => {
-                        const timeA = a.timestamp?.seconds || a.timestamp || 0;
-                        const timeB = b.timestamp?.seconds || b.timestamp || 0;
-                        return timeB - timeA;
-                    });
-
-                    docs.forEach((data) => {
-                        const status = data.status || "Pending";
-                        const statusClass = "status-" + status.toLowerCase();
-                        const borderClass = "border-" + status.toLowerCase();
-                        
-                        let dateStr = "N/A";
-                        if(data.timestamp) {
-                            const dateObj = data.timestamp.seconds ? new Date(data.timestamp.seconds * 1000) : new Date(data.timestamp);
-                            dateStr = dateObj.toLocaleString('bn-BD'); // বাংলাদেশী সময় ফরম্যাট
-                        }
-                        
-                        const card = document.createElement('div');
-                        card.className = `history-card ${borderClass}`;
-                        card.innerHTML = `
-                            <div class="history-info">
-                                <h4>${data.method} - ${data.amount} 💰</h4>
-                                <p><i class="fas fa-phone-alt"></i> ${data.number}</p>
-                                <p><i class="far fa-clock"></i> ${dateStr}</p>
-                            </div>
-                            <div class="status ${statusClass}">${status}</div>
-                        `;
-                        listDiv.appendChild(card);
-                    });
-                });
-
-            } catch (error) {
-                console.error("Error:", error);
-                loader.innerHTML = "<p style='color:red;'>সার্ভার সমস্যা! আবার চেষ্টা করুন।</p>";
+        function loadHistory() {
+            if (!tgId) {
+                historyList.innerHTML = "<p class='empty-state'>User ID not found!</p>";
+                return;
             }
+
+            // ইউজারের নিজস্ব উইথড্র ডাটা ফিল্টার করে আনা
+            const q = query(
+                collection(db, "withdrawals"),
+                where("uid", "==", tgId),
+                orderBy("timestamp", "desc")
+            );
+
+            onSnapshot(q, (snapshot) => {
+                let html = "";
+                if (snapshot.empty) {
+                    historyList.innerHTML = `
+                        <div class="empty-state">
+                            <i class="fas fa-folder-open fa-3x" style="margin-bottom:10px;"></i>
+                            <p>এখনো কোনো উইথড্র করেননি</p>
+                        </div>`;
+                    return;
+                }
+
+                snapshot.forEach((doc) => {
+                    const data = doc.data();
+                    const status = data.status || "Pending";
+                    const method = data.method || "Unknown";
+                    const date = new Date(data.timestamp).toLocaleString('bn-BD');
+                    
+                    const methodClass = method.toLowerCase() === 'bkash' ? 'card-bkash' : 'card-nagad';
+                    const statusClass = status.toLowerCase();
+
+                    html += `
+                        <div class="history-card ${methodClass}">
+                            <div class="history-info">
+                                <b>${method} - ${data.amount} 💰</b>
+                                <span><i class="fas fa-phone-alt"></i> ${data.number}</span><br>
+                                <span><i class="far fa-clock"></i> ${date}</span>
+                            </div>
+                            <div class="status-badge ${statusClass}">
+                                ${status}
+                            </div>
+                        </div>
+                    `;
+                });
+                historyList.innerHTML = html;
+            });
         }
 
         loadHistory();
 
-        if (tg) {
-            tg.ready();
-            tg.BackButton.show();
-            tg.BackButton.onClick(() => window.location.href = "withdraw.html");
+        // টেলিগ্রাম ব্যাক বাটন
+        if (window.Telegram && window.Telegram.WebApp) {
+            window.Telegram.WebApp.ready();
+            window.Telegram.WebApp.BackButton.show();
+            window.Telegram.WebApp.BackButton.onClick(() => {
+                window.location.href = "withdraw.html";
+            });
         }
     </script>
 </body>
