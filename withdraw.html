@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Withdraw - EarnPro</title>
     <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <style>
         body { background: #f4f7f6; font-family: 'Segoe UI', sans-serif; margin: 0; padding-bottom: 90px; }
@@ -15,12 +16,18 @@
         .input-field { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 10px; box-sizing: border-box; outline: none; }
         .btn-withdraw { width: 100%; padding: 15px; background: #667eea; color: white; border: none; border-radius: 12px; font-weight: bold; cursor: pointer; font-size: 16px; transition: 0.3s; }
         .balance-info { text-align: center; margin-bottom: 15px; color: #764ba2; font-weight: bold; font-size: 18px; }
+
+        /* নিচের নেভিগেশন বারের স্টাইল যদি style.css এ না থাকে তবে এটি কাজ করবে */
+        .bottom-nav { position: fixed; bottom: 0; width: 100%; background: white; display: flex; justify-content: space-around; padding: 12px 0; box-shadow: 0 -2px 10px rgba(0,0,0,0.1); z-index: 1000; }
+        .nav-item { text-align: center; font-size: 11px; color: #888; text-decoration: none; flex: 1; }
+        .nav-item i { font-size: 20px; display: block; margin-bottom: 4px; }
+        .nav-item.active { color: #667eea; }
     </style>
 </head>
 <body>
 
     <div class="header">
-        <h2>Withdraw Coins</h2>
+        <h2>Withdraw</h2>
         <p>আপনার উপার্জিত কয়েন তুলে নিন</p>
     </div>
 
@@ -48,8 +55,15 @@
             <input type="number" id="amount" class="input-field" placeholder="Minimum 5000">
         </div>
 
-        <button class="btn-withdraw" id="submitBtn">Submit Withdrawal Request</button>
+        <button class="btn-withdraw" id="submitBtn">Submit Request</button>
     </div>
+
+    <nav class="bottom-nav">
+        <a href="index.html" class="nav-item"><i class="fas fa-home"></i>Home</a>
+        <a href="earn.html" class="nav-item"><i class="fas fa-bolt"></i>Earn</a>
+        <a href="withdraw.html" class="nav-item active"><i class="fas fa-wallet"></i>Withdraw</a>
+        <a href="profile.html" class="nav-item"><i class="fas fa-user"></i>Profile</a>
+    </nav>
 
     <script type="module">
         import { db } from './firebase.js';
@@ -80,20 +94,17 @@
                 Swal.fire('Error', 'সঠিক নম্বর দিন', 'error'); return;
             }
             if (isNaN(amount) || amount < 5000) {
-                Swal.fire('Error', 'সর্বনিম্ন ৫০০০ কয়েন উইথড্র করা যাবে', 'error'); return;
+                Swal.fire('Error', 'সর্বনিম্ন ৫০০০ কয়েন লাগবে', 'error'); return;
             }
             if (amount > userBalance) {
-                Swal.fire('Error', 'আপনার পর্যাপ্ত কয়েন নেই!', 'error'); return;
+                Swal.fire('Error', 'পর্যাপ্ত কয়েন নেই!', 'error'); return;
             }
 
-            Swal.fire({ title: 'প্রসেস হচ্ছে...', allowOutsideClick: false, didOpen: () => { Swal.showLoading(); } });
-
             try {
-                // ১. ইউজারের ব্যালেন্স থেকে কয়েন কেটে নেওয়া
-                const userRef = doc(db, "users", tgId);
-                await updateDoc(userRef, { coins: increment(-amount) });
+                Swal.fire({ title: 'প্রসেস হচ্ছে...', allowOutsideClick: false, didOpen: () => { Swal.showLoading(); } });
 
-                // ২. withdrawals কালেকশনে ডাটা সেভ করা
+                await updateDoc(doc(db, "users", tgId), { coins: increment(-amount) });
+
                 await addDoc(collection(db, "withdrawals"), {
                     userId: tgId,
                     name: userName,
@@ -104,11 +115,11 @@
                     timestamp: Date.now()
                 });
 
-                Swal.fire('Success', 'আপনার উইথড্র রিকোয়েস্ট সফল হয়েছে!', 'success').then(() => {
+                Swal.fire('Success', 'রিকোয়েস্ট সফল হয়েছে!', 'success').then(() => {
                     window.location.reload();
                 });
             } catch (e) {
-                Swal.fire('Error', 'সমস্যা হয়েছে: ' + e.message, 'error');
+                Swal.fire('Error', e.message, 'error');
             }
         };
     </script>
